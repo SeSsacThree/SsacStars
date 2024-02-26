@@ -15,6 +15,7 @@ class SSACSTARS_API APartyGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 	
 
+	/*
 	UENUM(BlueprintType)
 		enum class EPlayerState : uint8
 	{
@@ -37,9 +38,9 @@ class SSACSTARS_API APartyGameModeBase : public AGameModeBase
 		Trap	UMETA(DisplayName = "함정발판"),
 		Warp		UMETA(DisplayName = "워프발판"),
 		Star		UMETA(DisplayName = "별얻기"),
-		2SideLoad		UMETA(DisplayName = "갈림길")
+		TwoSideLoad		UMETA(DisplayName = "갈림길")
 	};
-
+	*/
 
 
 };
