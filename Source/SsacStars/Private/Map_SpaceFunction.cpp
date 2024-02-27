@@ -27,6 +27,16 @@ void AMap_SpaceFunction::Tick(float DeltaTime)
 
 }
 
+void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport)
+{
+	if (ActorToTeleport && ActorToTeleport->IsValidLowLevel())
+	{
+		ActorToTeleport->SetActorLocation(TeleportDestination);
+	}
+}
+
+
+
 
 
 

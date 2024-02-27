@@ -2,7 +2,7 @@
 
 
 #include "MG_Jump_Ball.h"
-#include "Components/BoxComponent.h"
+#include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -11,12 +11,12 @@ AMG_Jump_Ball::AMG_Jump_Ball()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
-	SetRootComponent(boxComp);
+	sphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("sphereComp"));
+	SetRootComponent(sphereComp);
 
-	boxComp->SetWorldScale3D(FVector(3.0f));
+	sphereComp->SetWorldScale3D(FVector(3.0f));
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("meshComp"));
-	meshComp->SetupAttachment(boxComp);
+	meshComp->SetupAttachment(sphereComp);
 
 
 	SetActorLocation(FVector(0));

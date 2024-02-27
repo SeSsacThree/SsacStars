@@ -23,4 +23,12 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY()
+	float delayTime = 2.0f;
+
+	UPROPERTY()
+	TSubclassOf<class AMG_Jump_Ball> ball;
+
+private:
+	float currentTime = 0;
 };

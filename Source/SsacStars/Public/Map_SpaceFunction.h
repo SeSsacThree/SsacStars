@@ -23,7 +23,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(EditAnywhere)
+	FVector TeleportDestination;
 
-	//UFUNCTION()
-	//void warp_Destroy();
+	UFUNCTION()
+	void TeleportActor(AActor* ActorToTeleport);
 };

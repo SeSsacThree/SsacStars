@@ -3,6 +3,8 @@
 
 #include "MG_BallFactory.h"
 
+#include "MG_Jump_Ball.h"
+
 // Sets default values
 AMG_BallFactory::AMG_BallFactory()
 {
@@ -23,5 +25,13 @@ void AMG_BallFactory::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (currentTime > DeltaTime)
+	{
+		currentTime = 0;
+		AMG_Jump_Ball* spawnActor = GetWorld()->SpawnActor<AMG_Jump_Ball>(ball, GetActorLocation(), GetActorRotation());
+	}else
+	{
+		currentTime += DeltaTime;
+	}
 }
 

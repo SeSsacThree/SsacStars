@@ -28,7 +28,7 @@ public:
 
 
 	UPROPERTY(EditAnywhere)
-	class UBoxComponent* boxComp;
+	class USphereComponent* sphereComp;
 
 	UPROPERTY()
 	class UStaticMeshComponent* meshComp;
