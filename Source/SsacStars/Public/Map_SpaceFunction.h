@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Blueprint/UserWidget.h"
 #include "Map_SpaceFunction.generated.h"
 
 UCLASS()
@@ -19,13 +20,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void TeleportActor(AActor* ActorToTeleport);
+
 	UPROPERTY(EditAnywhere)
 	FVector TeleportDestination;
 
-	UFUNCTION()
-	void TeleportActor(AActor* ActorToTeleport);
 };
