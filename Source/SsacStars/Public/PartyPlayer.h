@@ -3,8 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BlueBoardSpace.h"
 #include "GameFramework/Character.h"
+#include "Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h"
 #include "PartyPlayer.generated.h"
+
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMoveCompletedDelegate);
 
 UCLASS()
 class SSACSTARS_API APartyPlayer : public ACharacter
@@ -15,9 +19,18 @@ public:
 	// Sets default values for this character's properties
 	APartyPlayer();
 
+
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+
+
+
+
+	
 
 public:	
 	// Called every frame
@@ -25,5 +38,51 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int MoveRemaining;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Coin;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Score;
+
+public:
+	bool IsMoving;
+	bool IsMovingTurn;
+public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class ABlueBoardSpace* CurrentSpace;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	class AAIController* Ai;
+
+	
+public:
+
+
+
+
+public:
+
+	void GetCamera();
+	void SelectBehavior();
+	void RollDice();
+	void ItemApply();
+	void ChooseItem();
+	void MoveToSpace(ABlueBoardSpace* currentSpace);
+	void MoveEnded();
+	void StopOrGo();
+
+	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
+
+
+	
+
+public:
+
+
 
 };

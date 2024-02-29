@@ -6,6 +6,19 @@
 #include "GameFramework/Actor.h"
 #include "BlueBoardSpace.generated.h"
 
+UENUM(BlueprintType)
+enum class ESpaceState : uint8
+{
+	Blue	UMETA(DisplayName = "Blue"),
+	Red		UMETA(DisplayName = "Red"),
+	Item	UMETA(DisplayName = "Item"),
+	Trap	UMETA(DisplayName = "Trap"),
+	Warp		UMETA(DisplayName = "Warp"),
+	Star		UMETA(DisplayName = "Star"),
+	TwoSideLoad		UMETA(DisplayName = "TwoSideLoad"),
+};
+
+
 UCLASS()
 class SSACSTARS_API ABlueBoardSpace : public AActor
 {
@@ -23,4 +36,39 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UStaticMeshComponent* MeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UMaterialInterface* ItemMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UMaterialInterface* BlueMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UMaterialInterface* RedMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UMaterialInterface* Material;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UMaterialInterface* TrapMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UMaterialInterface* WarpMaterial;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "YourCategory")
+	UMaterialInterface* StarMaterial;
+
+public:
+	UPROPERTY(EditAnywhere,BlueprintReadWrite)
+	ESpaceState SpaceState;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<ABlueBoardSpace*>  NextSpace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<ABlueBoardSpace*>  PreviousSpace;
+
+
+
+
+public:
+	void UpdateAppearance();
+
 };
+
