@@ -4,11 +4,12 @@
 #include "PartyPlayer.h"
 #include "BlueBoardSpace.h"
 #include "PartyGameModeBase.h"
+#include "RollDiceCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h"
-#include "NavigationSystem.h"
+
 // Sets default values
 
 
@@ -29,6 +30,9 @@ void APartyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//이벤트 디스페처 호출
+	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
+	RollDicePlayer = Cast<ARollDiceCharacter>(GetWorld());
 	Ai = Cast<AAIController>(this->GetController());
 
 }
@@ -59,7 +63,7 @@ void APartyPlayer::GetCamera()
 {
 	
 	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	OurPlayerController->SetViewTargetWithBlend(this, 0.0f);
+	OurPlayerController->SetViewTargetWithBlend(this, 0.5f);
 
 
 
@@ -68,11 +72,13 @@ void APartyPlayer::GetCamera()
 void APartyPlayer::SelectBehavior()
 {
 
-
+	
 	RollDice();
 }
 void APartyPlayer::RollDice()
 {
+	//RollDicePlayer->GetSignal();
+	
 	MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
 	ItemApply();
 	MoveToSpace(CurrentSpace);
@@ -84,7 +90,7 @@ void APartyPlayer::ItemApply()
 }
 void APartyPlayer::ChooseItem()
 {
-	
+	ItemApply();
 }
 
 
@@ -167,7 +173,8 @@ void APartyPlayer::MoveEnded()
 		break;
 		case ESpaceState::Warp:
 		{
-
+			
+			SetActorLocation(CurrentSpace->WarpSpace->GetActorLocation());
 		}
 		break;
 		case ESpaceState::Star:
@@ -182,8 +189,6 @@ void APartyPlayer::MoveEnded()
 		break;
 	}
 
-	//이벤트 디스페처 호출
-	APartyGameModeBase* GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	GM->NextTurn();
 
 	UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::MoveEnded - End"))

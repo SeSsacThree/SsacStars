@@ -4,11 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "BlueBoardSpace.h"
+#include "PartyGameModeBase.h"
 #include "GameFramework/Character.h"
-#include "Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h"
 #include "PartyPlayer.generated.h"
 
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMoveCompletedDelegate);
+
+class APartyGameModeBase;
 
 UCLASS()
 class SSACSTARS_API APartyPlayer : public ACharacter
@@ -25,6 +27,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
 
 
 
@@ -56,8 +59,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class ABlueBoardSpace* CurrentSpace;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class ARollDiceCharacter* RollDicePlayer;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class AAIController* Ai;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	APartyGameModeBase* GM;
 
 	
 public:

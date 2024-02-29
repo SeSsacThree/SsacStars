@@ -1,14 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
+#include "PartyPlayer.h"
 #include "PartyGameModeBase.h"
-
+//#include "MainUI.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetArrayLibrary.h"
+
 
 void APartyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	//PartyUi = CreateWidget<UMainUI>(GetWorld(), PartyUiFactory);
 
 
 	TArray<AActor*> PlayerActors;
@@ -74,3 +76,15 @@ void APartyGameModeBase::StartMiniGame()
 	//InitialRound();
 
 }
+
+void APartyGameModeBase::AddView()
+{
+	//PartyUi->AddToViewport();
+}
+
+//PartyUi->AddToViewport();
+
+//ui를띄운다
+//ui에서 있는 3가지 버튼중 하나를 플레이어가 누른다 
+//플레이어가 가지고 있는 3가지 행동함수중 하나가 호출된다
+//그동안엔 움직임이 없어야한다

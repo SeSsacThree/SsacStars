@@ -3,10 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PartyPlayer.h"
 #include "GameFramework/GameModeBase.h"
+
 #include "PartyGameModeBase.generated.h"
 
+//class UMainUI;
+class APartyPlayer;
 /**
  * 
  */
@@ -41,6 +43,13 @@ public:
 	TArray<APartyPlayer*>  RoundOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APartyPlayer* CurrentPlayer;
+
+	/*
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UUserWidget> PartyUiFactory;
+	UPROPERTY()
+	class UMainUI* PartyUi;
+	*/
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Round;
@@ -53,4 +62,5 @@ public:
 	void NextTurn();
 	void EndRound();
 	void StartMiniGame();
+	void AddView();
 };
