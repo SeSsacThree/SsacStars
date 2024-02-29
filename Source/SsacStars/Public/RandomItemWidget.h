@@ -36,6 +36,7 @@ public:
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
 	class UWidgetAnimation* ButtonThreeBlinkAnimation;
 
+	UFUNCTION()
 	void BlinkButton(UWidgetAnimation* InWidgetAnimation);
 
 	UFUNCTION()
@@ -46,5 +47,16 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class UWidgetAnimation* RandRange;
+
+	UPROPERTY()
+	UWidgetAnimation* OutWidgetAnimation;
+
+	FTimerDelegate TimerDelegate;
+
+	FTimerHandle DelayTimerHandle;
+
+	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
+
+	int RandomNumber;
 
 };

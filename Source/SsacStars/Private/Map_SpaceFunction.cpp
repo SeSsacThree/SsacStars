@@ -16,17 +16,6 @@ AMap_SpaceFunction::AMap_SpaceFunction()
 void AMap_SpaceFunction::BeginPlay()
 {
 	Super::BeginPlay();
-
-//UWBP_RandomItem* RandomItemWidget = Cast<UWBP_RandomItem>(ItemWidgetClass->GetDefaultObject());
-//if (RandomItemWidget)
-//{
-	//RandomItemWidget->AddToViewport();
-//}
-	//ItemNames.Add(TEXT("첫번째 아이템"));
-	//ItemNames.Add(TEXT("두번째 아이템"));
-	//ItemNames.Add(TEXT("세번째 아이템"));
-
-	// StartItemSimulation();
 }
 
 
