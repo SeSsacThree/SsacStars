@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PartyPlayer.h"
 #include "GameFramework/GameModeBase.h"
 #include "PartyGameModeBase.generated.h"
 
@@ -13,7 +14,10 @@ UCLASS()
 class SSACSTARS_API APartyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+
+protected:
+	virtual void BeginPlay() override;
 
 	/*
 	UENUM(BlueprintType)
@@ -28,19 +32,25 @@ class SSACSTARS_API APartyGameModeBase : public AGameModeBase
 		StartMinigame		UMETA(DisplayName = "미니게임 시작")
 	};
 
-
-	UENUM(BlueprintType)
-		enum class ESpaceState : uint8
-	{
-		Blue	UMETA(DisplayName = "효과없음"),
-		Red		UMETA(DisplayName = "코인-3"),
-		Item	UMETA(DisplayName = "아이템얻기"),
-		Trap	UMETA(DisplayName = "함정발판"),
-		Warp		UMETA(DisplayName = "워프발판"),
-		Star		UMETA(DisplayName = "별얻기"),
-		TwoSideLoad		UMETA(DisplayName = "갈림길")
-	};
 	*/
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<APartyPlayer*>  TurnOrder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<APartyPlayer*>  RoundOrder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APartyPlayer* CurrentPlayer;
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Round;
 
+public:
+
+	void CreateWidget();
+	void InitialRound();
+	void StartTurn();
+	void NextTurn();
+	void EndRound();
+	void StartMiniGame();
 };
