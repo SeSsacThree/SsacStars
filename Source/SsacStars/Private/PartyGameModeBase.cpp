@@ -41,8 +41,15 @@ void APartyGameModeBase::InitialRound()
 }
 void APartyGameModeBase::StartTurn()
 {
+	if(RoundOrder.IsEmpty()){
+		return;
+	}
+
 	CurrentPlayer = RoundOrder[0];
+
 	CurrentPlayer->GetCamera();
+
+
 	//델리게이트로 nextturn실행
 }
 void APartyGameModeBase::NextTurn()
