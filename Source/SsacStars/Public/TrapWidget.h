@@ -4,52 +4,47 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "RandomItemWidget.generated.h"
+#include "TrapWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class SSACSTARS_API URandomItemWidget : public UUserWidget
+class SSACSTARS_API UTrapWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
-public:
 
 	virtual void NativeConstruct() override;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UButton* ButtonOne;
+	class UButton* TrapButtonOne;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UButton* ButtonTwo;
+	class UButton* TrapButtonTwo;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
-	class UButton* ButtonThree;
+	class UButton* TrapButtonThree;
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
-	class UWidgetAnimation* ButtonOneBlinkAnimation;
+	class UWidgetAnimation* FirstTrapButtonAnimation;
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
-	class UWidgetAnimation* ButtonTwoBlinkAnimation;
+	class UWidgetAnimation* SecondTrapButtonAnimation;
 
 	UPROPERTY(meta = (BindWidgetAnim), Transient)
-	class UWidgetAnimation* ButtonThreeBlinkAnimation;
+	class UWidgetAnimation* ThirdTrapButtonAnimation;
 
 	UFUNCTION()
-	void BlinkButton(UWidgetAnimation* InWidgetAnimation);
+	void BlinkTrapButton(UWidgetAnimation* InWidgetAnimation);
 
 	UFUNCTION()
-	void RandomPickItem();
+	void RandomPickTrap();
 
 	UPROPERTY(EditAnywhere)
 	TArray<class UWidgetAnimation*> AnimationArray;
 
 	UPROPERTY(EditAnywhere)
 	class UWidgetAnimation* RandRange;
-
-	/*UPROPERTY()            
-	UWidgetAnimation* OutWidgetAnimation;*/
 
 	FTimerDelegate TimerDelegate;
 
@@ -58,5 +53,4 @@ public:
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
 
 	int RandomNumber;
-
 };
