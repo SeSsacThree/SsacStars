@@ -32,7 +32,7 @@ void APartyPlayer::BeginPlay()
 
 	//이벤트 디스페처 호출
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
-	RollDicePlayer = Cast<ARollDiceCharacter>(GetWorld());
+	RollDicePlayer = Cast<ARollDiceCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollDiceCharacter::StaticClass()));
 	Ai = Cast<AAIController>(this->GetController());
 
 }
@@ -63,17 +63,20 @@ void APartyPlayer::GetCamera()
 {
 	
 	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	OurPlayerController->SetViewTargetWithBlend(this, 0.5f);
+	OurPlayerController->SetViewTargetWithBlend(this, 1.0f);
+
+	DelayTime(1.0f, [this]()
+		{
+			SelectBehavior();
+		});
 
 
-
-	SelectBehavior();
+	
 }
 void APartyPlayer::SelectBehavior()
 {
+	GM->AddSelectBehaviorUi();
 
-	
-	RollDice();
 }
 void APartyPlayer::RollDice()
 {
@@ -81,7 +84,21 @@ void APartyPlayer::RollDice()
 	
 	MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
 	ItemApply();
-	MoveToSpace(CurrentSpace);
+
+	GM->CloseView();
+	RollDicePlayer->AddView();
+	RollDicePlayer->GetSignal();
+	DelayTime(0.4f, [this]()
+		{
+			RollDicePlayer->StartRolling();
+		});
+	DelayTime(5.0f, [this]()
+		{
+			MoveToSpace(CurrentSpace);
+			RollDicePlayer->CloseView();
+		});
+
+
 
 }
 void APartyPlayer::ItemApply()

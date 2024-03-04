@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PartyGameModeBase.h"
 #include "GameFramework/Character.h"
 #include "Dice.generated.h"
 
@@ -26,4 +27,48 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION()
+	void OnDicePoint1BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnDicePoint2BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnDicePoint3BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnDicePoint4BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnDicePoint5BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnDicePoint6BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+public:
+	void ThrowDice();
+	void StartDiceRolling();
+	void AfterOverlap();
+	void LaunchDice(float LaunchAmount);
+public:
+	bool IsRollingMode=false;
+	bool IsStopRollingMode = false;
+public:
+	FVector RollingLocation;
+	FVector StopRollingLocation;
+
+public:
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* DicePoint1;
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* DicePoint2;
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* DicePoint3;
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* DicePoint4;
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* DicePoint5;
+	UPROPERTY(EditAnywhere)
+	class UBoxComponent* DicePoint6;
+	UPROPERTY(EditAnywhere)
+	class USkeletalMeshComponent* DiceMesh;
+
+
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	APartyGameModeBase* GM;
 };

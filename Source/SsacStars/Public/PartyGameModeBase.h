@@ -43,13 +43,18 @@ public:
 	TArray<APartyPlayer*>  RoundOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APartyPlayer* CurrentPlayer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APlayerController* PlayerController;
 
-	/*
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<class UUserWidget> PartyUiFactory;
+public:
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UMainUI> SelectUiFactory;
 	UPROPERTY()
-	class UMainUI* PartyUi;
-	*/
+	class UMainUI* SelectUi;
+
+
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Round;
@@ -62,5 +67,6 @@ public:
 	void NextTurn();
 	void EndRound();
 	void StartMiniGame();
-	void AddView();
+	void AddSelectBehaviorUi();
+	void CloseView();
 };

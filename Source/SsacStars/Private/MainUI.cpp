@@ -15,7 +15,7 @@ void UMainUI::NativeConstruct()
 	Map->OnClicked.AddDynamic(this, &UMainUI::MapAction);
 
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
-
+	Dice->SetVisibility(ESlateVisibility::Visible);
 	
 }
 

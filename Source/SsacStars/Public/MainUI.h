@@ -15,8 +15,11 @@ class SSACSTARS_API UMainUI : public UUserWidget
 {
 	GENERATED_BODY()
 
-	void NativeConstruct() override;
+
 public:
+
+	void NativeConstruct() override;
+
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* Dice;
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
