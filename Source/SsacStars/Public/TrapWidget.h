@@ -6,9 +6,6 @@
 #include "Blueprint/UserWidget.h"
 #include "TrapWidget.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class SSACSTARS_API UTrapWidget : public UUserWidget
 {
