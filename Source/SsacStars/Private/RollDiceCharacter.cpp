@@ -92,7 +92,6 @@ void ARollDiceCharacter::CreateDice()
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Dice"));
 		GrapDice(Dice);
-		Dice->SetOwner(this);
 	}
 
 
@@ -108,10 +107,12 @@ void ARollDiceCharacter::ThrowDice(const AActor* Actor)
 	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
 	// pistol 물리를 켜고싶다.
 	mesh->SetSimulatePhysics(true);
+	//mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	//mesh->SetCollisionResponseToAllChannels(ECR_Block);
 	// hand에서 떼고싶다.
-	mesh->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
+	mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 
-	Dice->SetOwner(nullptr);
+	
 	
 }
 

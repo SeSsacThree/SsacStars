@@ -3,6 +3,7 @@
 
 #include "PartyPlayer.h"
 #include "BlueBoardSpace.h"
+#include "Dice.h"
 #include "ItemUI.h"
 #include "MainUI.h"
 #include "Map_SpaceFunction.h"
@@ -86,20 +87,25 @@ void APartyPlayer::RollDice()
 {
 	//RollDicePlayer->GetSignal();
 	
-	MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
+	//MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
 	
 
 	GM->CloseView();
 	RollDicePlayer->AddView();
 	RollDicePlayer->GetSignal();
-	DelayTime(0.4f, [this]()
+	DelayTime(2.0f, [this]()
 		{
 			RollDicePlayer->StartRolling();
 		});
-	DelayTime(5.0f, [this]()
+
+
+	DelayTime(30.0f, [this]()
 		{
-			MoveToSpace(CurrentSpace);
-			RollDicePlayer->CloseView();
+			if (RollDicePlayer->Dice->IsSelected == false)
+			{
+				ItemApply();
+				RollDicePlayer->CloseView();
+			}
 		});
 
 
@@ -107,7 +113,13 @@ void APartyPlayer::RollDice()
 }
 void APartyPlayer::ItemApply()
 {
-	RollDice();
+
+	DelayTime(2.0f, [this]()
+		{
+				MoveToSpace(CurrentSpace);
+
+		});
+	
 }
 void APartyPlayer::ChooseItem()
 {
@@ -117,7 +129,7 @@ void APartyPlayer::ChooseItem()
 
 	DelayTime(5.0f, [this]()
 		{
-			ItemApply();
+			RollDice();
 		});
 	
 }

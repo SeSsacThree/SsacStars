@@ -8,6 +8,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PartyGameModeBase.h"
+#include "GeometryCollection/GeometryCollectionSimulationTypes.h"
 #include "Physics/ImmediatePhysics/ImmediatePhysicsShared/ImmediatePhysicsCore.h"
 
 // Sets default values
@@ -18,7 +19,7 @@ ADice::ADice()
 	
 	DiceComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DiceComp"));
 	this->SetRootComponent(DiceComp);
-
+	DiceComp->SetSimulatePhysics(true);
 	DicePoint1 = CreateDefaultSubobject<UBoxComponent>(TEXT("DicePoint1"));
 	DicePoint2 = CreateDefaultSubobject<UBoxComponent>(TEXT("DicePoint2"));
 	DicePoint3 = CreateDefaultSubobject<UBoxComponent>(TEXT("DicePoint3"));
@@ -32,6 +33,13 @@ ADice::ADice()
 	DicePoint4->SetupAttachment(RootComponent);
 	DicePoint5->SetupAttachment(RootComponent);
 	DicePoint6->SetupAttachment(RootComponent);
+
+	DicePoint1->SetCollisionProfileName("Pawn");
+	DicePoint2->SetCollisionProfileName("Pawn");
+	DicePoint3->SetCollisionProfileName("Pawn");
+	DicePoint4->SetCollisionProfileName("Pawn");
+	DicePoint5->SetCollisionProfileName("Pawn");
+	DicePoint6->SetCollisionProfileName("Pawn");
 
 	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent"));
 	SceneCaptureComponent->SetupAttachment(RootComponent);
@@ -55,11 +63,26 @@ void ADice::BeginPlay()
 void ADice::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	FVector CameraLocation=SceneCaptureComponent->GetComponentLocation();
+	SceneCaptureComponent->SetWorldLocation(CameraLocation);
+
+	if(IsUpMode)
+	{
+		FVector CurrentLocation =GetActorLocation()+GetActorUpVector() * 160.0f * GetWorld()->GetDeltaSeconds();
+		SetActorLocation(CurrentLocation);
+		
+		FVector CurrentScale = GetActorScale3D();
+		FVector ScaleToAddVector = FVector(0.07);
+		FVector NewScale = CurrentScale + ScaleToAddVector;
+
+		SetActorScale3D(NewScale);
+	}
+
 
 	if (IsRollingMode)
 	{
 
-		AddActorWorldRotation(FRotator(10, 10, 2));
+		AddActorWorldRotation(FRotator(10, 10, 10));
 		FVector CurrentLocation = GetActorLocation();
 		CurrentLocation.Z = RollingLocation.Z;
 		SetActorLocation(CurrentLocation,true,nullptr,ETeleportType::TeleportPhysics);
@@ -142,29 +165,37 @@ void ADice::ThrowDice()
 	DicePoint5->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint6->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DiceComp->SetSimulatePhysics(true);
-	LaunchDice(1000);
+	IsUpMode = true;
+	LaunchDice(1000000);
 }
 
 void ADice::StartDiceRolling()
 {
+	IsUpMode = false;
 	IsRollingMode = true;
 	RollingLocation = GetActorLocation();
 }
 
 void ADice::AfterOverlap()
 {
-	IsRollingMode = false;
-	LaunchDice(200);
-	StopRollingLocation = GetActorLocation();
-	SetRotationToNumber(DiceNumber);
-
-
 	DicePoint1->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DicePoint2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DicePoint3->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DicePoint4->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DicePoint5->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DicePoint6->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DiceComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+	
+	LaunchDice(200);
+	StopRollingLocation = GetActorLocation();
+	IsRollingMode = false;
+	IsStopRollingMode = true;
+	IsSelected = true;
+	SetRotationToNumber(DiceNumber);
+
+
+	GM->CurrentPlayer->ItemApply();
 
 
 
@@ -176,7 +207,7 @@ void ADice::LaunchDice(float LaunchAmount)
 {
 	FVector LaunchDirection = FVector::UpVector; // À§ÂÊÀ¸·Î ¶ç¿ì±â ¿¹½Ã
 	float LaunchStrength = LaunchAmount; // ¶ç¿ì´Â ÈûÀÇ Å©±â
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Addforce"));
 	DiceComp->AddForce(LaunchDirection*LaunchStrength);
 
 	//LaunchCharacter(LaunchDirection * LaunchStrength, true, true);

@@ -44,6 +44,8 @@ public:
 public:
 	bool IsRollingMode=false;
 	bool IsStopRollingMode = false;
+	bool IsUpMode = false;
+	bool IsSelected = false;
 public:
 	FVector RollingLocation;
 	FVector StopRollingLocation;
