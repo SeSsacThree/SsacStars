@@ -27,7 +27,6 @@ void UTrapWidget::BlinkTrapButton(UWidgetAnimation* InWidgetAnimation)
 			RandomNumber--;
 			if (RandomNumber > 0)
 				RandomPickTrap();
-
 		});
 }
 

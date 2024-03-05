@@ -48,6 +48,7 @@ void UGetCoins::DropCoins(UWidgetAnimation* InWidgetAnimation)
 			DropCoinsNumber++;
 		}else
 		{
+			SetVisibility(ESlateVisibility::Hidden);
 			return;
 		}
 	});
@@ -64,5 +65,7 @@ void UGetCoins::DelayTime(float WantSeconds, TFunction<void()> InFunction)
 			InFunction();
 		}, WantSeconds, false);
 }
+
+
 
 
