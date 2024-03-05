@@ -28,15 +28,15 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void TeleportActor(AActor* ActorToTeleport);
-
-	UPROPERTY(EditAnywhere)
-	FVector TeleportDestination;
+	void TeleportActor(AActor* ActorToTeleport, FVector TeleportDestination);
 
 	UFUNCTION()
 	void PlusThreeSpaces();
-	/*
+	
 	UFUNCTION()
-	void SwapPlayerPositions(APartyGameModeBase* CurrentPlayer);
-	*/
+	void SwapPlayerPositions(APartyPlayer* CurrentPlayer);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	class APartyGameModeBase*GM;
+	
 };
