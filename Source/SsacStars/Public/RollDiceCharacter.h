@@ -41,10 +41,9 @@ public:
 
 
 public:
-	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return SpringArm; }
-	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return Camera; }
+	UPROPERTY(VisibleAnywhere)
+	USceneCaptureComponent2D* SceneCaptureComponent;
+
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Pistol)

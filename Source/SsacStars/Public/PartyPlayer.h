@@ -10,6 +10,17 @@
 
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE(FMoveCompletedDelegate);
 
+UENUM(BlueprintType)
+enum class EItem : uint8
+{
+	Add3Dice	UMETA(DisplayName = "Add3Dice"),
+	WarpToStar	UMETA(DisplayName = "WarpToStar"),
+	SwitchCharacter		UMETA(DisplayName = "TwoSideLoad"),
+	Nothing	UMETA(DisplayName = "Nothing"),
+};
+
+
+
 class APartyGameModeBase;
 
 UCLASS()
@@ -67,9 +78,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	APartyGameModeBase* GM;
 
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<EItem> Inventory;
+	int32 Inventoryindex=0;
+	int32 MaxInventorySize = 2;
 
-	
 public:
 
 

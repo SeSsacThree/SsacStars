@@ -52,7 +52,14 @@ public:
 	TSubclassOf<class UMainUI> SelectUiFactory;
 	UPROPERTY()
 	class UMainUI* SelectUi;
-
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUserWidget> StatusUiFactory;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UItemUI> ItemUiFactory;
+	UPROPERTY()
+	class UItemUI* ItemUi;
+	UPROPERTY()
+	class UUserWidget* StatusUi;
 
 	
 public:
@@ -61,7 +68,7 @@ public:
 
 public:
 
-	void CreateWidget();
+	void AddItemUseUi();
 	void InitialRound();
 	void StartTurn();
 	void NextTurn();

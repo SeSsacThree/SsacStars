@@ -3,6 +3,9 @@
 
 #include "PartyPlayer.h"
 #include "BlueBoardSpace.h"
+#include "ItemUI.h"
+#include "MainUI.h"
+#include "Map_SpaceFunction.h"
 #include "PartyGameModeBase.h"
 #include "RollDiceCharacter.h"
 #include "Kismet/GameplayStatics.h"
@@ -34,7 +37,8 @@ void APartyPlayer::BeginPlay()
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	RollDicePlayer = Cast<ARollDiceCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollDiceCharacter::StaticClass()));
 	Ai = Cast<AAIController>(this->GetController());
-
+	Inventory.SetNum(MaxInventorySize);
+	Inventory.Init(EItem::Nothing, MaxInventorySize);
 }
 
 // Called every frame
@@ -83,7 +87,7 @@ void APartyPlayer::RollDice()
 	//RollDicePlayer->GetSignal();
 	
 	MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
-	ItemApply();
+	
 
 	GM->CloseView();
 	RollDicePlayer->AddView();
@@ -103,11 +107,19 @@ void APartyPlayer::RollDice()
 }
 void APartyPlayer::ItemApply()
 {
-	
+	RollDice();
 }
 void APartyPlayer::ChooseItem()
 {
-	ItemApply();
+	GM->SelectUi->RemoveFromParent();
+	GM->AddItemUseUi();
+
+
+	DelayTime(5.0f, [this]()
+		{
+			ItemApply();
+		});
+	
 }
 
 
@@ -118,7 +130,6 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 	if (currentSpace)
 	{
 		CurrentSpace = currentSpace->NextSpace[0];
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("1move"));
 	}
 
 
@@ -180,7 +191,44 @@ void APartyPlayer::MoveEnded()
 		break;
 		case ESpaceState::Item:
 		{
+			int RanItemNum = UKismetMathLibrary::RandomIntegerInRange(1, 3);
 
+			UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::ItemSpace"))
+			if(Inventoryindex<3)
+			{
+				switch (RanItemNum)
+				{
+					case 1:
+						{
+
+							Inventory[Inventoryindex] = EItem::Add3Dice;
+							GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
+							//GM->ItemUi->Add3DiceItem();
+							break;
+						}
+				case 2:
+					{
+						Inventory[Inventoryindex] = EItem::WarpToStar;
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("wts"));
+							//GM->ItemUi->WarpToStarItem();
+						break;
+					}
+					case 3:
+					{
+						Inventory[Inventoryindex] = EItem::SwitchCharacter;
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("sw"));
+						//GM->ItemUi->SwitchSpaceItem();
+						break;
+					}
+				}
+				
+				Inventoryindex++;
+				
+			}
+			else
+			{
+				
+			}
 		}
 		break;
 		case ESpaceState::Trap:
@@ -208,7 +256,7 @@ void APartyPlayer::MoveEnded()
 
 	GM->NextTurn();
 
-	UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::MoveEnded - End"))
+	
 
 
 }

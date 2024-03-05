@@ -3,12 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PartyGameModeBase.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/Actor.h"
 #include "Dice.generated.h"
 
 UCLASS()
-class SSACSTARS_API ADice : public ACharacter
+class SSACSTARS_API ADice : public AActor
 {
 	GENERATED_BODY()
 
@@ -23,9 +22,6 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION()
 	void OnDicePoint1BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -44,14 +40,18 @@ public:
 	void StartDiceRolling();
 	void AfterOverlap();
 	void LaunchDice(float LaunchAmount);
+	void SetRotationToNumber(int Number);
 public:
 	bool IsRollingMode=false;
 	bool IsStopRollingMode = false;
 public:
 	FVector RollingLocation;
 	FVector StopRollingLocation;
+public:
+	int DiceNumber;
 
 public:
+
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* DicePoint1;
 	UPROPERTY(EditAnywhere)
@@ -64,11 +64,12 @@ public:
 	class UBoxComponent* DicePoint5;
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* DicePoint6;
+	UPROPERTY(VisibleAnywhere)
+	USceneCaptureComponent2D* SceneCaptureComponent;
 	UPROPERTY(EditAnywhere)
-	class USkeletalMeshComponent* DiceMesh;
-
+	class USkeletalMeshComponent* DiceComp;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
-	APartyGameModeBase* GM;
+	class APartyGameModeBase* GM;
 };

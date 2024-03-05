@@ -2,6 +2,7 @@
 #include "PartyGameModeBase.h"
 #include "PartyPlayer.h"
 #include "MainUI.h"
+#include "ItemUI.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 
@@ -10,8 +11,8 @@ void APartyGameModeBase::BeginPlay()
 	Super::BeginPlay();
 	//SelectUi = CreateWidget<UMainUI>(GetWorld(), SelectUiFactory);
 	SelectUi = NewObject<UMainUI>(this, SelectUiFactory);
-
-	
+	StatusUi = NewObject<UUserWidget>(this, StatusUiFactory);
+	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
 	TArray<AActor*> PlayerActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APartyPlayer::StaticClass(), PlayerActors);
 
@@ -23,16 +24,16 @@ void APartyGameModeBase::BeginPlay()
 			TurnOrder.Add(PartyPlayer);
 		}
 	}
-
+	StatusUi->AddToViewport();
 
 	InitialRound();
 
 }
 
 
-void APartyGameModeBase::CreateWidget()
+void APartyGameModeBase::AddItemUseUi()
 {
-
+	ItemUi->AddToViewport();
 	
 
 }
@@ -81,7 +82,7 @@ void APartyGameModeBase::StartMiniGame()
 
 
 
-	//InitialRound();
+	InitialRound();
 
 }
 
@@ -103,7 +104,7 @@ void APartyGameModeBase::AddSelectBehaviorUi()
 
 void APartyGameModeBase::CloseView()
 {
-
+	ItemUi->RemoveFromParent();
 	SelectUi->RemoveFromParent();
 	if (PlayerController)
 	{
