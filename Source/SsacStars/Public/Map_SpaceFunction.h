@@ -7,6 +7,8 @@
 #include "Blueprint/UserWidget.h"
 #include "Map_SpaceFunction.generated.h"
 
+class APartyGameModeBase;
+
 UCLASS()
 class SSACSTARS_API AMap_SpaceFunction : public AActor
 {
@@ -31,6 +33,10 @@ public:
 	UPROPERTY(EditAnywhere)
 	FVector TeleportDestination;
 
+	UFUNCTION()
 	void PlusThreeSpaces();
-
+	/*
+	UFUNCTION()
+	void SwapPlayerPositions(APartyGameModeBase* CurrentPlayer);
+	*/
 };

@@ -35,12 +35,31 @@ void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport)
 	}
 }
 
-APartyPlayer PartyPlayerInstance;
 void AMap_SpaceFunction::PlusThreeSpaces()
 {
+	APartyPlayer PartyPlayerInstance;
 	PartyPlayerInstance.MoveRemaining +=3;
 	PartyPlayerInstance.StopOrGo();
 }
+/*
+TArray<APartyGameModeBase*> Players;
+void AMap_SpaceFunction::SwapPlayerPositions(APartyGameModeBase* CurrentPlayer)
+{
+	APartyGameModeBase* myPlayer = nullptr;
+	for (APartyGameModeBase* Player : Players)
+	{
+		if (Player->PlayerController() == CurrentPlayer)
+		{
+			myPlayer = Player;
+			break;
+		}
+	}
+
+	if (!myPlayer)
+	{
+		
+	}
+}*/
 
 
 
