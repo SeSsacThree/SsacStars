@@ -31,4 +31,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	FVector TeleportDestination;
 
+	void PlusThreeSpaces();
+
 };

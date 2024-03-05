@@ -2,9 +2,10 @@
 
 
 #include "Map_SpaceFunction.h"
+#include "PartyPlayer.h"
 //#include "WBP_RandomItem.h"
 #include "Misc/OutputDeviceNull.h"
-#include "C:\Program Files\Epic Games\UE_5.3\Engine\Source\Runtime\UMG\Public\Blueprint\UserWidget.h"
+
 // Sets default values
 AMap_SpaceFunction::AMap_SpaceFunction()
 {
@@ -32,6 +33,13 @@ void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport)
 	{
 		ActorToTeleport->SetActorLocation(TeleportDestination);
 	}
+}
+
+APartyPlayer PartyPlayerInstance;
+void AMap_SpaceFunction::PlusThreeSpaces()
+{
+	PartyPlayerInstance.MoveRemaining +=3;
+	PartyPlayerInstance.StopOrGo();
 }
 
 
