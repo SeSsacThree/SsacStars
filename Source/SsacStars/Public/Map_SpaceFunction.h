@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Map_SpaceFunction.generated.h"
 
+class APartyPlayer;
 class APartyGameModeBase;
 
 UCLASS()
@@ -31,12 +32,23 @@ public:
 	void TeleportActor(AActor* ActorToTeleport, FVector TeleportDestination);
 
 	UFUNCTION()
-	void PlusThreeSpaces();
+	void PlusThreeSpaces(APartyPlayer* InPartyplayer);
 	
 	UFUNCTION()
 	void SwapPlayerPositions(APartyPlayer* CurrentPlayer);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class APartyGameModeBase*GM;
-	
+
+	UPROPERTY(EditAnywhere)
+	class APartyPlayer* partyPlayer;
+
+	UFUNCTION()
+	void FirstTrap(APartyPlayer* InPartyPlayer);
+
+	UFUNCTION()
+	void SecondTrap(APartyPlayer* InPartyPlayer);
+
+	UFUNCTION()
+	void ThirdTrap(APartyPlayer* InPartyPlayer);
 };

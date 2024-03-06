@@ -22,6 +22,7 @@ void AMap_SpaceFunction::BeginPlay()
 {
 	Super::BeginPlay();
 	GM=Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
+
 }
 
 
@@ -42,13 +43,10 @@ void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport, FVector Teleport
 	}
 }
 
-void AMap_SpaceFunction::PlusThreeSpaces()
+void AMap_SpaceFunction::PlusThreeSpaces(APartyPlayer* InPartyplayer)
 {
-	APartyPlayer PartyPlayerInstance;
-	PartyPlayerInstance.MoveRemaining +=3;
-	PartyPlayerInstance.StopOrGo();
-
-	GM->CurrentPlayer->MoveRemaining+=3;
+	InPartyplayer->MoveRemaining +=3;
+	InPartyplayer->StopOrGo();
 }
 
 void AMap_SpaceFunction::SwapPlayerPositions(APartyPlayer* CurrentPlayer)
@@ -81,6 +79,37 @@ void AMap_SpaceFunction::SwapPlayerPositions(APartyPlayer* CurrentPlayer)
 	OtherPlayer->SetActorLocation(TempPosition);
 }
 
+void AMap_SpaceFunction::FirstTrap(APartyPlayer* InPartyPlayer)
+{
+	if(InPartyPlayer == nullptr)
+	{
+		return;
+	}
+
+	// 코인 반을 없앤다
+	InPartyPlayer->Coin = InPartyPlayer->Coin * -2;
+}
+
+void AMap_SpaceFunction::SecondTrap(APartyPlayer* InPartyPlayer)
+{
+	if (InPartyPlayer == nullptr)
+	{
+		return;
+	}
+
+	InPartyPlayer->Score = InPartyPlayer->Score * -2;
+}
+
+void AMap_SpaceFunction::ThirdTrap(APartyPlayer* InPartyPlayer)
+{
+	if (InPartyPlayer == nullptr)
+	{
+		return;
+	}
+
+	InPartyPlayer->Coin = InPartyPlayer->Coin - 5;
+
+}
 
 
 
