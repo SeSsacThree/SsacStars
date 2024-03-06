@@ -50,4 +50,9 @@ class SSACSTARS_API UTrapWidget : public UUserWidget
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
 
 	int RandomNumber;
-};
+
+	UPROPERTY(EditDefaultsOnly)
+	class AMap_SpaceFunction* oneOfThreeTraps;
+
+
+	};

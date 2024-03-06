@@ -22,12 +22,12 @@ void APartyGameModeBase::BeginPlay()
 		if (PartyPlayer)
 		{
 			TurnOrder.Add(PartyPlayer);
+
 		}
 	}
 	StatusUi->AddToViewport();
 
 	InitialRound();
-
 }
 
 

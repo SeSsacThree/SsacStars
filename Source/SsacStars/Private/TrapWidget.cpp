@@ -2,6 +2,10 @@
 
 
 #include "TrapWidget.h"
+
+#include "GetCoins.h"
+#include "Map_SpaceFunction.h"
+#include "PartyGameModeBase.h"
 #include "Components/Button.h"
 #include "TimerManager.h"
 // #include "Developer/CookedEditor/Public/CookedEditorTargetPlatform.h"
@@ -16,6 +20,31 @@ void UTrapWidget::NativeConstruct()
 
 	RandomNumber = FMath::RandRange(10, 15);
 	RandomPickTrap();
+
+	APartyGameModeBase* GM=Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
+
+	// RandomNumber가 1일때 실행되는 애니메이션의 해당 기능을 실행
+	if (GM)
+	{
+		if (RandomNumber == 1)
+		{
+			switch (RandomNumber % 3)
+			{
+				case 0:
+						oneOfThreeTraps->FirstTrap(GM->CurrentPlayer);
+						break;
+					
+				case 1:
+						oneOfThreeTraps->SecondTrap(GM->CurrentPlayer);
+						break;
+					
+				case 2:
+						oneOfThreeTraps->ThirdTrap(GM->CurrentPlayer);
+						break;
+			}
+		}
+		
+	}
 }
 
 void UTrapWidget::BlinkTrapButton(UWidgetAnimation* InWidgetAnimation)
@@ -44,3 +73,4 @@ void UTrapWidget::DelayTime(float WantSeconds, TFunction<void()> InFunction)
 			InFunction();
 		}, WantSeconds, false);
 }
+
