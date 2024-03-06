@@ -21,6 +21,9 @@ void UTrapWidget::NativeConstruct()
 	RandomNumber = FMath::RandRange(10, 15);
 	RandomPickTrap();
 
+	RemoveFromParent();
+
+
 	APartyGameModeBase* GM=Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 
 	// RandomNumber가 1일때 실행되는 애니메이션의 해당 기능을 실행
@@ -32,14 +35,15 @@ void UTrapWidget::NativeConstruct()
 			{
 				case 0:
 						oneOfThreeTraps->FirstTrap(GM->CurrentPlayer);
+						UE_LOG(LogTemp, Warning, TEXT("aaaaaa"))
 						break;
-					
 				case 1:
 						oneOfThreeTraps->SecondTrap(GM->CurrentPlayer);
+						UE_LOG(LogTemp, Warning, TEXT("bbbbb"))
 						break;
-					
 				case 2:
 						oneOfThreeTraps->ThirdTrap(GM->CurrentPlayer);
+						UE_LOG(LogTemp, Warning, TEXT("ccccc"))
 						break;
 			}
 		}
