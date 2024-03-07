@@ -34,7 +34,7 @@ void URandomItemWidget::BlinkButton(UWidgetAnimation* InWidgetAnimation)
 	DelayTime(0.3f, [this]()
 		{
 			RandomNumber--;
-			if ((RandomNumber > 0)) // && (RandomNumber == 1)
+			if ((RandomNumber > 0) && (RandomNumber == 1)) 
 			{
 				RandomPickItem();
 			}

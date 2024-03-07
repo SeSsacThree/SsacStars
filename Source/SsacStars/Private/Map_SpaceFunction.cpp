@@ -102,7 +102,7 @@ void AMap_SpaceFunction::FirstTrap(APartyPlayer* InPartyPlayer)
 		return;
 	}
 
-	// 코인 반을 없앤다
+	// 코인  * -2
 	InPartyPlayer->Coin = InPartyPlayer->Coin * -2;
 }
 
