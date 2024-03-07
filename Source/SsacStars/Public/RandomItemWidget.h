@@ -72,10 +72,6 @@ public:
 
 	FWidgetAnimationDynamicEvent StarAnimationEvent;
 
-	/*
-	UPROPERTY()
-	class UTenCoinsforaStar* removeWidget;*/
-
 	UFUNCTION()
 	void RemoveWidgetAfterAnimation();
 

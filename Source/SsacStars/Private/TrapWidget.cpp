@@ -24,7 +24,7 @@ void UTrapWidget::NativeConstruct()
 	ArrayIndex = RandomNumber;
 
 	RandomPickTrap();
-	RemoveFromParent();
+	// RemoveFromParent();
 
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 }
@@ -44,6 +44,7 @@ void UTrapWidget::BlinkTrapButton(UWidgetAnimation* InWidgetAnimation)
 			else if ((RandomNumber > 0) && (RandomNumber == 1))
 			{
 				ApplyTrap(ArrayIndex);
+				RemoveFromParent();
 			}
 
 		});
@@ -91,5 +92,13 @@ void UTrapWidget::ApplyTrap(int32 InArrayNumber)
 				}
 		}
 	}
+}
+
+void UTrapWidget::RemoveWidgetAfterAnimation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("URandomItemWidget::RemoveWidgetAfterAnimation"))
+		// 애니메이션이 끝나면
+		// 위젯 사라짐
+		RemoveFromParent();
 }
 

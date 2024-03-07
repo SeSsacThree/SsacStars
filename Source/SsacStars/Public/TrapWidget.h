@@ -61,4 +61,7 @@ public:
 	class APartyGameModeBase* GM;
 
 	void ApplyTrap(int32 InArrayNumber);
+
+	UFUNCTION()
+	void RemoveWidgetAfterAnimation();
 	};
