@@ -2,21 +2,65 @@
 #include "PartyGameModeBase.h"
 #include "PartyPlayer.h"
 #include "MainUI.h"
+#include "StatusUi.h"
 #include "ItemUI.h"
+#include "TenCoinsforaStar.h"
+#include "PlayerUiCard.h"
 #include "TrapWidget.h"
+#include "RandomItemWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "EngineUtils.h"
+#include "PartyController.h"
 #include "PartyScore.h"
+
+APartyGameModeBase::APartyGameModeBase()
+{
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh1(TEXT("/Script/Engine.SkeletalMesh'/Game/CJW/Models/ZZang/Shinchan_Models.Shinchan_Models'"));
+	if(tempMesh1.Succeeded())
+	{
+		Mesh1 = tempMesh1.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh2(TEXT("/Script/Engine.SkeletalMesh'/Game/KMS/Mesh/pingu/pingu.pingu'"));
+	if (tempMesh2.Succeeded())
+	{
+		Mesh2 = tempMesh2.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh3(TEXT("/Script/Engine.SkeletalMesh'/Game/JYS/Kirby/source/kirby.kirby'"));
+	if (tempMesh3.Succeeded())
+	{
+		Mesh3 = tempMesh3.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh4(TEXT("/Script/Engine.StaticMesh'/Game/CJW/Models/ZZang/KERORO.KERORO'"));
+	if (tempMesh1.Succeeded())
+	{
+		Mesh4 = tempMesh4.Object;
+	}
+	PlayerControllerClass = APartyController::StaticClass();
+}
 
 void APartyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+	PlayerSetting();
 	//SelectUi = CreateWidget<UMainUI>(GetWorld(), SelectUiFactory);
 	SelectUi = NewObject<UMainUI>(this, SelectUiFactory);
-	StatusUi = NewObject<UUserWidget>(this, StatusUiFactory);
+	StatusUi = NewObject<UStatusUi>(this, StatusUiFactory);
 	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
 	TrapUi= NewObject<UTrapWidget>(this, TrapUiFactory);
+	GetItemUi = NewObject<URandomItemWidget>(this, GetItemUiFactory);
+	PlayerUiCard = NewObject<UPlayerUiCard>(this, PlayerUiCardFactory);
+	TenCoinsforaStarUi = NewObject<UTenCoinsforaStar>(this, TenCoinsforaStarUiFactory);
+	//순서를 정하고 싶을때 건들면 됌
+	//Algo::Shuffle(InitialTurnOrder);
+	StatusUi->AddToViewport();
+	
+	InitialRound();
+}
+
+
+void APartyGameModeBase::PlayerSetting()
+{
 	TArray<AActor*> PlayerActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APartyPlayer::StaticClass(), PlayerActors);
 	Star = Cast<APartyScore>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyScore::StaticClass()));
@@ -30,11 +74,55 @@ void APartyGameModeBase::BeginPlay()
 
 		}
 	}
-	StatusUi->AddToViewport();
+
+	InitialTurnOrder = TurnOrder;
+
+	for (int i = 0; i < InitialTurnOrder.Num(); i++)
+	{
+		InitialTurnOrder[i]->PlayerIndex = i;
+		SetPlayerAppeareance(InitialTurnOrder[i], i);
+	}
 	
-	InitialRound();
+	PlayerCoins.SetNum(InitialTurnOrder.Num());
+	PlayerCoins.Init(0, InitialTurnOrder.Num());
+	PlayerScores.SetNum(InitialTurnOrder.Num());
+	PlayerScores.Init(0, InitialTurnOrder.Num());
 }
 
+void APartyGameModeBase::SetPlayerAppeareance(APartyPlayer*Player,int Index)
+{
+	switch (Index)
+	{
+		case 0:
+			{
+				Player->GetMesh()->SetSkeletalMeshAsset(Mesh1);
+				Player->GetMesh()->SetWorldScale3D(FVector(16));
+				break;
+			}
+		case 1:
+		{
+			Player->GetMesh()->SetSkeletalMeshAsset(Mesh2);
+			Player->GetMesh()->SetWorldScale3D(FVector(0.4));
+			break;
+		}
+		case 2:
+		{
+			Player->GetMesh()->SetSkeletalMeshAsset(Mesh3);
+			Player->GetMesh()->SetWorldScale3D(FVector(17));
+			break;
+		}
+		case 3:
+		{
+			Player->GetMesh()->SetSkeletalMeshAsset(Mesh4);
+			Player->GetMesh()->SetWorldScale3D(FVector(1));
+			break;
+		}
+		
+	}
+	
+
+
+}
 
 void APartyGameModeBase::AddItemUseUi()
 {
@@ -44,7 +132,7 @@ void APartyGameModeBase::AddItemUseUi()
 }
 void APartyGameModeBase::InitialRound()
 {
-	RoundOrder = TurnOrder;
+	RoundOrder = InitialTurnOrder;
 
 	StartTurn();
 }
@@ -101,7 +189,7 @@ void APartyGameModeBase::AddSelectBehaviorUi()
 	{
 		PlayerController->bShowMouseCursor = true;
 		PlayerController->bEnableClickEvents = true;
-		PlayerController->bEnableMouseOverEvents = true;
+		
 	}
 }
 
@@ -162,7 +250,7 @@ void APartyGameModeBase::ChangeStarSpace()
 	
 
 	Star->ReSpace();
-
+	UpdateGameInfo();
 
 }
 
@@ -170,6 +258,50 @@ void APartyGameModeBase::AddTrapUi()
 {
 	TrapUi->AddToViewport();
 	
+}
+
+void APartyGameModeBase::AddGetItemUi()
+{
+	GetItemUi->AddToViewport();
+}
+
+void APartyGameModeBase::AddTenCoinsforaStar()
+{
+	TenCoinsforaStarUi->AddToViewport();
+}
+
+void APartyGameModeBase::UpdateGameInfo()
+{
+	int MaxTemp = 0;
+	int Rank=1;
+	int PreviousScore = 9999;
+	for (int t = 0; t < InitialTurnOrder.Num(); t++)
+	{
+		for (int i = 0; i < InitialTurnOrder.Num(); i++)
+		{
+			if (PlayerCoins[i] >= MaxTemp&&PlayerCoins[i]<PreviousScore)
+			{
+				MaxTemp = PlayerCoins[i];
+				Rank = i;
+				InitialTurnOrder[i]->Rank = Rank;
+			}
+		}
+		PreviousScore = MaxTemp;
+		Rank++;
+		MaxTemp = 0;
+	}
+}
+
+void APartyGameModeBase::GamePause()
+{
+
+	 PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+
+	if (PlayerController)
+	{
+		// 게임을 일시정지합니다.
+		PlayerController->SetPause(true);
+	}
 }
 
 

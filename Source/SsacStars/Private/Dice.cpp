@@ -8,6 +8,7 @@
 
 #include "Components/SkeletalMeshComponent.h"
 #include "PartyGameModeBase.h"
+#include "RollDiceCharacter.h"
 
 
 // Sets default values
@@ -76,7 +77,7 @@ void ADice::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	
-	//SceneCaptureDice->ShowOnlyActorComponents(this);
+	SceneCaptureDice->ShowOnlyActorComponents(this);
 
 	DiceComp->SetWorldLocation(FVector(BeginLocation.X, BeginLocation.Y, DiceComp->GetComponentLocation().Z));
 
@@ -209,7 +210,7 @@ void ADice::AfterOverlap()
 
 
 	GM->CurrentPlayer->ItemApply();
-
+	
 
 
 

@@ -3,6 +3,8 @@
 
 #include "TenCoinsforaStar.h"
 
+#include "PartyGameModeBase.h"
+#include "PartyPlayer.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/WrapBox.h"
@@ -50,7 +52,9 @@ void UTenCoinsforaStar::ClickedButton()
 	{
 		WrapBox->SetVisibility(ESlateVisibility::Visible);
 	}
-
+	
+	APartyGameModeBase* GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
+	GM->CurrentPlayer->Score++;
 	
 
 	// µÙ∑π¿Ã 1√ 

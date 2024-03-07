@@ -34,8 +34,8 @@ void APartyScore::Tick(float DeltaTime)
 	if(StarSpace)
 	{
 		FVector StarLocation = StarSpace->GetActorLocation();
-		StarLocation.Z += 1000;
-		SetActorLocation(StarSpace->GetActorLocation(), false, nullptr, ETeleportType::TeleportPhysics);
+		StarLocation.Z += 3000;
+		SetActorLocation(StarSpace->GetActorLocation(), true, nullptr, ETeleportType::TeleportPhysics);
 	}
 	
 
@@ -58,7 +58,7 @@ void APartyScore::ReSpace()
 		}
 
 	}
-
+	StarSpace->UpdateAppearance();
 }
 
 void APartyScore::GetCamera()

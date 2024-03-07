@@ -18,7 +18,7 @@ class SSACSTARS_API APartyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
-
+	APartyGameModeBase();
 protected:
 	virtual void BeginPlay() override;
 
@@ -43,6 +43,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<APartyPlayer*>  RoundOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<APartyPlayer*> InitialTurnOrder;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APartyPlayer* CurrentPlayer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APlayerController* PlayerController;
@@ -56,32 +58,63 @@ public:
 	UPROPERTY()
 	class UMainUI* SelectUi;
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UUserWidget> StatusUiFactory;
+	TSubclassOf<class UStatusUi> StatusUiFactory;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UItemUI> ItemUiFactory;
 	UPROPERTY()
 	class UItemUI* ItemUi;
 	UPROPERTY()
-	class UUserWidget* StatusUi;
+	class UStatusUi* StatusUi;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UTrapWidget> TrapUiFactory;
 	UPROPERTY()
 	class UTrapWidget* TrapUi;
-
-	
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class URandomItemWidget> GetItemUiFactory;
+	UPROPERTY()
+	class URandomItemWidget* GetItemUi;
+	UPROPERTY()
+	class UPlayerUiCard* PlayerUiCard;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UPlayerUiCard> PlayerUiCardFactory;
+	UPROPERTY()
+	class UTenCoinsforaStar* TenCoinsforaStarUi;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UTenCoinsforaStar> TenCoinsforaStarUiFactory;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Round;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int> PlayerCoins;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int> PlayerScores;
+
 
 public:
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh4;
+public:
+	void PlayerSetting();
+	void SetPlayerAppeareance(APartyPlayer*Player,int Index);
 	void AddItemUseUi();
 	void InitialRound();
 	void StartTurn();
 	void NextTurn();
 	void EndRound();
-	void StartMiniGame();void AddSelectBehaviorUi();
+	void StartMiniGame();
+	void AddSelectBehaviorUi();
 	void CloseView();
 	void ChangeStarSpace();
 	void AddTrapUi();
+	void AddGetItemUi();
+	void AddTenCoinsforaStar();
+	void UpdateGameInfo();
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void GamePause();
 };

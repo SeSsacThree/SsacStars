@@ -63,16 +63,19 @@ public:
 
 public:
 
-	void Add3DiceItem();
-	void WarpToStarItem();
-	void SwitchSpaceItem();
+	void Add3DiceItem(int index);
+	void WarpToStarItem(int index);
+	void SwitchSpaceItem(int index);
 	void RemoveItemUi(int32 index);
+	UFUNCTION()
 	void Select1Button();
+	UFUNCTION()
 	void Select2Button();
 	void SwitchItem(EItem SelectedItem);
 
 public:
 	int32 PlayerItemIndex=0;
+
 	TArray<EItem> PlayerInventory;
-	TArray<EItem> ButtonStaus;
+	
 };

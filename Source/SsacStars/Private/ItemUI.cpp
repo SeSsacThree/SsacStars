@@ -13,7 +13,7 @@ void UItemUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
-	CurrentPlayer = GM->TurnOrder[0];
+	CurrentPlayer = GM->CurrentPlayer;
 	PlayerInventory=CurrentPlayer->Inventory;
 	Index1Button->OnClicked.AddDynamic(this, &UItemUI::Select1Button);
 	Index2Button->OnClicked.AddDynamic(this, &UItemUI::Select2Button);
@@ -25,19 +25,20 @@ void UItemUI::NativeConstruct()
 	{
 		case EItem::Add3Dice:
 			{
-				Add3DiceItem();
+				Add3DiceItem(1);
 				Item1->SetText(FText::FromString(TEXT("Dice+3")));
 				break;
 			}
 		case EItem::WarpToStar:
 		{
-			WarpToStarItem();
+			WarpToStarItem(1);
 			Item1->SetText(FText::FromString(TEXT("WarpToStar")));
 			break;
 		}
 
 		case EItem::SwitchCharacter:
 		{
+			SwitchSpaceItem(1);
 			Item1->SetText(FText::FromString(TEXT("SwitchSpace")));
 			break;
 		}
@@ -52,21 +53,21 @@ void UItemUI::NativeConstruct()
 	{
 		case EItem::Add3Dice:
 		{
-			Add3DiceItem();
-			Item1->SetText(FText::FromString(TEXT("Dice+3")));
+			Add3DiceItem(2);
+			Item2->SetText(FText::FromString(TEXT("Dice+3")));
 			break;
 		}
 		case EItem::WarpToStar:
 		{
-			Item1->SetText(FText::FromString(TEXT("WarpToStar")));
-			WarpToStarItem();
+			Item2->SetText(FText::FromString(TEXT("WarpToStar")));
+			WarpToStarItem(2);
 			break;
 		}
 
 		case EItem::SwitchCharacter:
 		{
-			SwitchSpaceItem();
-			Item1->SetText(FText::FromString(TEXT("SwitchSpace")));
+			SwitchSpaceItem(2);
+			Item2->SetText(FText::FromString(TEXT("SwitchSpace")));
 			break;
 		}
 		case EItem::Nothing:
@@ -79,9 +80,22 @@ void UItemUI::NativeConstruct()
 
 }
 
-void UItemUI::Add3DiceItem()//아이템을 먹었을때 ui띄우기
+void UItemUI::Add3DiceItem(int index)//아이템을 먹었을때 ui띄우기
 {
-	
+	if(index==1)
+	{
+		A3D1->SetVisibility(ESlateVisibility::Visible);
+		WTS1->SetVisibility(ESlateVisibility::Hidden);
+		SC1->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else if(index==2)
+	{
+		A3D2->SetVisibility(ESlateVisibility::Visible);
+		WTS2->SetVisibility(ESlateVisibility::Hidden);
+		SC2->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+
 	//auto AddUi = CreateWidget(this, Add3DiceUIFactory);
 	// grid에 자식으로 붙인다.
 	//ItemGrid->AddChildToUniformGrid(AddUi, 0, ItemGrid->GetChildrenCount());
@@ -89,17 +103,39 @@ void UItemUI::Add3DiceItem()//아이템을 먹었을때 ui띄우기
 
 }
 
-void UItemUI::WarpToStarItem()
+void UItemUI::WarpToStarItem(int index)
 {
-	
+	if (index == 1)
+	{
+		A3D1->SetVisibility(ESlateVisibility::Hidden);
+		WTS1->SetVisibility(ESlateVisibility::Visible);
+		SC1->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else if (index == 2)
+	{
+		A3D2->SetVisibility(ESlateVisibility::Hidden);
+		WTS2->SetVisibility(ESlateVisibility::Visible);
+		SC2->SetVisibility(ESlateVisibility::Hidden);
+	}
 	//auto AddUi = CreateWidget(this, WarpToStarUIFactory);
 	//ItemGrid->AddChildToUniformGrid(AddUi, 0, ItemGrid->GetChildrenCount());
 	//ButtonStaus[PlayerItemIndex] = EItem::WarpToStar;
 }
 
-void UItemUI::SwitchSpaceItem()
+void UItemUI::SwitchSpaceItem(int index)
 {
-	
+	if (index == 1)
+	{
+		A3D1->SetVisibility(ESlateVisibility::Hidden);
+		WTS1->SetVisibility(ESlateVisibility::Hidden);
+		SC1->SetVisibility(ESlateVisibility::Visible);
+	}
+	else if (index == 2)
+	{
+		A3D2->SetVisibility(ESlateVisibility::Hidden);
+		WTS2->SetVisibility(ESlateVisibility::Hidden);
+		SC2->SetVisibility(ESlateVisibility::Visible);
+	}
 	//auto AddUi = CreateWidget(this, SwitchSpaceUIFactory);
 	//ItemGrid->AddChildToUniformGrid(AddUi, 0, ItemGrid->GetChildrenCount());
 	//ButtonStaus[PlayerItemIndex] = EItem::SwitchCharacter;
@@ -133,18 +169,20 @@ void UItemUI::SwitchItem(EItem SelectedItem)//아이템사용효과를 넣으면 된다
 	{
 		case EItem::Add3Dice:
 			{
-				
+				GM->CurrentPlayer->ToApplyDo = EItem::Add3Dice;
 				break;
 			}
 		case EItem::WarpToStar:
 		{
-
+			GM->CurrentPlayer->ToApplyDo = EItem::WarpToStar;
 			break;
 		}
 		case EItem::SwitchCharacter:
 		{
-
+			GM->CurrentPlayer->ToApplyDo = EItem::SwitchCharacter;
 			break;
 		}
 	}
+	GM->CurrentPlayer->RollDice();
+	GM->CloseView();
 }

@@ -3,11 +3,13 @@
 
 #include "PartyPlayer.h"
 #include "BlueBoardSpace.h"
-#include "Dice.h"
+
 #include "MainUI.h"
 #include "Map_SpaceFunction.h"
 #include "PartyGameModeBase.h"
+#include "PlayerUiCard.h"
 #include "RollDiceCharacter.h"
+#include "StatusUi.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Runtime/AIModule/Classes/AIController.h"
@@ -27,7 +29,7 @@ APartyPlayer::APartyPlayer()
 
 	DiceRemainWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("DiceRemainWidget"));
 	DiceRemainWidget->SetupAttachment(RootComponent);
-
+	
 }
 
 // Called when the game starts or when spawned
@@ -43,6 +45,7 @@ void APartyPlayer::BeginPlay()
 	Inventory.SetNum(MaxInventorySize);
 	Inventory.Init(EItem::Nothing, MaxInventorySize);
 	ToApplyDo = EItem::Nothing;
+	
 }
 
 // Called every frame
@@ -102,14 +105,7 @@ void APartyPlayer::RollDice()
 		});
 
 
-	DelayTime(30.0f, [this]()
-		{
-			if (RollDicePlayer->Dice->IsSelected == false)
-			{
-				ItemApply();
-				RollDicePlayer->CloseView();
-			}
-		});
+
 
 
 
@@ -134,6 +130,7 @@ void APartyPlayer::ItemApply()
 		case EItem::WarpToStar:
 		{
 			CurrentSpace = GM->Star->StarSpace;
+			SetActorLocation(CurrentSpace->GetActorLocation(), false, nullptr, ETeleportType::TeleportPhysics);
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
 				//CurrentSpace=별 전 장소 
 			break;
@@ -147,18 +144,22 @@ void APartyPlayer::ItemApply()
 		}
 		case EItem::Nothing:
 		{
-			//장소 바꾸는 함수 호출 
+			//장소 바꾸는 함수 호출
+			
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
 			break;
 		}
 	}
 	
 	//PlayFun->SwapPlayerPositions(this);
+	
 	DelayTime(2.0f, [this]()
 		{
+				RollDicePlayer->CloseView();
 				MoveToSpace(CurrentSpace);
 
 		});
+	
 	
 }
 void APartyPlayer::ChooseItem()
@@ -166,12 +167,12 @@ void APartyPlayer::ChooseItem()
 	GM->SelectUi->RemoveFromParent();
 	GM->AddItemUseUi();
 
-
+	/*
 	DelayTime(5.0f, [this]()
 		{
 			RollDice();
 		});
-	
+	*/
 }
 
 
@@ -209,7 +210,7 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		//Ai->MoveTo(MoveRequest, &NavPath, FAIMoveDoneSignature::CreateUObject(this, &APartyPlayer::OnMoveCompleted));
 
 		 
-		DelayTime(2.0f,[this]()
+		DelayTime(1.5f,[this]()
 		{
 				StopOrGo();
 		});
@@ -245,6 +246,7 @@ void APartyPlayer::MoveEnded()
 		break;
 		case ESpaceState::Item:
 		{
+			GM->AddGetItemUi();
 			int RanItemNum = UKismetMathLibrary::RandomIntegerInRange(1, 3);
 
 			UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::ItemSpace"))
@@ -281,6 +283,42 @@ void APartyPlayer::MoveEnded()
 			}
 			else
 			{
+				for(int i=0;i<Inventoryindex;i++)
+				{
+					if(Inventory[i]==EItem::Nothing)
+					{
+
+
+						switch (RanItemNum)
+						{
+							case 1:
+							{
+
+								Inventory[i] = EItem::Add3Dice;
+								GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
+								//GM->ItemUi->Add3DiceItem();
+								break;
+							}
+							case 2:
+							{
+								Inventory[i] = EItem::WarpToStar;
+								GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("wts"));
+								//GM->ItemUi->WarpToStarItem();
+								break;
+							}
+							case 3:
+							{
+								Inventory[i] = EItem::SwitchCharacter;
+								GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("sw"));
+								//GM->ItemUi->SwitchSpaceItem();
+								break;
+							}
+						}
+						
+							
+
+					}
+				}
 				
 			}
 		}
@@ -301,15 +339,10 @@ void APartyPlayer::MoveEnded()
 		break;
 		case ESpaceState::Star:
 		{
-
-
-			DelayTime(2.0f, [this]()
-				{
-					GM->ChangeStarSpace();
-					MoveToSpace(CurrentSpace);
-
-				});
-
+			
+			GM->AddTenCoinsforaStar();
+			GetStar();
+			//지금은 시간이 지나면 자동으로 꺼지게 설정됌 누르면 꺼지게 바꿔야함
 		}
 		break;
 		case ESpaceState::TwoSideLoad:
@@ -318,11 +351,12 @@ void APartyPlayer::MoveEnded()
 		}
 		break;
 	}
-
+	MyInfoSend();
 
 	DelayTime(4.0f, [this]()
 		{
 			RollDicePlayer->CloseView();
+			MyTurnEnd();
 			GM->NextTurn();
 
 		});
@@ -335,17 +369,17 @@ void APartyPlayer::MoveEnded()
 
 void APartyPlayer::StopOrGo()
 {
-	
-	if(CurrentSpace->SpaceState==ESpaceState::Star)
-	{
-		//별을 먹을건지 물어보고 교환한다
-	//먹는다면
-		//별의 위치를 바꾼다
-		GM->ChangeStarSpace();
-		MoveToSpace(CurrentSpace);
-	}
 
 	MoveRemaining--;
+
+	if(CurrentSpace->SpaceState==ESpaceState::Star)
+	{
+		GM->AddTenCoinsforaStar();
+		GM->GamePause();
+		//위젯이 켜져있는동안 그냥 게임이 흘러가게 되있음 막아야함 
+	}
+
+
 	if (MoveRemaining > 0)
 	{
 		MoveToSpace(CurrentSpace);
@@ -374,7 +408,75 @@ void APartyPlayer::MyTurnStart()
 
 void APartyPlayer::MyTurnEnd()
 {
+	
+	
+	if(PlayerIndex>=0)
+	{
+	GM->PlayerCoins[PlayerIndex] =Coin;
+	GM->PlayerCoins[PlayerIndex] =Score;
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("MYSCoreSEND"));
+	}
 
+}
+
+void APartyPlayer::MyInfoSend()
+{
+	switch (PlayerIndex)
+	{
+		case 0:
+			{
+				GM->StatusUi->PersonalState->SetCoinScoreText(Coin);
+				GM->StatusUi->PersonalState->SetStarScoreText(Score);
+				GM->StatusUi->PersonalState->SetSpaceTypeBorder(this);
+				GM->StatusUi->PersonalState1->SetMainScoreText(Rank);
+				break;
+			}	
+		case 1:
+		{
+			GM->StatusUi->PersonalState1->SetCoinScoreText(Coin);
+			GM->StatusUi->PersonalState1->SetStarScoreText(Score);
+			GM->StatusUi->PersonalState1->SetSpaceTypeBorder(this);
+			GM->StatusUi->PersonalState1->SetMainScoreText(Rank);
+			break;
+
+		}
+		case 2:
+		{
+			GM->StatusUi->PersonalState2->SetCoinScoreText(Coin);
+			GM->StatusUi->PersonalState2->SetStarScoreText(Score);
+			GM->StatusUi->PersonalState2->SetSpaceTypeBorder(this);
+			GM->StatusUi->PersonalState1->SetMainScoreText(Rank);
+			break;
+			
+		}
+		case 3:
+		{
+			GM->StatusUi->PersonalState3->SetCoinScoreText(Coin);
+			GM->StatusUi->PersonalState3->SetStarScoreText(Score);
+			GM->StatusUi->PersonalState3->SetSpaceTypeBorder(this);
+			GM->StatusUi->PersonalState1->SetMainScoreText(Rank);
+			break;
+		
+		}
+	}
+
+
+	GM->PlayerCoins[PlayerIndex] = Coin;
+	GM->PlayerScores[PlayerIndex] = Score;
+
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("MyVariable: %d"), PlayerIndex));
+}
+
+void APartyPlayer::GetStar()
+{
+	
+	//별을 먹을건지 물어보고 교환한다
+//먹는다면
+	//별의 위치를 바꾼다
+	auto BeforeChangeSpace = CurrentSpace;
+	MyInfoSend();
+	GM->ChangeStarSpace();
+	//MoveToSpace(BeforeChangeSpace);
 
 }
 

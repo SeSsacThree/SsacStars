@@ -91,7 +91,10 @@ public:
 	EItem ToApplyDo;
 	int32 Inventoryindex=0;
 	int32 MaxInventorySize = 2;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 PlayerIndex;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Rank;
 public:
 
 
@@ -111,8 +114,9 @@ public:
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
 	void MyTurnStart();
 	void MyTurnEnd();
+	void MyInfoSend();
+	void GetStar();
 
-	
 
 public:
 
