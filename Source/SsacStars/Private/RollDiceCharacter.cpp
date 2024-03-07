@@ -16,10 +16,11 @@ ARollDiceCharacter::ARollDiceCharacter()
 	PrimaryActorTick.bCanEverTick = true;
 
 
-
+	
 	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent"));
 	SceneCaptureComponent->SetupAttachment(RootComponent);
 
+	
 	handComp = CreateDefaultSubobject<USceneComponent>(TEXT("handComp"));
 	handComp->SetupAttachment(GetMesh(), TEXT("handComp"));
 
@@ -35,7 +36,7 @@ void ARollDiceCharacter::BeginPlay()
 	ThrowDiceUi = NewObject<UThrowDiceCharacterUi>(this, ThrowDiceUiFactory);
 
 	CreateDice();
-
+	BeginLocation = GetActorLocation();
 
 	
 }
@@ -44,7 +45,8 @@ void ARollDiceCharacter::BeginPlay()
 void ARollDiceCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	SceneCaptureComponent->ShowOnlyActorComponents(this);
+	SetActorLocation(FVector(BeginLocation.X, BeginLocation.Y, GetActorLocation().Z));
 }
 
 // Called to bind functionality to input
@@ -106,12 +108,12 @@ void ARollDiceCharacter::ThrowDice(const AActor* Actor)
 
 	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
 	// pistol 물리를 켜고싶다.
-	mesh->SetSimulatePhysics(true);
+	//mesh->SetSimulatePhysics(true);
 	//mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	//mesh->SetCollisionResponseToAllChannels(ECR_Block);
 	// hand에서 떼고싶다.
 	mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Throw"));
 	
 	
 }
@@ -119,11 +121,12 @@ void ARollDiceCharacter::ThrowDice(const AActor* Actor)
 
 void ARollDiceCharacter::GrapDice(const AActor* Actor)
 {
+	Dice->ReBack();
 	Dice->IsStopRollingMode = false;
 	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
-	mesh->SetSimulatePhysics(false);
+	//mesh->SetSimulatePhysics(false);
 	mesh->AttachToComponent(handComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GrabDice"));
 }
 
 void ARollDiceCharacter::GetSignal()

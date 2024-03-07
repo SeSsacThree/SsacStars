@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "PartyScore.h"
 #include "GameFramework/GameModeBase.h"
 
 #include "PartyGameModeBase.generated.h"
@@ -45,6 +46,8 @@ public:
 	APartyPlayer* CurrentPlayer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APlayerController* PlayerController;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APartyScore* Star;
 
 public:
 
@@ -60,6 +63,10 @@ public:
 	class UItemUI* ItemUi;
 	UPROPERTY()
 	class UUserWidget* StatusUi;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UTrapWidget> TrapUiFactory;
+	UPROPERTY()
+	class UTrapWidget* TrapUi;
 
 	
 public:
@@ -73,7 +80,8 @@ public:
 	void StartTurn();
 	void NextTurn();
 	void EndRound();
-	void StartMiniGame();
-	void AddSelectBehaviorUi();
+	void StartMiniGame();void AddSelectBehaviorUi();
 	void CloseView();
+	void ChangeStarSpace();
+	void AddTrapUi();
 };

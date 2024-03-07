@@ -6,6 +6,8 @@
 #include "PartyGameModeBase.h"
 
 #include "Components/Button.h"
+#include "Components/Image.h"
+#include "Components/TextBlock.h"
 
 void UItemUI::NativeConstruct()
 {
@@ -15,25 +17,28 @@ void UItemUI::NativeConstruct()
 	PlayerInventory=CurrentPlayer->Inventory;
 	Index1Button->OnClicked.AddDynamic(this, &UItemUI::Select1Button);
 	Index2Button->OnClicked.AddDynamic(this, &UItemUI::Select2Button);
-
 	
+	//A3D1 = NewObject<UImage>(this,Add3DiceImageFactory);
 
 
 	switch (PlayerInventory[0])
 	{
 		case EItem::Add3Dice:
 			{
-			Add3DiceItem();
-			break;
+				Add3DiceItem();
+				Item1->SetText(FText::FromString(TEXT("Dice+3")));
+				break;
 			}
 		case EItem::WarpToStar:
 		{
 			WarpToStarItem();
+			Item1->SetText(FText::FromString(TEXT("WarpToStar")));
 			break;
 		}
 
 		case EItem::SwitchCharacter:
 		{
+			Item1->SetText(FText::FromString(TEXT("SwitchSpace")));
 			break;
 		}
 			case EItem::Nothing:
@@ -48,10 +53,12 @@ void UItemUI::NativeConstruct()
 		case EItem::Add3Dice:
 		{
 			Add3DiceItem();
+			Item1->SetText(FText::FromString(TEXT("Dice+3")));
 			break;
 		}
 		case EItem::WarpToStar:
 		{
+			Item1->SetText(FText::FromString(TEXT("WarpToStar")));
 			WarpToStarItem();
 			break;
 		}
@@ -59,6 +66,7 @@ void UItemUI::NativeConstruct()
 		case EItem::SwitchCharacter:
 		{
 			SwitchSpaceItem();
+			Item1->SetText(FText::FromString(TEXT("SwitchSpace")));
 			break;
 		}
 		case EItem::Nothing:
@@ -73,6 +81,7 @@ void UItemUI::NativeConstruct()
 
 void UItemUI::Add3DiceItem()//아이템을 먹었을때 ui띄우기
 {
+	
 	//auto AddUi = CreateWidget(this, Add3DiceUIFactory);
 	// grid에 자식으로 붙인다.
 	//ItemGrid->AddChildToUniformGrid(AddUi, 0, ItemGrid->GetChildrenCount());
@@ -82,6 +91,7 @@ void UItemUI::Add3DiceItem()//아이템을 먹었을때 ui띄우기
 
 void UItemUI::WarpToStarItem()
 {
+	
 	//auto AddUi = CreateWidget(this, WarpToStarUIFactory);
 	//ItemGrid->AddChildToUniformGrid(AddUi, 0, ItemGrid->GetChildrenCount());
 	//ButtonStaus[PlayerItemIndex] = EItem::WarpToStar;
@@ -89,6 +99,7 @@ void UItemUI::WarpToStarItem()
 
 void UItemUI::SwitchSpaceItem()
 {
+	
 	//auto AddUi = CreateWidget(this, SwitchSpaceUIFactory);
 	//ItemGrid->AddChildToUniformGrid(AddUi, 0, ItemGrid->GetChildrenCount());
 	//ButtonStaus[PlayerItemIndex] = EItem::SwitchCharacter;
@@ -122,7 +133,7 @@ void UItemUI::SwitchItem(EItem SelectedItem)//아이템사용효과를 넣으면 된다
 	{
 		case EItem::Add3Dice:
 			{
-
+				
 				break;
 			}
 		case EItem::WarpToStar:

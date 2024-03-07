@@ -53,7 +53,11 @@ public:
 
 	UPROPERTY()
 	class ADice* Dice;
+public:
+	
 
+public:
+	FVector BeginLocation;
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UThrowDiceCharacterUi> ThrowDiceUiFactory;

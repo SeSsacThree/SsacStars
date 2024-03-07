@@ -41,12 +41,14 @@ public:
 	void AfterOverlap();
 	void LaunchDice(float LaunchAmount);
 	void SetRotationToNumber(int Number);
+	void ReBack();
 public:
 	bool IsRollingMode=false;
 	bool IsStopRollingMode = false;
 	bool IsUpMode = false;
 	bool IsSelected = false;
 public:
+	FVector BeginLocation;
 	FVector RollingLocation;
 	FVector StopRollingLocation;
 public:
@@ -66,8 +68,8 @@ public:
 	class UBoxComponent* DicePoint5;
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* DicePoint6;
-	UPROPERTY(VisibleAnywhere)
-	USceneCaptureComponent2D* SceneCaptureComponent;
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
+	USceneCaptureComponent2D* SceneCaptureDice;
 	UPROPERTY(EditAnywhere)
 	class USkeletalMeshComponent* DiceComp;
 

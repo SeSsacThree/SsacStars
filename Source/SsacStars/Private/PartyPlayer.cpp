@@ -4,7 +4,6 @@
 #include "PartyPlayer.h"
 #include "BlueBoardSpace.h"
 #include "Dice.h"
-#include "ItemUI.h"
 #include "MainUI.h"
 #include "Map_SpaceFunction.h"
 #include "PartyGameModeBase.h"
@@ -13,7 +12,8 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Runtime/AIModule/Classes/AIController.h"
 #include "Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h"
-
+#include "Blueprint/UserWidget.h"
+#include "Components/WidgetComponent.h"
 // Sets default values
 
 
@@ -25,7 +25,8 @@ APartyPlayer::APartyPlayer()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-
+	DiceRemainWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("DiceRemainWidget"));
+	DiceRemainWidget->SetupAttachment(RootComponent);
 
 }
 
@@ -38,8 +39,10 @@ void APartyPlayer::BeginPlay()
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	RollDicePlayer = Cast<ARollDiceCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollDiceCharacter::StaticClass()));
 	Ai = Cast<AAIController>(this->GetController());
+	PlayFun = Cast<AMap_SpaceFunction>(UGameplayStatics::GetActorOfClass(GetWorld(), AMap_SpaceFunction::StaticClass()));
 	Inventory.SetNum(MaxInventorySize);
 	Inventory.Init(EItem::Nothing, MaxInventorySize);
+	ToApplyDo = EItem::Nothing;
 }
 
 // Called every frame
@@ -48,11 +51,11 @@ void APartyPlayer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
+
 	
 	
 
-
-
+	
 }
 
 // Called to bind functionality to input
@@ -111,9 +114,46 @@ void APartyPlayer::RollDice()
 
 
 }
+
+
+
 void APartyPlayer::ItemApply()
 {
+	//아이템 적용
 
+	switch (ToApplyDo)
+	{
+		case EItem::Add3Dice:
+			{
+				MoveRemaining += 3;
+				
+				PlayFun->PlusThreeSpaces(this);
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItema3d"));
+				break;
+			}
+		case EItem::WarpToStar:
+		{
+			CurrentSpace = GM->Star->StarSpace;
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
+				//CurrentSpace=별 전 장소 
+			break;
+		}
+		case EItem::SwitchCharacter:
+		{
+				//장소 바꾸는 함수 호출
+			PlayFun->SwapPlayerPositions(this);
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
+			break;
+		}
+		case EItem::Nothing:
+		{
+			//장소 바꾸는 함수 호출 
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
+			break;
+		}
+	}
+	
+	//PlayFun->SwapPlayerPositions(this);
 	DelayTime(2.0f, [this]()
 		{
 				MoveToSpace(CurrentSpace);
@@ -142,6 +182,8 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 	if (currentSpace)
 	{
 		CurrentSpace = currentSpace->NextSpace[0];
+
+
 	}
 
 
@@ -180,25 +222,25 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerCantMove"));
 	}
 
-
-
+	
+	
 } 
 
 void APartyPlayer::MoveEnded()
 {
-
+	
 	UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::MoveEnded - Start"))
 
 	switch (CurrentSpace->SpaceState)
 	{
 		case ESpaceState::Blue:
 		{
-
+			Coin += 3;
 		}
 		break;
 		case ESpaceState::Red:
 		{
-
+			Coin -= 3;
 		}
 		break;
 		case ESpaceState::Item:
@@ -245,17 +287,28 @@ void APartyPlayer::MoveEnded()
 		break;
 		case ESpaceState::Trap:
 		{
-
+			//함정 위젯 열어서 종류에 따라 실행
+			GM->AddTrapUi();
 		}
 		break;
 		case ESpaceState::Warp:
 		{
+			//AMap_SpaceFunction Map_SpaceFunction;
+			//Map_SpaceFunction.SwapPlayerPositions(this);
 			
 			SetActorLocation(CurrentSpace->WarpSpace->GetActorLocation());
 		}
 		break;
 		case ESpaceState::Star:
 		{
+
+
+			DelayTime(2.0f, [this]()
+				{
+					GM->ChangeStarSpace();
+					MoveToSpace(CurrentSpace);
+
+				});
 
 		}
 		break;
@@ -266,7 +319,14 @@ void APartyPlayer::MoveEnded()
 		break;
 	}
 
-	GM->NextTurn();
+
+	DelayTime(4.0f, [this]()
+		{
+			RollDicePlayer->CloseView();
+			GM->NextTurn();
+
+		});
+	
 
 	
 
@@ -275,6 +335,16 @@ void APartyPlayer::MoveEnded()
 
 void APartyPlayer::StopOrGo()
 {
+	
+	if(CurrentSpace->SpaceState==ESpaceState::Star)
+	{
+		//별을 먹을건지 물어보고 교환한다
+	//먹는다면
+		//별의 위치를 바꾼다
+		GM->ChangeStarSpace();
+		MoveToSpace(CurrentSpace);
+	}
+
 	MoveRemaining--;
 	if (MoveRemaining > 0)
 	{
@@ -294,6 +364,18 @@ void APartyPlayer::DelayTime(float WantSeconds,TFunction<void()> InFunction)
 			// 지연 후 실행될 함수 호출
 			InFunction();
 		}, WantSeconds, false);
+}
+
+void APartyPlayer::MyTurnStart()
+{
+
+
+}
+
+void APartyPlayer::MyTurnEnd()
+{
+
+
 }
 
 

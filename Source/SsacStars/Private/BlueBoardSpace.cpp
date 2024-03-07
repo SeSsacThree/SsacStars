@@ -3,6 +3,8 @@
 
 #include "BlueBoardSpace.h"
 
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 ABlueBoardSpace::ABlueBoardSpace()
 {
@@ -59,3 +61,5 @@ void ABlueBoardSpace::UpdateAppearance()
 
 
 }
+
+

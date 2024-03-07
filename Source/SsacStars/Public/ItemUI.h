@@ -35,6 +35,10 @@ class SSACSTARS_API UItemUI : public UUserWidget
 	class UImage* WTS2;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UImage* SC2;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UTextBlock* Item1;
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UTextBlock* Item2;
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	APartyGameModeBase* GM;
@@ -49,7 +53,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UUserWidget> SwitchSpaceUIFactory;
 	*/
-
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UImage> Add3DiceImageFactory;
 	
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
