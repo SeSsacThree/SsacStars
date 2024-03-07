@@ -18,8 +18,7 @@ void UTrapWidget::NativeConstruct()
 	AnimationArray.Add(SecondTrapButtonAnimation);
 	AnimationArray.Add(FirstTrapButtonAnimation);
 
-	RandomNumber = FMath::RandRange(10, 15);
-	ArrayIndex = RandomNumber;
+	
 	UE_LOG(LogTemp, Warning, TEXT("ArrayIndex: %d"), ArrayIndex)
 
 	RandomPickTrap();
@@ -27,6 +26,8 @@ void UTrapWidget::NativeConstruct()
 
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 
+	RandomNumber = FMath::RandRange(10, 15);
+	ArrayIndex = RandomNumber;
 
 }
 
@@ -37,7 +38,8 @@ void UTrapWidget::BlinkTrapButton(UWidgetAnimation* InWidgetAnimation)
 	DelayTime(0.3f, [this]()
 		{
 			RandomNumber--;
-			if ((RandomNumber > 0) && (RandomNumber != 1))
+
+			if ((RandomNumber > 0) ) //&& (RandomNumber != 1)
 			{
 				RandomPickTrap();
 			}
@@ -51,8 +53,9 @@ void UTrapWidget::BlinkTrapButton(UWidgetAnimation* InWidgetAnimation)
 
 void UTrapWidget::RandomPickTrap()
 {
-
 	BlinkTrapButton(AnimationArray[RandomNumber % 3]);
+	UE_LOG(LogTemp, Warning, TEXT("111111"), ArrayIndex)
+
 }
 
 void UTrapWidget::DelayTime(float WantSeconds, TFunction<void()> InFunction)

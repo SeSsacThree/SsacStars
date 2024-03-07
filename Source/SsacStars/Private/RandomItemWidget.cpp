@@ -3,6 +3,8 @@
 
 #include "RandomItemWidget.h"
 
+#include "Map_SpaceFunction.h"
+#include "PartyGameModeBase.h"
 #include "Animation/WidgetAnimation.h"
 #include "Components/Button.h"
 
@@ -14,11 +16,13 @@ void URandomItemWidget::NativeConstruct()
 	AnimationArray.Add(ButtonTwoBlinkAnimation);
 	AnimationArray.Add(ButtonOneBlinkAnimation);
 
-	RandomNumber = FMath::RandRange(10, 15);
 	RandomPickItem();
+	RemoveFromParent();
 
-	//TimerDelegate.BindUFunction(this, "BlinkButton", OutWidgetAnimation);
+	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 
+	RandomNumber = FMath::RandRange(10, 15);
+	ArrayIndex = RandomNumber;
 
 }
 
@@ -30,15 +34,19 @@ void URandomItemWidget::BlinkButton(UWidgetAnimation* InWidgetAnimation)
 	DelayTime(0.3f, [this]()
 		{
 			RandomNumber--;
-			if (RandomNumber > 0)
+			if ((RandomNumber > 0)) // && (RandomNumber == 1)
+			{
 				RandomPickItem();
-
+			}
+			else if ((RandomNumber > 0) && (RandomNumber != 1))
+			{
+				ApplyTrap(ArrayIndex);
+			}
 		});
 }
 
 void URandomItemWidget::RandomPickItem()
 {
-
 	BlinkButton(AnimationArray[RandomNumber % 3]);
 }
 
@@ -50,6 +58,38 @@ void URandomItemWidget::DelayTime(float WantSeconds, TFunction<void()> InFunctio
 			// 지연 후 실행될 함수 호출
 			InFunction();
 		}, WantSeconds, false);
+}
+
+void URandomItemWidget::ApplyTrap(int32 InArrayNumber)
+{
+	// RandomNumber가 1일때 실행되는 애니메이션의 해당 기능을 실행
+	if (GM)
+	{
+		if (RandomNumber == 1)		//Random == 1		
+		{
+			UE_LOG(LogTemp, Warning, TEXT("InArrayNumber: %d"), InArrayNumber)
+
+				//switch (RandomNumber % 3) // Random == 1, 2, 3
+				switch (InArrayNumber % 3)
+				{
+				case 0:
+					oneOfRandomItems->PlusThreeSpaces(GM->CurrentPlayer);
+					UE_LOG(LogTemp, Warning, TEXT("aaaaaa"))
+						break;
+					
+				case 1:
+					oneOfRandomItems->SwapToStar(GM->CurrentPlayer);
+					UE_LOG(LogTemp, Warning, TEXT("bbbbb"))
+						break;
+						
+				case 2:
+					oneOfRandomItems->SwapPlayerPositions(GM->CurrentPlayer);
+					UE_LOG(LogTemp, Warning, TEXT("ccccc"))
+						break;
+				}
+		}
+	}
+
 }
 
 

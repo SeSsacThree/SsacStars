@@ -13,6 +13,7 @@ class SSACSTARS_API UTrapWidget : public UUserWidget
 
 	virtual void NativeConstruct() override;
 
+public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* TrapButtonOne;
 
