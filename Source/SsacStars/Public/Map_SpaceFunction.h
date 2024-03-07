@@ -51,4 +51,6 @@ public:
 
 	UFUNCTION()
 	void ThirdTrap(APartyPlayer* InPartyPlayer);
+
+	
 };

@@ -51,8 +51,13 @@ class SSACSTARS_API UTrapWidget : public UUserWidget
 
 	int RandomNumber;
 
+	int32 ArrayIndex;
+
 	UPROPERTY(EditDefaultsOnly)
 	class AMap_SpaceFunction* oneOfThreeTraps;
 
+	UPROPERTY()
+	class APartyGameModeBase* GM;
 
+	void ApplyTrap(int32 InArrayNumber);
 	};
