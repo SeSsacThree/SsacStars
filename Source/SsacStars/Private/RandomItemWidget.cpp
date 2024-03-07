@@ -5,6 +5,7 @@
 
 #include "Map_SpaceFunction.h"
 #include "PartyGameModeBase.h"
+#include "TenCoinsforaStar.h"
 #include "Animation/WidgetAnimation.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
@@ -25,6 +26,7 @@ void URandomItemWidget::NativeConstruct()
 
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	oneOfRandomItems=Cast<AMap_SpaceFunction>(UGameplayStatics::GetActorOfClass(GetWorld(), AMap_SpaceFunction::StaticClass()));
+	// removeWidget=Cast<UTenCoinsforaStar>(UGameplayStatics::GetActorOfClass(GetWorld(), UTenCoinsforaStar::StaticClass()));
 
 	
 	TArray<AActor*> FoundActors;
@@ -127,9 +129,8 @@ void URandomItemWidget::ApplyTrap(int32 InArrayNumber)
 
 void URandomItemWidget::RemoveWidgetAfterAnimation()
 {
+	UE_LOG(LogTemp, Warning, TEXT("URandomItemWidget::RemoveWidgetAfterAnimation"))
+		// 애니메이션이 끝나면
+		// 위젯 사라짐
+		RemoveFromParent();
 }
-
-
-
-
-
