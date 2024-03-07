@@ -17,6 +17,10 @@ void UTenCoinsforaStar::NativeConstruct()
 	{
 		Button->OnClicked.AddDynamic(this, &UTenCoinsforaStar::ClickedButton);
 	}
+	if (PassButton)
+	{
+		PassButton->OnClicked.AddDynamic(this, &UTenCoinsforaStar::ClickedPassButton);
+	}
 
 	if(WrapBox && StarImage)
 	{
@@ -74,13 +78,18 @@ void UTenCoinsforaStar::ClickedButton()
 
 }
 
+
 void UTenCoinsforaStar::GetStarAnimation(UWidgetAnimation* InWidgetAnimation)
 {
 	UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::GetStarAnimation"))
 	PlayAnimation(InWidgetAnimation);
-
 }
 
+void UTenCoinsforaStar::ClickedPassButton()
+{
+	UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::ClickedPassButton"))
+	RemoveWidgetAfterAnimation();
+}
 
 void UTenCoinsforaStar::RemoveWidgetAfterAnimation()
 {
