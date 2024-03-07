@@ -46,7 +46,18 @@ void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport, FVector Teleport
 void AMap_SpaceFunction::PlusThreeSpaces(APartyPlayer* InPartyplayer)
 {
 	InPartyplayer->MoveRemaining +=3;
-	InPartyplayer->StopOrGo();
+
+}
+
+void AMap_SpaceFunction::SwapToStar(APartyPlayer* InPartyPlayer)
+{
+	APartyPlayer* myPlayer = nullptr;
+	FVector playerPosition = myPlayer->GetActorLocation();
+	
+	APartyScore* star = nullptr;
+	FVector starPosition = star->GetActorLocation();
+
+	myPlayer->SetActorLocation(starPosition);
 }
 
 void AMap_SpaceFunction::SwapPlayerPositions(APartyPlayer* CurrentPlayer)
@@ -77,6 +88,11 @@ void AMap_SpaceFunction::SwapPlayerPositions(APartyPlayer* CurrentPlayer)
 	FVector TempPosition = myPlayer->GetActorLocation();
 	myPlayer->SetActorLocation(OtherPlayer->GetActorLocation());
 	OtherPlayer->SetActorLocation(TempPosition);
+
+	ABlueBoardSpace *TempSpace=myPlayer->CurrentSpace;
+	myPlayer->CurrentSpace= OtherPlayer->CurrentSpace;
+	OtherPlayer->CurrentSpace=TempSpace;
+
 }
 
 void AMap_SpaceFunction::FirstTrap(APartyPlayer* InPartyPlayer)
