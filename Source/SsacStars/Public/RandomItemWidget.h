@@ -68,4 +68,11 @@ public:
 	class APartyGameModeBase* GM;
 
 	void ApplyTrap(int32 InArrayNumber);
+
+
+	FWidgetAnimationDynamicEvent StarAnimationEvent;
+
+	UFUNCTION()
+	void RemoveWidgetAfterAnimation();
+
 };

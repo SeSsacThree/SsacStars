@@ -7,6 +7,7 @@
 #include "PartyGameModeBase.h"
 #include "Animation/WidgetAnimation.h"
 #include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
 
 void URandomItemWidget::NativeConstruct()
 {
@@ -16,14 +17,28 @@ void URandomItemWidget::NativeConstruct()
 	AnimationArray.Add(ButtonTwoBlinkAnimation);
 	AnimationArray.Add(ButtonOneBlinkAnimation);
 
-	RandomPickItem();
-	RemoveFromParent();
-
-	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
-
 	RandomNumber = FMath::RandRange(10, 15);
 	ArrayIndex = RandomNumber;
 
+	RandomPickItem();
+	// RemoveFromParent();
+
+	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
+	oneOfRandomItems=Cast<AMap_SpaceFunction>(UGameplayStatics::GetActorOfClass(GetWorld(), AMap_SpaceFunction::StaticClass()));
+
+	
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMap_SpaceFunction::StaticClass(), FoundActors);
+	if (FoundActors.Num() > 0)
+	{
+		oneOfRandomItems = Cast<AMap_SpaceFunction>(FoundActors[0]);
+	}
+	else
+	{
+		oneOfRandomItems = GetWorld()->SpawnActor<AMap_SpaceFunction>(AMap_SpaceFunction::StaticClass());
+
+	}
+	
 }
 
 // 넘겨 받은 WidgetAnimation을 실행하기
@@ -34,13 +49,14 @@ void URandomItemWidget::BlinkButton(UWidgetAnimation* InWidgetAnimation)
 	DelayTime(0.3f, [this]()
 		{
 			RandomNumber--;
-			if ((RandomNumber > 0) && (RandomNumber == 1)) 
+			if ((RandomNumber > 0) && (RandomNumber != 1)) 
 			{
 				RandomPickItem();
 			}
-			else if ((RandomNumber > 0) && (RandomNumber != 1))
+			else if ((RandomNumber > 0) && (RandomNumber == 1))
 			{
 				ApplyTrap(ArrayIndex);
+				RemoveWidgetAfterAnimation();
 			}
 		});
 }
@@ -62,6 +78,20 @@ void URandomItemWidget::DelayTime(float WantSeconds, TFunction<void()> InFunctio
 
 void URandomItemWidget::ApplyTrap(int32 InArrayNumber)
 {
+	/*
+	if (oneOfRandomItems)
+	{
+		return;
+	}*/
+
+	if (!oneOfRandomItems)
+	{
+		UE_LOG(LogTemp, Error, TEXT("No instance of AMap_SpaceFunction found. Trap cannot be applied."));
+		return;
+	}
+
+
+
 	// RandomNumber가 1일때 실행되는 애니메이션의 해당 기능을 실행
 	if (GM)
 	{
@@ -75,21 +105,28 @@ void URandomItemWidget::ApplyTrap(int32 InArrayNumber)
 				case 0:
 					oneOfRandomItems->PlusThreeSpaces(GM->CurrentPlayer);
 					UE_LOG(LogTemp, Warning, TEXT("aaaaaa"))
+				
 						break;
 					
 				case 1:
 					oneOfRandomItems->SwapToStar(GM->CurrentPlayer);
 					UE_LOG(LogTemp, Warning, TEXT("bbbbb"))
+				
 						break;
 						
 				case 2:
 					oneOfRandomItems->SwapPlayerPositions(GM->CurrentPlayer);
 					UE_LOG(LogTemp, Warning, TEXT("ccccc"))
+				
 						break;
 				}
 		}
 	}
 
+}
+
+void URandomItemWidget::RemoveWidgetAfterAnimation()
+{
 }
 
 
