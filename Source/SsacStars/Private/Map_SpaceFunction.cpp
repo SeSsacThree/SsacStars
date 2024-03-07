@@ -2,9 +2,14 @@
 
 
 #include "Map_SpaceFunction.h"
+#include "PartyPlayer.h"
 //#include "WBP_RandomItem.h"
+#include <random>
+#include "PartyGameModeBase.h"
+#include "EngineUtils.h"
 #include "Misc/OutputDeviceNull.h"
-#include "C:\Program Files\Epic Games\UE_5.3\Engine\Source\Runtime\UMG\Public\Blueprint\UserWidget.h"
+#include "Slate/SGameLayerManager.h"
+
 // Sets default values
 AMap_SpaceFunction::AMap_SpaceFunction()
 {
@@ -16,17 +21,8 @@ AMap_SpaceFunction::AMap_SpaceFunction()
 void AMap_SpaceFunction::BeginPlay()
 {
 	Super::BeginPlay();
+	GM=Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 
-//UWBP_RandomItem* RandomItemWidget = Cast<UWBP_RandomItem>(ItemWidgetClass->GetDefaultObject());
-//if (RandomItemWidget)
-//{
-	//RandomItemWidget->AddToViewport();
-//}
-	//ItemNames.Add(TEXT("첫번째 아이템"));
-	//ItemNames.Add(TEXT("두번째 아이템"));
-	//ItemNames.Add(TEXT("세번째 아이템"));
-
-	// StartItemSimulation();
 }
 
 
@@ -34,17 +30,86 @@ void AMap_SpaceFunction::BeginPlay()
 void AMap_SpaceFunction::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 }
 
 
-void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport)
+void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport, FVector TeleportDestination)
 {
+
 	if (ActorToTeleport && ActorToTeleport->IsValidLowLevel())
 	{
 		ActorToTeleport->SetActorLocation(TeleportDestination);
 	}
 }
 
+void AMap_SpaceFunction::PlusThreeSpaces(APartyPlayer* InPartyplayer)
+{
+	InPartyplayer->MoveRemaining +=3;
+	InPartyplayer->StopOrGo();
+}
+
+void AMap_SpaceFunction::SwapPlayerPositions(APartyPlayer* CurrentPlayer)
+{
+	TArray<APartyPlayer*> Players;
+	APartyPlayer* myPlayer = nullptr;
+	for (TActorIterator<APartyPlayer> It(GetWorld()); It; ++It)
+	{
+		APartyPlayer* player = *It;
+		if (player == CurrentPlayer)
+		{
+			myPlayer = player;
+		}
+		else
+		{
+			Players.Add(player);
+		}
+	}
+
+	if (!myPlayer)
+	{
+		return;
+	}
+
+	int RandomIndex = FMath::RandRange(0, Players.Num()-1);
+	APartyPlayer* OtherPlayer = Players[RandomIndex];
+
+	FVector TempPosition = myPlayer->GetActorLocation();
+	myPlayer->SetActorLocation(OtherPlayer->GetActorLocation());
+	OtherPlayer->SetActorLocation(TempPosition);
+}
+
+void AMap_SpaceFunction::FirstTrap(APartyPlayer* InPartyPlayer)
+{
+	if(InPartyPlayer == nullptr)
+	{
+		return;
+	}
+
+	// 코인 반을 없앤다
+	InPartyPlayer->Coin = InPartyPlayer->Coin * -2;
+}
+
+void AMap_SpaceFunction::SecondTrap(APartyPlayer* InPartyPlayer)
+{
+	if (InPartyPlayer == nullptr)
+	{
+		return;
+	}
+
+	InPartyPlayer->Score = InPartyPlayer->Score * -2;
+}
+
+void AMap_SpaceFunction::ThirdTrap(APartyPlayer* InPartyPlayer)
+{
+	if (InPartyPlayer == nullptr)
+	{
+		return;
+	}
+
+	InPartyPlayer->Coin = InPartyPlayer->Coin - 5;
+
+}
 
 
 

@@ -3,6 +3,8 @@
 
 #include "BlueBoardSpace.h"
 
+#include "Kismet/GameplayStatics.h"
+
 // Sets default values
 ABlueBoardSpace::ABlueBoardSpace()
 {
@@ -10,20 +12,21 @@ ABlueBoardSpace::ABlueBoardSpace()
 	PrimaryActorTick.bCanEverTick = true;
 	MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
 	RootComponent = MeshComponent;
+
 }
 
 // Called when the game starts or when spawned
 void ABlueBoardSpace::BeginPlay()
 {
 	Super::BeginPlay();
-	UpdateAppearance();
+	
 }
 
 // Called every frame
 void ABlueBoardSpace::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+    UpdateAppearance();
 }
 
 void ABlueBoardSpace::UpdateAppearance()
@@ -58,3 +61,5 @@ void ABlueBoardSpace::UpdateAppearance()
 
 
 }
+
+

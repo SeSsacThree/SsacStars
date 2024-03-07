@@ -10,31 +10,49 @@ void URandomItemWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	AnimationArray.Add(ButtonOneBlinkAnimation);
-	AnimationArray.Add(ButtonTwoBlinkAnimation);
 	AnimationArray.Add(ButtonThreeBlinkAnimation);
+	AnimationArray.Add(ButtonTwoBlinkAnimation);
+	AnimationArray.Add(ButtonOneBlinkAnimation);
 
+	RandomNumber = FMath::RandRange(10, 15);
 	RandomPickItem();
+
+	//TimerDelegate.BindUFunction(this, "BlinkButton", OutWidgetAnimation);
+
+
 }
 
 // 넘겨 받은 WidgetAnimation을 실행하기
 void URandomItemWidget::BlinkButton(UWidgetAnimation* InWidgetAnimation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("%s"), *InWidgetAnimation->GetName())
-
 	PlayAnimation(InWidgetAnimation);
+
+	DelayTime(0.3f, [this]()
+		{
+			RandomNumber--;
+			if (RandomNumber > 0)
+				RandomPickItem();
+
+		});
 }
 
 void URandomItemWidget::RandomPickItem()
 {
-	int RandomNumber = FMath::RandRange(10,15);
 
-	UE_LOG(LogTemp, Warning, TEXT("%d"), RandomNumber)
-	for (int i = 0; i < RandomNumber; i++)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%d"), i)
-		int ButtonIndex = i % 3;
-		BlinkButton(AnimationArray[ButtonIndex]);
-	}
+	BlinkButton(AnimationArray[RandomNumber % 3]);
 }
- 
+
+void URandomItemWidget::DelayTime(float WantSeconds, TFunction<void()> InFunction)
+{
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [InFunction]()
+		{
+			// 지연 후 실행될 함수 호출
+			InFunction();
+		}, WantSeconds, false);
+}
+
+
+
+
+

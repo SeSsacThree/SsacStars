@@ -63,12 +63,15 @@ public:
 	TArray<ABlueBoardSpace*>  NextSpace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<ABlueBoardSpace*>  PreviousSpace;
-
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class ABlueBoardSpace* WarpSpace;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ESpaceState PreviousState;
 
 
 public:
 	void UpdateAppearance();
+	
 
 };
 

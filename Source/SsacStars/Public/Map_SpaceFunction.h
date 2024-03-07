@@ -7,6 +7,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Map_SpaceFunction.generated.h"
 
+class APartyPlayer;
+class APartyGameModeBase;
+
 UCLASS()
 class SSACSTARS_API AMap_SpaceFunction : public AActor
 {
@@ -26,9 +29,28 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void TeleportActor(AActor* ActorToTeleport);
+	void TeleportActor(AActor* ActorToTeleport, FVector TeleportDestination);
+
+	UFUNCTION()
+	void PlusThreeSpaces(APartyPlayer* InPartyplayer);
+	
+	UFUNCTION()
+	void SwapPlayerPositions(APartyPlayer* CurrentPlayer);
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
+	class APartyGameModeBase*GM;
 
 	UPROPERTY(EditAnywhere)
-	FVector TeleportDestination;
+	class APartyPlayer* partyPlayer;
 
+	UFUNCTION()
+	void FirstTrap(APartyPlayer* InPartyPlayer);
+
+	UFUNCTION()
+	void SecondTrap(APartyPlayer* InPartyPlayer);
+
+	UFUNCTION()
+	void ThirdTrap(APartyPlayer* InPartyPlayer);
+
+	
 };

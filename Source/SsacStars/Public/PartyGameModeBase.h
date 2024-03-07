@@ -3,10 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "PartyPlayer.h"
+#include "PartyScore.h"
 #include "GameFramework/GameModeBase.h"
+
 #include "PartyGameModeBase.generated.h"
 
+//class UMainUI;
+class APartyPlayer;
 /**
  * 
  */
@@ -41,16 +44,44 @@ public:
 	TArray<APartyPlayer*>  RoundOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APartyPlayer* CurrentPlayer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APlayerController* PlayerController;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	APartyScore* Star;
+
+public:
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UMainUI> SelectUiFactory;
+	UPROPERTY()
+	class UMainUI* SelectUi;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UUserWidget> StatusUiFactory;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UItemUI> ItemUiFactory;
+	UPROPERTY()
+	class UItemUI* ItemUi;
+	UPROPERTY()
+	class UUserWidget* StatusUi;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UTrapWidget> TrapUiFactory;
+	UPROPERTY()
+	class UTrapWidget* TrapUi;
+
+	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Round;
 
 public:
 
-	void CreateWidget();
+	void AddItemUseUi();
 	void InitialRound();
 	void StartTurn();
 	void NextTurn();
 	void EndRound();
-	void StartMiniGame();
+	void StartMiniGame();void AddSelectBehaviorUi();
+	void CloseView();
+	void ChangeStarSpace();
+	void AddTrapUi();
 };
