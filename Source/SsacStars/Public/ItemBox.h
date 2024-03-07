@@ -23,9 +23,28 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION()
+	void OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	                          UPrimitiveComponent* OtherComp,
+	                          int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMeshComponent* itemBox;
+
+	UFUNCTION()
+	void GetRandomItem();
+
+	float currentTime = 0;
+	float delayTime = 8;
+
+	// 아이템 박스 존재 유무
+	bool bItemBox=true;
+	
+
+
+	UPROPERTY(EditAnywhere)
+	class UItemWidget* itemWidget;
 };
