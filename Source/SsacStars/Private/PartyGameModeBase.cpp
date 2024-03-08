@@ -44,9 +44,9 @@ void APartyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
 	PlayerSetting();
-	//SelectUi = CreateWidget<UMainUI>(GetWorld(), SelectUiFactory);
+	SelectUi = CreateWidget<UMainUI>(GetWorld(), SelectUiFactory);
 	SelectUi = NewObject<UMainUI>(this, SelectUiFactory);
-	StatusUi = NewObject<UUserWidget>(this, StatusUiFactory);
+	//StatusUi = NewObject<UUserWidget>(this, StatusUiFactory);
 	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
 	TrapUi= NewObject<UTrapWidget>(this, TrapUiFactory);
 	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
@@ -57,7 +57,7 @@ void APartyGameModeBase::BeginPlay()
 
 
 
-	StatusUi->AddToViewport();
+	//StatusUi->AddToViewport();
 	
 	InitialRound();
 }
@@ -69,23 +69,33 @@ void APartyGameModeBase::PlayerSetting()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APartyPlayer::StaticClass(), PlayerActors);
 	Star = Cast<APartyScore>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyScore::StaticClass()));
 
-	StatusUi->AddToViewport();
+	//StatusUi->AddToViewport();
 
-	/*
+
+	for(AActor*PlayerActor:PlayerActors)
+	{
+		APartyPlayer* PartyPlayer = Cast<APartyPlayer>(PlayerActor);
+		if(PartyPlayer)
+			
+			{
+			TurnOrder.Add(PartyPlayer);
+			}
+	}
+	
 	InitialTurnOrder = TurnOrder;
 
 	for (int i = 0; i < InitialTurnOrder.Num(); i++)
 	{
 		InitialTurnOrder[i]->PlayerIndex = i;
-		SetPlayerAppeareance(InitialTurnOrder[i], i);
+		//SetPlayerAppeareance(InitialTurnOrder[i], i);
 	}
 
 	InitialRound();
-	PlayerCoins.SetNum(InitialTurnOrder.Num());
-	PlayerCoins.Init(0, InitialTurnOrder.Num());
-	PlayerScores.SetNum(InitialTurnOrder.Num());
-	PlayerScores.Init(0, InitialTurnOrder.Num());
-	*/
+	//PlayerCoins.SetNum(InitialTurnOrder.Num());
+	//PlayerCoins.Init(0, InitialTurnOrder.Num());
+	//PlayerScores.SetNum(InitialTurnOrder.Num());
+	//PlayerScores.Init(0, InitialTurnOrder.Num());
+	
 }
 
 void APartyGameModeBase::AddItemUseUi()

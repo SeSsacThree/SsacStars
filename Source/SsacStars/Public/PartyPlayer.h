@@ -91,7 +91,7 @@ public:
 	EItem ToApplyDo;
 	int32 Inventoryindex=0;
 	int32 MaxInventorySize = 2;
-
+	int32 PlayerIndex = 0;
 public:
 
 

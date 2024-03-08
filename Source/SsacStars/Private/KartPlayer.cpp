@@ -73,7 +73,10 @@ void AKartPlayer::BeginPlay()
 	MainUI = CreateWidget<UMiniGameMainUI>(GetWorld(), MainUIFactory);
 	MainUI->AddToViewport();
 	FTimerHandle Handle;
+	
 	GetWorldTimerManager().SetTimer(Handle, this, &AKartPlayer::GetReadyTimer, 1.0f, true, 3.0f);
+	
+	
 	
 	starCount = 0;
 
@@ -176,7 +179,7 @@ void AKartPlayer::starCountUP()
 
 void AKartPlayer::getSmall()
 {
-	playerMeshComp->SetRelativeScale3D(FVector(0.1f));
+	/*playerMeshComp->SetRelativeScale3D(FVector(0.1f));
 	playerMeshComp->SetRelativeLocation(FVector(10.1802, 29.3196, -58.129));
 	carMeshComp->SetRelativeScale3D(FVector(40));
 	carMeshComp->SetRelativeLocation(FVector(0, 30, -79));
@@ -185,7 +188,7 @@ void AKartPlayer::getSmall()
 	if(ct>dt)
 	{
 		
-	}
+	}*/
 }
 
 void AKartPlayer::shoot()

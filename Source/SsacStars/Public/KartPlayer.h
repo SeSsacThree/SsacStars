@@ -87,7 +87,7 @@ public:
 	int itemNumber = 0;
 
 	float ct = 0;
-	float dt = 4;
+	float dt = 6;
 
 	UPROPERTY(EditAnywhere)
 	UClass* bulletFactory;

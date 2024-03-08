@@ -43,6 +43,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<APartyPlayer*>  RoundOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<APartyPlayer*>  InitialTurnOrder;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APartyPlayer* CurrentPlayer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APlayerController* PlayerController;
