@@ -17,7 +17,7 @@ UCLASS()
 class SSACSTARS_API APartyGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-
+	APartyGameModeBase();
 
 protected:
 	virtual void BeginPlay() override;
@@ -68,13 +68,36 @@ public:
 	UPROPERTY()
 	class UTrapWidget* TrapUi;
 
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class URandomItemWidget> GetItemUiFactory;
+	UPROPERTY()
+	class URandomItemWidget* GetItemUi;
+	UPROPERTY()
+	class UPlayerUiCard* PlayerUiCard;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UPlayerUiCard> PlayerUiCardFactory;
+	UPROPERTY()
+	class UTenCoinsforaStar* TenCoinsforaStarUi;
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class UTenCoinsforaStar> TenCoinsforaStarUiFactory;
 	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Round;
 
-public:
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh2;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh3;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMesh* Mesh4;
+public:
+	void PlayerSetting();
 	void AddItemUseUi();
 	void InitialRound();
 	void StartTurn();

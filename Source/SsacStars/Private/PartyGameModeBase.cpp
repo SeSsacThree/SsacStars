@@ -1,40 +1,92 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+
 #include "PartyGameModeBase.h"
 #include "PartyPlayer.h"
 #include "MainUI.h"
+//#include "StatusUi.h"
 #include "ItemUI.h"
+#include "TenCoinsforaStar.h"
+#include "PlayerUiCard.h"
 #include "TrapWidget.h"
+#include "RandomItemWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "Blueprint/UserWidget.h"
 #include "EngineUtils.h"
+#include "PartyController.h"
 #include "PartyScore.h"
+
+APartyGameModeBase::APartyGameModeBase()
+{
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh1(TEXT("/Script/Engine.SkeletalMesh'/Game/CJW/Models/ZZang/Shinchan_Models.Shinchan_Models'"));
+	if (tempMesh1.Succeeded())
+	{
+		Mesh1 = tempMesh1.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh2(TEXT("/Script/Engine.SkeletalMesh'/Game/KMS/Mesh/pingu/pingu.pingu'"));
+	if (tempMesh2.Succeeded())
+	{
+		Mesh2 = tempMesh2.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh3(TEXT("/Script/Engine.SkeletalMesh'/Game/JYS/Kirby/source/kirby.kirby'"));
+	if (tempMesh3.Succeeded())
+	{
+		Mesh3 = tempMesh3.Object;
+	}
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> tempMesh4(TEXT("/Script/Engine.StaticMesh'/Game/CJW/Models/ZZang/KERORO.KERORO'"));
+	if (tempMesh1.Succeeded())
+	{
+		Mesh4 = tempMesh4.Object;
+	}
+	PlayerControllerClass = APartyController::StaticClass();
+}
 
 void APartyGameModeBase::BeginPlay()
 {
 	Super::BeginPlay();
+	PlayerSetting();
 	//SelectUi = CreateWidget<UMainUI>(GetWorld(), SelectUiFactory);
 	SelectUi = NewObject<UMainUI>(this, SelectUiFactory);
 	StatusUi = NewObject<UUserWidget>(this, StatusUiFactory);
 	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
 	TrapUi= NewObject<UTrapWidget>(this, TrapUiFactory);
-	TArray<AActor*> PlayerActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APartyPlayer::StaticClass(), PlayerActors);
-	Star = Cast<APartyScore>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyScore::StaticClass()));
+	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
+	TrapUi = NewObject<UTrapWidget>(this, TrapUiFactory);
+	GetItemUi = NewObject<URandomItemWidget>(this, GetItemUiFactory);
+	PlayerUiCard = NewObject<UPlayerUiCard>(this, PlayerUiCardFactory);
+	TenCoinsforaStarUi = NewObject<UTenCoinsforaStar>(this, TenCoinsforaStarUiFactory);
 
-	for (AActor* PlayerActor : PlayerActors)
-	{
-		APartyPlayer* PartyPlayer = Cast<APartyPlayer>(PlayerActor);
-		if (PartyPlayer)
-		{
-			TurnOrder.Add(PartyPlayer);
 
-		}
-	}
+
 	StatusUi->AddToViewport();
 	
 	InitialRound();
 }
 
+
+void APartyGameModeBase::PlayerSetting()
+{
+	TArray<AActor*> PlayerActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APartyPlayer::StaticClass(), PlayerActors);
+	Star = Cast<APartyScore>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyScore::StaticClass()));
+
+	StatusUi->AddToViewport();
+
+	/*
+	InitialTurnOrder = TurnOrder;
+
+	for (int i = 0; i < InitialTurnOrder.Num(); i++)
+	{
+		InitialTurnOrder[i]->PlayerIndex = i;
+		SetPlayerAppeareance(InitialTurnOrder[i], i);
+	}
+
+	InitialRound();
+	PlayerCoins.SetNum(InitialTurnOrder.Num());
+	PlayerCoins.Init(0, InitialTurnOrder.Num());
+	PlayerScores.SetNum(InitialTurnOrder.Num());
+	PlayerScores.Init(0, InitialTurnOrder.Num());
+	*/
+}
 
 void APartyGameModeBase::AddItemUseUi()
 {
@@ -78,16 +130,26 @@ void APartyGameModeBase::NextTurn()
 void APartyGameModeBase::EndRound()
 {
 	Round++;
-	StartMiniGame();
+
+	if(Round>2)
+	{
+		StartMiniGame();
+	}
+	else
+	{
+		InitialRound();
+	}
+
 	//미니게임 시작 
 }
 
 void APartyGameModeBase::StartMiniGame()
 {
 
-
-
-	InitialRound();
+	//open
+	FName LevelName = TEXT("D:/GitHub/SsacStars/Content/KMS/Maps/MiniGame_Kart.umap");
+	UGameplayStatics::LoadStreamLevel(GetWorld(), LevelName, true, true, FLatentActionInfo());
+	//UGameplayStatics::OpenLevel(GetWorld(),TEXT("MiniGame_Kart"));
 
 }
 
