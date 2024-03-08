@@ -13,5 +13,10 @@ UCLASS()
 class SSACSTARS_API AKartGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void CountDown();
 };

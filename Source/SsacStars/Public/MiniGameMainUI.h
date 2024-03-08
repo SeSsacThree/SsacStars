@@ -23,9 +23,26 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UTextBlock* ReadyCount;
 
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UTextBlock* Minutes;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UTextBlock* Seconds;
+
+
 	UFUNCTION()
 	void SetStarCount();
 
+	UFUNCTION()
+	void GetReadyCount();
 
+	UFUNCTION()
+	void HideReady();
+	int32 num = 4;
 
+	UFUNCTION()
+	void CountDown();
+
+	int32 min = 2;
+	int32 sec = 0;
 };

@@ -28,11 +28,21 @@ public:
 	void MoveForward(float Value);
 	void TurnRight(float Value);
 
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* playerMeshComp;
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* carMeshComp;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USpringArmComponent* springArmComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UCameraComponent* cameraComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UArrowComponent* firePosition;
+
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UItemWidget> itemUIFactory;
@@ -48,7 +58,10 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 starCount;
-public:
+
+	UFUNCTION()
+	void useItem();
+
 	UFUNCTION()
 	void speedUp();
 
@@ -58,10 +71,33 @@ public:
 	UFUNCTION()
 	void starCountUP();
 
+	UFUNCTION()
+	void getSmall();
+
+	UFUNCTION()
+	void shoot();
+
 	bool bSpeedUp=false;
 	float currentTime;
 	float speedUpTime = 1.5;
+
 	//플레이어가 아이템을 가지고 있는지
 	bool hasItem = false;
+	//1 : speed Up  2: small size  
+	int itemNumber = 0;
 
+	float ct = 0;
+	float dt = 4;
+
+	UPROPERTY(EditAnywhere)
+	UClass* bulletFactory;
+
+	UFUNCTION()
+	void GetReadyTimer();
+
+	UPROPERTY(EditAnywhere)
+	bool isPaused=true;
+
+	UFUNCTION()
+	void CountDown();
 };

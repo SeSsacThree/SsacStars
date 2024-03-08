@@ -50,7 +50,7 @@ void AMiniGameStarManager::spawnStar()
         // starPoint 클래스의 모든 액터를 가져오기
         UGameplayStatics::GetAllActorsOfClass(World, AMiniGameStarPoint::StaticClass(), starPointArr);
         UE_LOG(LogTemp, Warning, TEXT("get all star points"));
-        // starPoint 액터 배열이 비어있지 않은 경우에만 랜덤 액터를 선택.
+        // starPoint 액터 배열이 비어있지 않은 경우에만 랜덤 액터를 선택
         if (starPointArr.Num() > 0)
         {
             // 랜덤하게 starPoint 액터를 선택.

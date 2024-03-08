@@ -69,7 +69,7 @@ void AItemBox::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 
 		bItemBox = false;
 
-		//플레이어가 아이템이 없다면
+		//플레이어가 아이템이 없을때만
 		if(false==player->hasItem)
 		{
 			player->hasItem = true;
@@ -91,25 +91,28 @@ void AItemBox::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AA
 void AItemBox::GetRandomItem()
 {
 	int index = rand() % 2;
-
+	//int index = 1;
 	//auto itemWidget = Cast<UItemWidget>(UGameplayStatics::GetActorOfClass(GetWorld(), UItemWidget::StaticClass()));
-	//auto player= Cast<AKartPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AKartPlayer::StaticClass()));
-	UE_LOG(LogTemp, Warning, TEXT("random ok"));
+	auto player= Cast<AKartPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AKartPlayer::StaticClass()));
+	
 	switch (index)
 	{
 	case 0:
 		//speedUp 
 		//player->speedUp();
 		if(itemWidget){
-			UE_LOG(LogTemp, Warning, TEXT("Item : speedup"));
-			itemWidget->bSpeedUp = true;
+			//Item : speedup
+			itemWidget->speedUp();
+			player->itemNumber = 1;
 		}
 		break;
 	case 1:
 		//getSmall
 		if (itemWidget) {
-			UE_LOG(LogTemp, Warning, TEXT("Item : get small"));
+			//Item : get small
 			itemWidget->bGetSmall = true;
+			itemWidget->getSmall();
+			player->itemNumber =2;
 		}
 		break;
 	//case 2:
