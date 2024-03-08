@@ -59,4 +59,20 @@ public:
 
 	int RandomNumber;
 
+	int32 ArrayIndex;
+
+	UPROPERTY(EditDefaultsOnly)
+	class AMap_SpaceFunction* oneOfRandomItems;
+
+	UPROPERTY()
+	class APartyGameModeBase* GM;
+
+	void ApplyTrap(int32 InArrayNumber);
+
+
+	FWidgetAnimationDynamicEvent StarAnimationEvent;
+
+	UFUNCTION()
+	void RemoveWidgetAfterAnimation();
+
 };

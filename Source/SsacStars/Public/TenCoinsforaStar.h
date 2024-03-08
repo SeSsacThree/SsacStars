@@ -21,5 +21,31 @@ public:
 	class UButton* Button;
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UButton* PassButton;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UWrapBox* WrapBox;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UImage* StarImage;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidgetAnim), Transient)
+	class UWidgetAnimation* StarImageAnimation;
+
+
+	UFUNCTION()
+	void ClickedButton();
+
+	UFUNCTION()
+	void ClickedPassButton();
+
+	UFUNCTION()
+	void GetStarAnimation(UWidgetAnimation* InWidgetAnimation);
+
+
+	FWidgetAnimationDynamicEvent StarAnimationEvent;
+
+	UFUNCTION()
+	void RemoveWidgetAfterAnimation();
+
 };

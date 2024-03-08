@@ -33,6 +33,9 @@ public:
 
 	UFUNCTION()
 	void PlusThreeSpaces(APartyPlayer* InPartyplayer);
+
+	UFUNCTION()
+	void SwapToStar(APartyPlayer* InPartyPlayer);
 	
 	UFUNCTION()
 	void SwapPlayerPositions(APartyPlayer* CurrentPlayer);

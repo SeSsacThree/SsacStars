@@ -13,6 +13,7 @@ class SSACSTARS_API UTrapWidget : public UUserWidget
 
 	virtual void NativeConstruct() override;
 
+public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* TrapButtonOne;
 
@@ -60,4 +61,7 @@ class SSACSTARS_API UTrapWidget : public UUserWidget
 	class APartyGameModeBase* GM;
 
 	void ApplyTrap(int32 InArrayNumber);
+
+	UFUNCTION()
+	void RemoveWidgetAfterAnimation();
 	};

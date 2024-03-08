@@ -45,12 +45,35 @@ void AMap_SpaceFunction::TeleportActor(AActor* ActorToTeleport, FVector Teleport
 
 void AMap_SpaceFunction::PlusThreeSpaces(APartyPlayer* InPartyplayer)
 {
-	InPartyplayer->MoveRemaining +=3;
-	InPartyplayer->StopOrGo();
+	if (InPartyplayer)
+	{
+		InPartyplayer->MoveRemaining += 3;
+	}
+}
+
+void AMap_SpaceFunction::SwapToStar(APartyPlayer* InPartyPlayer)
+{
+	if (InPartyPlayer == nullptr || GM == nullptr)
+	{
+		return;
+	}
+
+	APartyPlayer* myPlayer = InPartyPlayer;
+	FVector playerPosition = myPlayer->GetActorLocation();
+
+
+	APartyScore* star = GM->Star;
+	FVector starPosition = star->GetActorLocation();
+
+	myPlayer->SetActorLocation(starPosition);
 }
 
 void AMap_SpaceFunction::SwapPlayerPositions(APartyPlayer* CurrentPlayer)
 {
+	if (CurrentPlayer == nullptr)
+	{
+		return;
+	}
 	TArray<APartyPlayer*> Players;
 	APartyPlayer* myPlayer = nullptr;
 	for (TActorIterator<APartyPlayer> It(GetWorld()); It; ++It)
@@ -71,12 +94,17 @@ void AMap_SpaceFunction::SwapPlayerPositions(APartyPlayer* CurrentPlayer)
 		return;
 	}
 
-	int RandomIndex = FMath::RandRange(0, Players.Num()-1);
+	int RandomIndex = FMath::RandRange(0, Players.Num() - 1);
 	APartyPlayer* OtherPlayer = Players[RandomIndex];
 
 	FVector TempPosition = myPlayer->GetActorLocation();
 	myPlayer->SetActorLocation(OtherPlayer->GetActorLocation());
 	OtherPlayer->SetActorLocation(TempPosition);
+
+	ABlueBoardSpace *TempSpace=myPlayer->CurrentSpace;
+	myPlayer->CurrentSpace= OtherPlayer->CurrentSpace;
+	OtherPlayer->CurrentSpace=TempSpace;
+
 }
 
 void AMap_SpaceFunction::FirstTrap(APartyPlayer* InPartyPlayer)
@@ -86,7 +114,7 @@ void AMap_SpaceFunction::FirstTrap(APartyPlayer* InPartyPlayer)
 		return;
 	}
 
-	// 코인 반을 없앤다
+	// 코인  * -2
 	InPartyPlayer->Coin = InPartyPlayer->Coin * -2;
 }
 

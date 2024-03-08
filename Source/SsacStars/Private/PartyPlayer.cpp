@@ -205,11 +205,11 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		MoveRequest.SetAcceptanceRadius(5.f);
 		FNavPathSharedPtr NavPath;
 
-		Ai->MoveToActor(CurrentSpace, 5.0f, true);
+		Ai->MoveToActor(CurrentSpace, 0.1f, false);
 		//Ai->MoveTo(MoveRequest, &NavPath, FAIMoveDoneSignature::CreateUObject(this, &APartyPlayer::OnMoveCompleted));
 
 		 
-		DelayTime(2.0f,[this]()
+		DelayTime(1.0f,[this]()
 		{
 				StopOrGo();
 		});
@@ -245,6 +245,8 @@ void APartyPlayer::MoveEnded()
 		break;
 		case ESpaceState::Item:
 		{
+
+				
 			int RanItemNum = UKismetMathLibrary::RandomIntegerInRange(1, 3);
 
 			UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::ItemSpace"))
