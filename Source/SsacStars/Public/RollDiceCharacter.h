@@ -3,14 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "GameFramework/Actor.h"
+
 #include "RollDiceCharacter.generated.h"
 
 class USpringArmComponent;
 class UCameraComponent;
 
 UCLASS()
-class SSACSTARS_API ARollDiceCharacter : public ACharacter
+class SSACSTARS_API ARollDiceCharacter : public AActor
 {
 	GENERATED_BODY()
 
@@ -32,36 +33,38 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+//	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
 public:
 	UPROPERTY(VisibleAnywhere)
-	USceneCaptureComponent2D* SceneCaptureComponent;
+	class USceneCaptureComponent2D* SceneCaptureComponent;
 
 
 public:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Pistol)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dice)
 	class USceneComponent* handComp;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* MeshComp;
 	//UPROPERTY()
 	//class AActor* Dice;
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Replicated)
 	class ADice* Dice;
 public:
-	
+
 
 public:
 	FVector BeginLocation;
 public:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UThrowDiceCharacterUi> ThrowDiceUiFactory;
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	class UThrowDiceCharacterUi* ThrowDiceUi;
 
 
@@ -73,6 +76,35 @@ public:
 	void AddView();
 	void CloseView();
 	void Jump(float LaunchAmount);
+	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
 
+
+public:
+	UFUNCTION(Server, Reliable)
+	void ServerViewThrowDiceUi();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiViewThrowDiceUi();
+	UFUNCTION(Server, Reliable)
+	void ServerRemoveThrowDiceUi();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiRemoveThrowDiceUi();
+
+
+public:
+	UFUNCTION(Server, Reliable)
+	void ServerGrabDice(const AActor* Actor);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiGrabDice(const AActor* Actor);
+	UFUNCTION(Server, Reliable)
+	void ServerThrowDice(const AActor* Actor);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiThrowDice(const AActor* Actor);
+	UFUNCTION(Server, Reliable)
+	void ServerCreateDice();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiCreateDice();
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 };

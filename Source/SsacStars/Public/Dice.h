@@ -19,7 +19,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -42,8 +42,22 @@ public:
 	void LaunchDice(float LaunchAmount);
 	void SetRotationToNumber(int Number);
 	void ReBack();
+
 public:
-	bool IsRollingMode=false;
+	UFUNCTION(Server, Reliable)
+	void ServerThrowDice();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiThrowDice();
+	UFUNCTION(Server, Reliable)
+	void ServerStartDiceRolling();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiStartDiceRolling();
+	UFUNCTION(Server, Reliable)
+	void ServerAfterOverlap();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiAfterOverlap();
+public:
+	bool IsRollingMode = false;
 	bool IsStopRollingMode = false;
 	bool IsUpMode = false;
 	bool IsSelected = false;
@@ -68,12 +82,17 @@ public:
 	class UBoxComponent* DicePoint5;
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* DicePoint6;
-	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	USceneCaptureComponent2D* SceneCaptureDice;
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Replicated)
 	class USkeletalMeshComponent* DiceComp;
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	class APartyGameModeBase* GM;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APartyGameStateBase* PartyGameState;
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

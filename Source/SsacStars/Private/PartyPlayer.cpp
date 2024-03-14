@@ -11,9 +11,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Runtime/AIModule/Classes/AIController.h"
+#include "NavigationSystem.h"
 #include "Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
+#include "PartyGameStateBase.h"
 // Sets default values
 
 
@@ -22,7 +24,7 @@
 
 APartyPlayer::APartyPlayer()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	DiceRemainWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("DiceRemainWidget"));
@@ -36,13 +38,17 @@ void APartyPlayer::BeginPlay()
 	Super::BeginPlay();
 
 	//이벤트 디스페처 호출
+
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
+	PartyGameState = Cast<APartyGameStateBase>(GetWorld()->GetGameState());
+	//PartyGameState = GetGameState<APartyGameStateBase>();
 	RollDicePlayer = Cast<ARollDiceCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollDiceCharacter::StaticClass()));
 	Ai = Cast<AAIController>(this->GetController());
 	PlayFun = Cast<AMap_SpaceFunction>(UGameplayStatics::GetActorOfClass(GetWorld(), AMap_SpaceFunction::StaticClass()));
 	Inventory.SetNum(MaxInventorySize);
 	Inventory.Init(EItem::Nothing, MaxInventorySize);
 	ToApplyDo = EItem::Nothing;
+
 }
 
 // Called every frame
@@ -52,10 +58,10 @@ void APartyPlayer::Tick(float DeltaTime)
 
 
 
-	
-	
 
-	
+
+
+
 }
 
 // Called to bind functionality to input
@@ -69,9 +75,10 @@ void APartyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 void APartyPlayer::GetCamera()
 {
-	
-	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	OurPlayerController->SetViewTargetWithBlend(this, 1.0f);
+
+
+	//APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	//OurPlayerController->SetViewTargetWithBlend(this, 1.0f);
 
 	DelayTime(1.0f, [this]()
 		{
@@ -79,29 +86,31 @@ void APartyPlayer::GetCamera()
 		});
 
 
-	
+
 }
 void APartyPlayer::SelectBehavior()
 {
-	GM->AddSelectBehaviorUi();
-
+	//GM->AddSelectBehaviorUi();
+	PartyGameState->ServerViewSelectUi();
 }
 void APartyPlayer::RollDice()
 {
 	//RollDicePlayer->GetSignal();
-	
-	//MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
-	
 
-	GM->CloseView();
-	RollDicePlayer->AddView();
+	//MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
+
+	PartyGameState->ServerCloseView();
+	//GM->CloseView();
+	//RollDicePlayer->AddView();
+	RollDicePlayer->ServerViewThrowDiceUi();
 	RollDicePlayer->GetSignal();
 	DelayTime(2.0f, [this]()
 		{
 			RollDicePlayer->StartRolling();
+
 		});
 
-
+	/*
 	DelayTime(30.0f, [this]()
 		{
 			if (RollDicePlayer->Dice->IsSelected == false)
@@ -110,7 +119,7 @@ void APartyPlayer::RollDice()
 				RollDicePlayer->CloseView();
 			}
 		});
-
+		*/
 
 
 }
@@ -123,55 +132,59 @@ void APartyPlayer::ItemApply()
 
 	switch (ToApplyDo)
 	{
-		case EItem::Add3Dice:
-			{
-				MoveRemaining += 3;
-				
-				PlayFun->PlusThreeSpaces(this);
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItema3d"));
-				break;
-			}
-		case EItem::WarpToStar:
-		{
-			CurrentSpace = GM->Star->StarSpace;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
-				//CurrentSpace=별 전 장소 
-			break;
-		}
-		case EItem::SwitchCharacter:
-		{
-				//장소 바꾸는 함수 호출
-			PlayFun->SwapPlayerPositions(this);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
-			break;
-		}
-		case EItem::Nothing:
-		{
-			//장소 바꾸는 함수 호출 
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
-			break;
-		}
+	case EItem::Add3Dice:
+	{
+		MoveRemaining += 3;
+
+		PlayFun->PlusThreeSpaces(this);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItema3d"));
+		break;
 	}
-	
+	case EItem::WarpToStar:
+	{
+		FVector TelpLocation = GetActorLocation();
+		TelpLocation.Z += 100;
+		SetActorLocation(TelpLocation);
+		CurrentSpace = GM->Star->StarSpace;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
+		//CurrentSpace=별 전 장소 
+		break;
+	}
+	case EItem::SwitchCharacter:
+	{
+		//장소 바꾸는 함수 호출
+		PlayFun->SwapPlayerPositions(this);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
+		break;
+	}
+	case EItem::Nothing:
+	{
+		//장소 바꾸는 함수 호출 
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
+		break;
+	}
+	}
+
 	//PlayFun->SwapPlayerPositions(this);
 	DelayTime(2.0f, [this]()
 		{
-				MoveToSpace(CurrentSpace);
+			MoveToSpace(CurrentSpace);
 
 		});
-	
+
 }
 void APartyPlayer::ChooseItem()
 {
-	GM->SelectUi->RemoveFromParent();
-	GM->AddItemUseUi();
-
+	PartyGameState->ServerRemoveSelectUi();
+	//	GM->SelectUi->RemoveFromParent();
+		//GM->AddItemUseUi();
+	PartyGameState->ServerViewItemUi();
 
 	DelayTime(5.0f, [this]()
 		{
 			RollDice();
 		});
-	
+
 }
 
 
@@ -187,7 +200,7 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 	}
 
 
-		
+
 	if (!Ai)
 	{
 		Ai = Cast<AAIController>(this->GetController());
@@ -195,24 +208,29 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		{
 			Ai = GetWorld()->SpawnActor<AAIController>();
 			// 필요한 경우 AI 컨트롤러 초기화 및 설정
+
+
 		}
 	}
 
 	if (Ai)
 	{
 		FAIMoveRequest MoveRequest;
-		MoveRequest.SetGoalActor(CurrentSpace);
-		MoveRequest.SetAcceptanceRadius(5.f);
+		FVector MoveLoc = CurrentSpace->GetActorLocation();
+		MoveLoc.Y += 30;
+		MoveRequest.SetGoalLocation(MoveLoc);
+		//MoveRequest.SetGoalActor(CurrentSpace);
+		MoveRequest.SetAcceptanceRadius(0.1f);
 		FNavPathSharedPtr NavPath;
+		FAIMoveCompletedSignature Move;
+		//Ai->MoveToActor(CurrentSpace, 0.1f, false);
+		Ai->MoveTo(MoveRequest, &NavPath);
 
-		Ai->MoveToActor(CurrentSpace, 0.1f, false);
-		//Ai->MoveTo(MoveRequest, &NavPath, FAIMoveDoneSignature::CreateUObject(this, &APartyPlayer::OnMoveCompleted));
 
-		 
-		DelayTime(1.0f,[this]()
-		{
+		DelayTime(1.0f, [this]()
+			{
 				StopOrGo();
-		});
+			});
 
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerMove"));
@@ -222,51 +240,53 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerCantMove"));
 	}
 
-	
-	
-} 
+
+
+}
 
 void APartyPlayer::MoveEnded()
 {
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::MoveEnded - Start"))
 
-	switch (CurrentSpace->SpaceState)
-	{
+		switch (CurrentSpace->SpaceState)
+		{
 		case ESpaceState::Blue:
 		{
 			Coin += 3;
+			PartyGameState->ServerGetCoinsUi();
 		}
 		break;
 		case ESpaceState::Red:
 		{
+			PartyGameState->ServerGetCoins_PinguUi();
 			Coin -= 3;
 		}
 		break;
 		case ESpaceState::Item:
 		{
 
-				
+
 			int RanItemNum = UKismetMathLibrary::RandomIntegerInRange(1, 3);
 
 			UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::ItemSpace"))
-			if(Inventoryindex<3)
-			{
-				switch (RanItemNum)
+				if (Inventoryindex < 3)
 				{
+					switch (RanItemNum)
+					{
 					case 1:
-						{
+					{
 
-							Inventory[Inventoryindex] = EItem::Add3Dice;
-							GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
-							//GM->ItemUi->Add3DiceItem();
-							break;
-						}
-				case 2:
+						Inventory[Inventoryindex] = EItem::Add3Dice;
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
+						//GM->ItemUi->Add3DiceItem();
+						break;
+					}
+					case 2:
 					{
 						Inventory[Inventoryindex] = EItem::WarpToStar;
 						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("wts"));
-							//GM->ItemUi->WarpToStarItem();
+						//GM->ItemUi->WarpToStarItem();
 						break;
 					}
 					case 3:
@@ -276,38 +296,43 @@ void APartyPlayer::MoveEnded()
 						//GM->ItemUi->SwitchSpaceItem();
 						break;
 					}
+					}
+
+					Inventoryindex++;
+
 				}
-				
-				Inventoryindex++;
-				
-			}
-			else
-			{
-				
-			}
+				else
+				{
+					//일단 아이템 두개만 보유 	
+				}
 		}
 		break;
 		case ESpaceState::Trap:
 		{
 			//함정 위젯 열어서 종류에 따라 실행
-			GM->AddTrapUi();
+			//GM->AddTrapUi();
+			PartyGameState->ServerViewTrapUi();
 		}
 		break;
 		case ESpaceState::Warp:
 		{
 			//AMap_SpaceFunction Map_SpaceFunction;
 			//Map_SpaceFunction.SwapPlayerPositions(this);
-			
+
 			SetActorLocation(CurrentSpace->WarpSpace->GetActorLocation());
+			CurrentSpace = CurrentSpace->WarpSpace;
 		}
 		break;
 		case ESpaceState::Star:
 		{
 
+			// 최종 도착이 별이여도 그냥 한칸 더 간다 
+			PartyGameState->ServerViewTenCoinsforaStarUi();
 
 			DelayTime(2.0f, [this]()
 				{
-					GM->ChangeStarSpace();
+					PartyGameState->ServerChangeStarSpace();
+					//GM->ChangeStarSpace();
 					MoveToSpace(CurrentSpace);
 
 				});
@@ -319,46 +344,63 @@ void APartyPlayer::MoveEnded()
 
 		}
 		break;
+		}
+
+	//발판에 대한 특성 적용 시간
+	if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining <= 0)
+	{
+		DelayTime(4.0f, [this]()
+			{
+				RollDicePlayer->CloseView();
+
+				if (true == IsLocallyControlled())
+				{
+					GM->NextTurn();
+				}
+
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("End"));
+			});
 	}
 
 
-	DelayTime(4.0f, [this]()
-		{
-			RollDicePlayer->CloseView();
-			GM->NextTurn();
-
-		});
-	
-
-	
 
 
 }
 
 void APartyPlayer::StopOrGo()
 {
-	
-	if(CurrentSpace->SpaceState==ESpaceState::Star)
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StopOrGo"));
+
+	//중간 멈춤 장소가 별이라면 , 
+	if (CurrentSpace->SpaceState == ESpaceState::Star)
 	{
 		//별을 먹을건지 물어보고 교환한다
 	//먹는다면
 		//별의 위치를 바꾼다
-		GM->ChangeStarSpace();
-		MoveToSpace(CurrentSpace);
+
+		PartyGameState->ServerViewTenCoinsforaStarUi();
+		//PartyGameState->ServerChangeStarSpace();
+
 	}
 
-	MoveRemaining--;
-	if (MoveRemaining > 0)
+	//중간멈춤 장소가 별이 아닌데 주사위가 남으면 앞으로 
+	if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining > 0)
 	{
+		MoveRemaining--;
 		MoveToSpace(CurrentSpace);
-	}
-	else
+	}//별이아닌데 주사위가 없으면 멈춰
+	else if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining == 0)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CallMoveEnded"));
+		PartyGameState->ServerUpdateGameInfo(PlayerIndex);
+		//	GM->UpdateGameInfo(PlayerIndex);
+		//	GM->UpdateRankInfo();
+		PartyGameState->ServerUpdateRankInfo();
 		MoveEnded();
 	}
 }
 
-void APartyPlayer::DelayTime(float WantSeconds,TFunction<void()> InFunction)
+void APartyPlayer::DelayTime(float WantSeconds, TFunction<void()> InFunction)
 {
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [InFunction]()
