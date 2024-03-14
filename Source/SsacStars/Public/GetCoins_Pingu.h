@@ -7,7 +7,7 @@
 #include "GetCoins_Pingu.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SSACSTARS_API UGetCoins_Pingu : public UUserWidget

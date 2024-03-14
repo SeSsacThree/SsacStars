@@ -4,25 +4,31 @@
 #include "RollDiceCharacter.h"
 #include "Blueprint/UserWidget.h"
 #include "Dice.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
+#include "Components/SceneCaptureComponent.h"
 #include "ThrowDiceCharacterUi.h"
 #include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 
 class UStaticMeshComponent;
 ARollDiceCharacter::ARollDiceCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 
-	
-	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent"));
-	SceneCaptureComponent->SetupAttachment(RootComponent);
 
-	
+	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent"));
+	this->SetRootComponent(SceneCaptureComponent);
+
+
+	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
+	MeshComp->SetupAttachment(SceneCaptureComponent);
+
 	handComp = CreateDefaultSubobject<USceneComponent>(TEXT("handComp"));
-	handComp->SetupAttachment(GetMesh(), TEXT("handComp"));
+	handComp->SetupAttachment(MeshComp);
 
 
 
@@ -32,13 +38,14 @@ ARollDiceCharacter::ARollDiceCharacter()
 void ARollDiceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	Dice = Cast<ADice>(UGameplayStatics::GetActorOfClass(GetWorld(), ADice::StaticClass()));
 	ThrowDiceUi = NewObject<UThrowDiceCharacterUi>(this, ThrowDiceUiFactory);
 
-	CreateDice();
+	ServerCreateDice();
+	//CreateDice();
 	BeginLocation = GetActorLocation();
 
-	
+
 }
 
 // Called every frame
@@ -50,15 +57,17 @@ void ARollDiceCharacter::Tick(float DeltaTime)
 }
 
 // Called to bind functionality to input
+/*
 void ARollDiceCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
-
+*/
 void ARollDiceCharacter::CreateDice()
 {
-	Dice = Cast<ADice>(UGameplayStatics::GetActorOfClass(GetWorld(), ADice::StaticClass()));
+
+	//Dice = Cast<ADice>(UGameplayStatics::GetActorOfClass(GetWorld(), ADice::StaticClass()));
 
 	/*
 	TArray<struct FOverlapResult> OutOverlaps;
@@ -93,15 +102,62 @@ void ARollDiceCharacter::CreateDice()
 	if (Dice)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Dice"));
-		GrapDice(Dice);
+		//GrapDice(Dice);
+		ServerGrabDice(Dice);
 	}
 
 
 }
+void ARollDiceCharacter::ServerCreateDice_Implementation()
+{
+	MultiCreateDice();
+}
+
+void ARollDiceCharacter::MultiCreateDice_Implementation()
+{
+
+
+	/*
+	TArray<struct FOverlapResult> OutOverlaps;
+	FCollisionObjectQueryParams ObjectQueryParams(FCollisionObjectQueryParams::InitType::AllObjects);
+	bool bHits = GetWorld()->OverlapMultiByObjectType(
+		OutOverlaps,
+		GetActorLocation(),
+		FQuat::Identity,
+		ObjectQueryParams,
+		FCollisionShape::MakeSphere(100));
+
+	if (bHits)
+	{
+		// 전체 검색해서
+		for (auto result : OutOverlaps)
+		{
+
+			// 만약 액터의 이름에 BP_Dice이 포함되어있다면
+			if (result.GetActor()->GetActorNameOrLabel().Contains(TEXT("BP_Dice")))
+			{
+				// 그것을 grabPistol로 하고싶다.
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("overlap"));
+				Dice = result.GetActor();
+				// 반복을 그만하고싶다.
+				break;
+			}
+		}
+	}
+	*/
+
+
+	if (Dice)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Dice"));
+		//GrapDice(Dice);
+		ServerGrabDice(Dice);
+	}
+}
 
 void ARollDiceCharacter::ThrowDice(const AActor* Actor)
 {
-
+	/*
 	if (nullptr == Actor)
 		return;
 	//Dice->SetActorEnableCollision(false);
@@ -114,12 +170,48 @@ void ARollDiceCharacter::ThrowDice(const AActor* Actor)
 	// hand에서 떼고싶다.
 	mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Throw"));
-	
-	
+	*/
+
+}
+void ARollDiceCharacter::ServerThrowDice_Implementation(const AActor* Actor)
+{
+	MultiThrowDice(Actor);
 }
 
+void ARollDiceCharacter::MultiThrowDice_Implementation(const AActor* Actor)
+{
+	if (nullptr == Actor)
+		return;
+	//Dice->SetActorEnableCollision(false);
+
+	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
+	// pistol 물리를 켜고싶다.
+	//mesh->SetSimulatePhysics(true);
+	//mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	//mesh->SetCollisionResponseToAllChannels(ECR_Block);
+	// hand에서 떼고싶다.
+	mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Throw"));
+}
 
 void ARollDiceCharacter::GrapDice(const AActor* Actor)
+{
+	/*
+	Dice->ReBack();
+	Dice->IsStopRollingMode = false;
+	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
+	//mesh->SetSimulatePhysics(false);
+	mesh->AttachToComponent(handComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GrabDice"));
+	*/
+}
+
+void ARollDiceCharacter::ServerGrabDice_Implementation(const AActor* Actor)
+{
+	MultiGrabDice(Actor);
+}
+
+void ARollDiceCharacter::MultiGrabDice_Implementation(const AActor* Actor)
 {
 	Dice->ReBack();
 	Dice->IsStopRollingMode = false;
@@ -128,29 +220,44 @@ void ARollDiceCharacter::GrapDice(const AActor* Actor)
 	mesh->AttachToComponent(handComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GrabDice"));
 }
-
 void ARollDiceCharacter::GetSignal()
 {
-	ThrowDice(Dice);
-	Dice->ThrowDice();
+	ServerThrowDice(Dice);
+	//ThrowDice(Dice);
+	//Dice->ThrowDice();
+	Dice->ServerThrowDice();
+	//Dice->IsUpMode = true;
 }
 
 void ARollDiceCharacter::StartRolling()
 {
-	Dice->StartDiceRolling();
+	//Dice->StartDiceRolling();
+	Dice->MultiStartDiceRolling();
 }
 
 void ARollDiceCharacter::AddView()
 {
-	if(ThrowDiceUi)
+	if (ThrowDiceUi)
 		ThrowDiceUi->AddToViewport();
 
 }
 
 void ARollDiceCharacter::CloseView()
 {
-	GrapDice(Dice);
-	ThrowDiceUi->RemoveFromParent();
+
+
+
+
+	DelayTime(1.0f, [this]()
+		{
+			//변환필요
+			ServerGrabDice(Dice);
+			//GrapDice(Dice);
+			ServerRemoveThrowDiceUi();
+			//ThrowDiceUi->RemoveFromParent();
+
+		});
+
 }
 
 void ARollDiceCharacter::Jump(float LaunchAmount)
@@ -158,6 +265,48 @@ void ARollDiceCharacter::Jump(float LaunchAmount)
 	FVector LaunchDirection = FVector::UpVector; // 위쪽으로 띄우기 예시
 	float LaunchStrength = LaunchAmount; // 띄우는 힘의 크기
 
-	LaunchCharacter(LaunchDirection * LaunchStrength, false, false);
+
 }
 
+void ARollDiceCharacter::DelayTime(float WantSeconds, TFunction<void()> InFunction)
+{
+
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [InFunction]()
+		{
+			// 지연 후 실행될 함수 호출
+			InFunction();
+		}, WantSeconds, false);
+}
+
+
+
+void ARollDiceCharacter::ServerRemoveThrowDiceUi_Implementation()
+{
+	MultiRemoveThrowDiceUi();
+}
+
+void ARollDiceCharacter::MultiRemoveThrowDiceUi_Implementation()
+{
+	ThrowDiceUi->RemoveFromParent();
+}
+
+void ARollDiceCharacter::ServerViewThrowDiceUi_Implementation()
+{
+	MultiViewThrowDiceUi();
+}
+
+void ARollDiceCharacter::MultiViewThrowDiceUi_Implementation()
+{
+	ThrowDiceUi->AddToViewport();
+}
+
+
+
+
+void ARollDiceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(ARollDiceCharacter, Dice);
+	DOREPLIFETIME(ARollDiceCharacter, ThrowDiceUi);
+}

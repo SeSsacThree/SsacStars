@@ -7,7 +7,7 @@
 #include "GetCoins.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SSACSTARS_API UGetCoins : public UUserWidget
@@ -16,7 +16,7 @@ class SSACSTARS_API UGetCoins : public UUserWidget
 
 	virtual void NativeConstruct() override;
 
-public: 
+public:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UImage* Image0;
 

@@ -31,15 +31,15 @@ class SSACSTARS_API APartyPlayer : public ACharacter
 public:
 	// Sets default values for this character's properties
 	APartyPlayer();
-	
 
-	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite)
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	class UWidgetComponent* DiceRemainWidget;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<class UUserWidget> DiceRemainWidgetFactory;
 
 
-	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -49,9 +49,9 @@ protected:
 
 
 
-	
 
-public:	
+
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -65,8 +65,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Coin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int Score;
-
+	int Score = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int PlayerIndex;
 public:
 	bool IsMoving;
 	bool IsMovingTurn;
@@ -74,7 +75,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class ABlueBoardSpace* CurrentSpace;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APartyGameStateBase* PartyGameState;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class ARollDiceCharacter* RollDicePlayer;
 	UPROPERTY(EditDefaultsOnly)
@@ -89,9 +91,10 @@ public:
 	TArray<EItem> Inventory;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	EItem ToApplyDo;
-	int32 Inventoryindex=0;
+	int32 Inventoryindex = 0;
 	int32 MaxInventorySize = 2;
-	int32 PlayerIndex = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 Rank = 0;
 public:
 
 
@@ -111,8 +114,8 @@ public:
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
 	void MyTurnStart();
 	void MyTurnEnd();
+	void CommandCloseView();
 
-	
 
 public:
 
