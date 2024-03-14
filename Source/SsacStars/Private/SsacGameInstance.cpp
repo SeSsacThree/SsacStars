@@ -14,7 +14,7 @@ void USsacGameInstance::Init()
 	{
 		sessionInterface = subsystem->GetSessionInterface();
 	}
-	//Timer
+	//TimerS
 	//FTimerHandle handle;
 	//GetTimerManager().SetTimer(handle,[&]()
 	//{
