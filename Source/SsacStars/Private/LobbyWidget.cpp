@@ -13,6 +13,8 @@ void ULobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
+	PlayAnimation( Image_bg_Animation,0,0 );
+
 	gi = GetWorld()->GetGameInstance<USsacGameInstance>();
 
 	btn_doCreateRoom->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyClicked_doCreateRoom);
@@ -23,8 +25,9 @@ void ULobbyWidget::NativeConstruct()
 	Slider_maxPlayer->OnValueChanged.AddDynamic(this, &ULobbyWidget::OnMyValueChange_maxplayer);
 
 	text_maxplayer->SetText(FText::AsNumber(Slider_maxPlayer->GetValue()));
+	Slider_maxPlayer->SetValue(2);
 	Slider_maxPlayer->SetMinValue(2);
-	Slider_maxPlayer->SetMaxValue(10);
+	Slider_maxPlayer->SetMaxValue(4);
 	Slider_maxPlayer->SetStepSize(1);
 	Slider_maxPlayer->MouseUsesStep = true;
 
