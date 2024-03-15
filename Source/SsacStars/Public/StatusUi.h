@@ -17,8 +17,7 @@ class SSACSTARS_API UStatusUi : public UUserWidget
 
 
 public:
-
-
+	
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	class UPlayerUiCard* PersonalState;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))

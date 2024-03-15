@@ -94,14 +94,17 @@ public:
 	int32 Inventoryindex = 0;
 	int32 MaxInventorySize = 2;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 Rank = 0;
+	int32 Rank = 4;
 public:
 
 
 
 
 public:
-
+	UFUNCTION(Server, Reliable)
+	void ServerChangeAppereance();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiChangeAppereance();
 	void GetCamera();
 	void SelectBehavior();
 	void RollDice();

@@ -6,7 +6,7 @@
 #include "StatusUi.h"
 #include "ItemUI.h"
 #include "TenCoinsforaStar.h"
-#include "PlayerUiCard.h"
+
 #include "Components/Image.h"
 #include "TrapWidget.h"
 #include "RandomItemWidget.h"
@@ -16,8 +16,28 @@
 #include "EngineUtils.h"
 #include "GetCoins.h"
 #include "GetCoins_Pingu.h"
-#include "Components/WrapBox.h"
 
+#include "Components/WrapBox.h"
+#include "LevelSequencePlayer.h"
+#include "LevelSequenceActor.h"
+#include "LevelSequence.h"
+#include "MovieSceneSequencePlaybackSettings.h"
+#include "PlayerUiCard.h"
+
+
+APartyGameStateBase::APartyGameStateBase()
+{
+	/*
+	LevelSequence = CreateDefaultSubobject<ULevelSequence>(TEXT("LevelSequence"));
+	static ConstructorHelpers::FObjectFinder<ULevelSequence>LS(TEXT("D:/Projects/SsacStars/Content/CJW/PartyGameStart.uasset"));
+
+	if (LS.Succeeded())
+	{
+		LevelSequence = LS.Object;
+	}
+	LevelSequenceActor = CreateDefaultSubobject<ALevelSequenceActor>(TEXT("LevelSequenceActor"));
+	*/
+}
 
 void APartyGameStateBase::BeginPlay()
 {
@@ -35,11 +55,21 @@ void APartyGameStateBase::BeginPlay()
 
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	Star = Cast<APartyScore>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyScore::StaticClass()));
+	PlayerScores.SetNum(PlayerList.Num());
+	PlayerScores.Init(0, PlayerList.Num());
+	
+	/*
+	FMovieSceneSequencePlaybackSettings Setting;
+	Setting.bAutoPlay = false;
+	Setting.bPauseAtEnd = true;
+	LevelSequencePlayer = ULevelSequencePlayer::CreateLevelSequencePlayer(GetWorld(), LevelSequence, Setting, LevelSequenceActor);
+*/
 
-
-
-
-
+	
+		// 서버에서만 실행될 초기화 코드
+		// 예: 서버에서 게임 시작 시 시퀀스를 재생하도록 서버에 요청
+		ServerTriggerSequence();
+	
 }
 
 void APartyGameStateBase::ServerMoveCameraToStar_Implementation()
@@ -72,7 +102,11 @@ void APartyGameStateBase::MultiUpdateAppeareance_Implementation(APartyPlayer* Pl
 	case 0:
 	{
 		Player->GetMesh()->SetSkeletalMeshAsset(Mesh1);
-		Player->GetMesh()->SetWorldScale3D(FVector(16));
+		Player->GetMesh()->SetWorldScale3D(FVector(18));
+		//UPinguAnimInstance* PinguAnimaion = LoadObject<UPinguAnimInstance>(nullptr, TEXT("D:\Projects\SsacStars\Content\JYS\Blueprints"));
+		//Player->GetMesh()->GetSkeletalMeshAsset()-
+			//SetAnimInstanceClass(PinguAnimaion);
+		
 		break;
 	}
 	case 1:
@@ -158,12 +192,19 @@ void APartyGameStateBase::MultiMoveCameraToPlayer_Implementation(APartyPlayer* I
 void APartyGameStateBase::ServerViewStatusUi_Implementation()
 {
 
+	
 	MultiViewStatusUi();
 }
 
 void APartyGameStateBase::MultiViewStatusUi_Implementation()
 {
+
+
+		//StatusUi->PersonalState->playe = PlayerList[i];
+	
+
 	StatusUi->AddToViewport();
+
 }
 
 void APartyGameStateBase::ServerViewItemUi_Implementation()
@@ -307,88 +348,164 @@ void APartyGameStateBase::ServerUpdateGameInfo_Implementation(int Index)
 
 void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 {
+	for (int i = 0; i < PlayerList.Num(); i++)
+	{
+		if (PlayerList[i]->Score)
+			PlayerScores[i] = PlayerList[i]->Score;
+	}
+	TArray<int> TempArray;
+	TempArray.SetNum(PlayerList.Num());
+	//Initial 의 크기 만큼 Temp크기를 설정하고
+	int Count;
+
+	for (int i = 0; i < PlayerList.Num(); i++)
+	{
+		Count = 0;
+		for (int t = 0; t < PlayerList.Num(); t++)
+		{
+			if (PlayerScores[i] < PlayerScores[t])
+			{
+				Count++;
+			}
+		}
+		TempArray[i] = Count + 1;
+		PlayerList[i]->Rank = TempArray[i];
+	}
+
 	/*
+	if (HasAuthority())
+	{
+		//플레이어 목록이 담겨있는 각 스코어에 접근하여 플레이어 스코에저장
+		for (int i = 0; i < GM->InitialTurnOrder.Num(); i++)
+		{
+			if (GM->InitialTurnOrder[i]->Score)
+				GM->PlayerScores[i] = GM->InitialTurnOrder[i]->Score;
+
+		}
+		//순위 정렬을 위해 TempArray를 만들고
+		TArray<int> TempArray;
+		TempArray.SetNum(GM->InitialTurnOrder.Num());
+		//Initial 의 크기 만큼 Temp크기를 설정하고
+		int Count;
+
+		for (int i = 0; i < GM->InitialTurnOrder.Num(); i++)
+		{
+			Count = 0;
+			for (int t = 0; t < GM->InitialTurnOrder.Num(); t++)
+			{
+				if (GM->PlayerScores[i] < GM->PlayerScores[t])
+				{
+					Count++;
+				}
+			}
+			TempArray[i] = Count + 1;
+		}
+		//3번째 playerscore 인덱스의 등수는  temparry3
+
+	}
+	//MultiUpdateRankInfo();
+	*/
+
+
+
+
 	switch (Index)
 	{
 	case 0:
 	{
-		StatusUi->PersonalState[0].SetStarScoreText(GM->CurrentPlayer->Score);
-		StatusUi->PersonalState[0].SetSpaceTypeBorder(GM->CurrentPlayer);
+		StatusUi->PersonalState->SetStarScoreText(CurrentPlayer->Score);
+		StatusUi->PersonalState->SetSpaceTypeBorder(CurrentPlayer);
+		StatusUi->PersonalState->SetMainScoreText(CurrentPlayer->Rank);
+		StatusUi->PersonalState->SetTurnOrderScoreText(CurrentPlayerIndex);
 		break;
 	}
 	case 1:
 	{
-		StatusUi->PersonalState[1].SetStarScoreText(GM->CurrentPlayer->Score);
-		StatusUi->PersonalState[1].SetSpaceTypeBorder(GM->CurrentPlayer);
+		StatusUi->PersonalState1->SetStarScoreText(CurrentPlayer->Score);
+		StatusUi->PersonalState1->SetSpaceTypeBorder(CurrentPlayer);
+		StatusUi->PersonalState1->SetMainScoreText(CurrentPlayer->Rank);
+		StatusUi->PersonalState1->SetTurnOrderScoreText(CurrentPlayerIndex);
 		break;
 	}
 	case 2:
 	{
-		StatusUi->PersonalState[2].SetStarScoreText(GM->CurrentPlayer->Score);
-		StatusUi->PersonalState[2].SetSpaceTypeBorder(GM->CurrentPlayer);
+		StatusUi->PersonalState2->SetStarScoreText(CurrentPlayer->Score);
+		StatusUi->PersonalState2->SetSpaceTypeBorder(CurrentPlayer);
+		StatusUi->PersonalState2->SetMainScoreText(CurrentPlayer->Rank);
+		StatusUi->PersonalState2->SetTurnOrderScoreText(CurrentPlayerIndex);
 		break;
 	}
 	case 3:
 	{
-		StatusUi->PersonalState[3].SetStarScoreText(GM->CurrentPlayer->Score);
-		StatusUi->PersonalState[3].SetSpaceTypeBorder(GM->CurrentPlayer);
+		StatusUi->PersonalState3->SetStarScoreText(CurrentPlayer->Score);
+		StatusUi->PersonalState3->SetSpaceTypeBorder(CurrentPlayer);
+		StatusUi->PersonalState3->SetMainScoreText(CurrentPlayer->Rank);
+		StatusUi->PersonalState3->SetTurnOrderScoreText(CurrentPlayerIndex);
 		break;
 	}
 
 	}
-	*/
+	
 
 }
+void APartyGameStateBase::ServerUpdateEndInfo_Implementation(int Index)
+{
+	MultiUpdateEndInfo(Index);
+}
 
+void APartyGameStateBase::MultiUpdateEndInfo_Implementation(int Index)
+{
+	switch (Index)
+	{
+	case 0:
+	{
+		StatusUi->PersonalState->SetTurnOrderScoreText(CurrentPlayerIndex+1);
+		break;
+	}
+	case 1:
+	{
+
+		StatusUi->PersonalState1->SetTurnOrderScoreText(CurrentPlayerIndex+1);
+		break;
+	}
+	case 2:
+	{
+
+		StatusUi->PersonalState2->SetTurnOrderScoreText(CurrentPlayerIndex+1);
+		break;
+	}
+	case 3:
+	{
+
+		StatusUi->PersonalState3->SetTurnOrderScoreText(CurrentPlayerIndex+1);
+		break;
+	}
+
+	}
+	
+}
 void APartyGameStateBase::ServerUpdateRankInfo_Implementation()
 {
-	MultiUpdateRankInfo();
+	
 }
 
 void APartyGameStateBase::MultiUpdateRankInfo_Implementation()
 {
 	//현재 플레이어의 인덱스를 넣으면 ex 1
 	/*
-	StatusUi->PersonalState->SetTurnOrderScoreText(GM->CurrentPlayer->PlayerIndex);
-	StatusUi->PersonalState1->SetTurnOrderScoreText(GM->CurrentPlayer->PlayerIndex);
-	StatusUi->PersonalState2->SetTurnOrderScoreText(GM->CurrentPlayer->PlayerIndex);
+	StatusUi->PersonalState->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
+	StatusUi->PersonalState1->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
+	StatusUi->PersonalState2->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
 	//	StatusUi->PersonalState3->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
 
-		//플레이어 목록이 담겨있는 각 스코어에 접근하여 플레이어 스코에저장
-	for (int i = 0; i < GM->InitialTurnOrder.Num(); i++)
+
+
+
+
+
+	for (int t = 0; t < PlayerList.Num(); t++)
 	{
-		if (GM->InitialTurnOrder[i]->Score)
-			GM->PlayerScores[i] = GM->InitialTurnOrder[i]->Score;
-
-	}
-	//순위 정렬을 위해 TempArray를 만들고
-	TArray<int> TempArray;
-	TempArray.SetNum(GM->InitialTurnOrder.Num());
-	//Initial 의 크기 만큼 Temp크기를 설정하고
-	int Count;
-
-	for (int i = 0; i < GM->InitialTurnOrder.Num(); i++)
-	{
-		Count = 0;
-		for (int t = 0; t < GM->InitialTurnOrder.Num(); t++)
-		{
-			if (GM->PlayerScores[i] < GM->PlayerScores[t])
-			{
-				Count++;
-			}
-		}
-		TempArray[i] = Count + 1;
-	}
-	//3번째 playerscore 인덱스의 등수는  temparry3
-
-
-
-
-
-
-	for (int t = 0; t < GM->InitialTurnOrder.Num(); t++)
-	{
-		StatusUi->PersonalState->SetMainScoreText(GM->InitialTurnOrder[t]->Rank);
+		StatusUi->PersonalState->SetMainScoreText(PlayerList[t]->Rank);
 
 	}
 	*/
@@ -440,7 +557,7 @@ void APartyGameStateBase::MultiClickedGetStarButton_Implementation()
 	CurrentPlayer->Score++;
 	ServerUpdateGameInfo(PlayerCount);
 	//	GM->UpdateGameInfo(PlayerIndex);
-	ServerUpdateRankInfo();
+	//ServerUpdateRankInfo();
 	//GM->UpdateRankInfo();
 	ServerChangeStarSpace();
 	//GM->ChangeStarSpace();
@@ -513,6 +630,107 @@ void APartyGameStateBase::MultiClickedItem2Button_Implementation()
 	CurrentPlayer->RollDice();
 }
 
+void APartyGameStateBase::ServerOpenMinigame_Implementation()
+{
+	MultiOpenMinigame();
+}
+
+void APartyGameStateBase::MultiOpenMinigame_Implementation()
+{
+}
+void APartyGameStateBase::ClientTriggerSequence_Implementation()
+{
+	
+	if (SequencePlayer)
+	{
+		// 시퀀스를 재생합니다.
+
+		SequencePlayer->Play();
+
+		//Controller->SetPause(true);
+	}
+	
+}
+void APartyGameStateBase::ServerTriggerSequence_Implementation()
+{
+	
+
+	MultiTriggerSequence();
+}
+
+void APartyGameStateBase::MultiTriggerSequence_Implementation()
+{
+
+	Controller = Cast<APlayerController>(GetWorld()->GetFirstPlayerController());
+
+	UClass* SequenceActorClass = ALevelSequenceActor::StaticClass();
+
+	// 현재 맵에서 레벨 시퀀스 액터들을 모두 찾습니다.
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), SequenceActorClass, FoundActors);
+
+	// 모든 레벨 시퀀스 액터를 순회하여 시퀀스를 재생합니다.
+	for (AActor* FoundActor : FoundActors)
+	{
+		ALevelSequenceActor* SequenceActor = Cast<ALevelSequenceActor>(FoundActor);
+		if (SequenceActor)
+		{
+			// 시퀀스 액터에 연결된 시퀀스 플레이어를 가져옵니다.
+			SequencePlayer = SequenceActor->SequencePlayer;
+
+
+		}
+	}
+
+	if (SequencePlayer)
+	{
+		// 시퀀스를 재생합니다.
+
+		SequencePlayer->Play();
+		ClientTriggerSequence();
+		//Controller->SetPause(true);
+	}
+	
+	DelayTime(6.0f, [this]()
+		{
+			Controller->SetPause(false);
+			ServerViewStatusUi();
+			ServerSequenceEnded();
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CalledMulti"));
+		});
+
+	// 시퀀스 액터 찾기
+	/*
+	if (Controller && LevelSequenceActor)
+	{
+		// 게임 일시 중지
+		Controller->SetPause(true);
+
+		// 시퀀스 재생
+		LevelSequencePlayer->Play();
+		//auto SequencePlayer = SequenceActor->SequencePlayer;
+		//SequencePlayer->Play();
+	}
+	*/
+	
+}
+
+void APartyGameStateBase::ServerSequenceEnded_Implementation()
+{
+	if(HasAuthority())
+	{
+		GM->InitialRound();
+	}
+
+}
+
+void APartyGameStateBase::MultiSequenceEnded_Implementation()
+{
+}
+
+
+
+
 void APartyGameStateBase::DelayTime(float WantSeconds, TFunction<void()> InFunction)
 {
 	FTimerHandle TimerHandle;
@@ -532,5 +750,8 @@ void APartyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(APartyGameStateBase, CurrentPlayer);
 	DOREPLIFETIME(APartyGameStateBase, TenCoinsforaStarUi);
 	DOREPLIFETIME(APartyGameStateBase, Star);
+	DOREPLIFETIME(APartyGameStateBase, SequencePlayer);
+
+	
 }
 

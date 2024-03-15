@@ -33,10 +33,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
 public:
+	UPROPERTY(Replicated)
+	FVector PlayerLocation;
+
+
 	UFUNCTION()
 	void ReSpace();
 	UFUNCTION()
 	void GetCamera();
+	UFUNCTION()
+	float OscillatingValue(float min, float max, float speed);
 
 
+public:
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

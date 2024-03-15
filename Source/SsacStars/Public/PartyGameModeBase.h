@@ -92,6 +92,7 @@ public:
 	void UpdateGameInfo(int Index);
 	void UpdateRankInfo();
 	UFUNCTION(BlueprintCallable, Category = "Game")
+	void GameStartSequence();
 	void GamePause();
 	void GameRelease();
 };

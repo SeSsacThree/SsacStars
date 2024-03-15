@@ -6,6 +6,7 @@
 #include "GameFramework/GameStateBase.h"
 #include "PartyGameStateBase.generated.h"
 
+class ALevelSequenceActor;
 /**
  *
  */
@@ -13,6 +14,7 @@ UCLASS()
 class SSACSTARS_API APartyGameStateBase : public AGameStateBase
 {
 	GENERATED_BODY()
+	APartyGameStateBase();
 public:
 
 	virtual void BeginPlay() override;
@@ -66,8 +68,18 @@ public:
 	class UTenCoinsforaStar* TenCoinsforaStarUi;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UTenCoinsforaStar> TenCoinsforaStarUiFactory;
-
-
+	UPROPERTY(EditDefaultsOnly)
+	class APlayerController* Controller;
+	/*
+	UPROPERTY(VisibleAnywhere,BlueprintReadWrite)
+	class ALevelSequenceActor* LevelSequenceActor;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class ULevelSequence* LevelSequence;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class ULevelSequencePlayer* LevelSequencePlayer;
+	*/
+	UPROPERTY(VisibleAnywhere, Replicated)
+	class ULevelSequencePlayer* SequencePlayer;
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMesh* Mesh1;
@@ -77,12 +89,16 @@ public:
 	USkeletalMesh* Mesh3;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USkeletalMesh* Mesh4;
-
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int>PlayerScores;
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	int CurrentPlayerIndex;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	int PlayerCount = 0;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
+	int Round = 1;
 public:
 	UFUNCTION(Server, Reliable)
 	void ServerMoveCameraToPlayer(APartyPlayer* InPlayer);
@@ -156,7 +172,10 @@ public:
 	void ServerUpdateRankInfo();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiUpdateRankInfo();
-
+	UFUNCTION(Server, Reliable)
+	void ServerUpdateEndInfo(int Index);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiUpdateEndInfo(int Index);
 public:
 	UFUNCTION(Server, Reliable)
 	void ServerRollDice();
@@ -181,6 +200,22 @@ public:
 	void ServerClickedItem2Button();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiClickedItem2Button();
+public:
+	UFUNCTION(Server, Reliable)
+	void ServerOpenMinigame();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiOpenMinigame();
+	UFUNCTION(Client, Reliable)
+	void ClientTriggerSequence();
+	UFUNCTION(Server, Reliable)
+	void ServerTriggerSequence();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiTriggerSequence();
+	UFUNCTION(Server, Reliable)
+	void ServerSequenceEnded();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSequenceEnded();
+
 
 
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);

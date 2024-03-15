@@ -48,7 +48,7 @@ void APartyPlayer::BeginPlay()
 	Inventory.SetNum(MaxInventorySize);
 	Inventory.Init(EItem::Nothing, MaxInventorySize);
 	ToApplyDo = EItem::Nothing;
-
+	//PartyGameState->ServerTriggerSequence();
 }
 
 // Called every frame
@@ -72,6 +72,16 @@ void APartyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 
+void APartyPlayer::ServerChangeAppereance_Implementation()
+{
+	MultiChangeAppereance();
+
+}
+
+void APartyPlayer::MultiChangeAppereance_Implementation()
+{
+
+}
 
 void APartyPlayer::GetCamera()
 {
@@ -91,6 +101,7 @@ void APartyPlayer::GetCamera()
 void APartyPlayer::SelectBehavior()
 {
 	//GM->AddSelectBehaviorUi();
+	PartyGameState->ServerUpdateGameInfo(PlayerIndex);
 	PartyGameState->ServerViewSelectUi();
 }
 void APartyPlayer::RollDice()
@@ -217,7 +228,7 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 	{
 		FAIMoveRequest MoveRequest;
 		FVector MoveLoc = CurrentSpace->GetActorLocation();
-		MoveLoc.Y += 30;
+		MoveLoc.Y -=20;
 		MoveRequest.SetGoalLocation(MoveLoc);
 		//MoveRequest.SetGoalActor(CurrentSpace);
 		MoveRequest.SetAcceptanceRadius(0.1f);
@@ -355,6 +366,7 @@ void APartyPlayer::MoveEnded()
 
 				if (true == IsLocallyControlled())
 				{
+					PartyGameState->ServerUpdateEndInfo(PlayerIndex);
 					GM->NextTurn();
 				}
 
@@ -392,10 +404,10 @@ void APartyPlayer::StopOrGo()
 	else if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CallMoveEnded"));
-		PartyGameState->ServerUpdateGameInfo(PlayerIndex);
+	//PartyGameState->ServerUpdateGameInfo(PlayerIndex);
 		//	GM->UpdateGameInfo(PlayerIndex);
 		//	GM->UpdateRankInfo();
-		PartyGameState->ServerUpdateRankInfo();
+		//PartyGameState->ServerUpdateRankInfo();
 		MoveEnded();
 	}
 }

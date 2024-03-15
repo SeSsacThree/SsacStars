@@ -6,6 +6,8 @@
 #include "BlueBoardSpace.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 APartyScore::APartyScore()
 {
@@ -31,14 +33,16 @@ void APartyScore::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (StarSpace)
-	{
-		FVector StarLocation = StarSpace->GetActorLocation();
-		StarLocation.Z += 1000;
-		SetActorLocation(StarLocation, false, nullptr, ETeleportType::TeleportPhysics);
-	}
+			if (StarSpace)
+			{
+				FVector StarLocation = StarSpace->GetActorLocation();
+				
+				StarLocation.Z += OscillatingValue(450.0f, 650.0f, 0.01f);
+				PlayerLocation = StarLocation;
+				SetActorLocation(PlayerLocation, false, nullptr, ETeleportType::TeleportPhysics);
+			}
 
-
+			
 }
 
 void APartyScore::ReSpace()
@@ -65,5 +69,22 @@ void APartyScore::GetCamera()
 {
 	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	OurPlayerController->SetViewTargetWithBlend(this, 1.0f);
+}
+
+float APartyScore::OscillatingValue(float min, float max, float speed)
+{
+	static float currentTime = 0.0f;
+	currentTime += speed;
+
+	float oscillation = (sinf(currentTime) + 1.0f) / 2.0f; // 사인 함수 값을 0부터 1로 매핑
+
+	return min + oscillation * (max - min); // min과 max 사이의 값으로 변환
+}
+
+void APartyScore::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(APartyScore, PlayerLocation, COND_OwnerOnly);
 }
 

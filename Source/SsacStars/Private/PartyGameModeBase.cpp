@@ -10,6 +10,7 @@
 #include "PartyController.h"
 #include "PartyGameStateBase.h"
 #include "PartyScore.h"
+#include "StatusUi.h"
 
 
 APartyGameModeBase::APartyGameModeBase()
@@ -47,8 +48,9 @@ void APartyGameModeBase::BeginPlay()
 
 
 	//StatusUi->AddToViewport();
-
-	InitialRound();
+	//시퀀스 틀고 게임정지시켰다가 끝나면 roundstart
+	//GameStartSequence();
+	//InitialRound();
 }
 
 
@@ -81,9 +83,10 @@ void APartyGameModeBase::PlayerSetting()
 	{
 		//맨처음에 이니션 턴오더 에 각 player index가 플레이어 에게도 생김 0,1,2,3 지정
 		InitialTurnOrder[i]->PlayerIndex = i;
+		
 		//서버 요청 필요 
 		//SetPlayerAppeareance(InitialTurnOrder[i], i);
-		PartyGameState->ServerUpdateAppeareance(InitialTurnOrder[i], i);
+		//PartyGameState->ServerUpdateAppeareance(InitialTurnOrder[i], i);
 	}
 	/*
 	StatusUi->PersonalState->SetProfile(0);
@@ -168,7 +171,7 @@ void APartyGameModeBase::AddItemUseUi()
 }
 void APartyGameModeBase::InitialRound()
 {
-
+	
 	StartTurn();
 }
 void APartyGameModeBase::StartTurn()
@@ -212,13 +215,15 @@ void APartyGameModeBase::EndRound()
 	Round++;
 	PartyGameState->CurrentPlayerIndex = 0;
 	//CurrentPlayerIndex = 0;
-	if (Round > 2)
+	if (PartyGameState->Round > 2)
 	{
 		StartMiniGame();
 	}
 	else
 	{
 		//다시 맨처음 플레이어 부터 주사위 사이클 시작
+		Round++;
+		PartyGameState++;
 		InitialRound();
 	}
 
@@ -415,6 +420,12 @@ void APartyGameModeBase::UpdateRankInfo()
 		}
 
 		*/
+}
+
+void APartyGameModeBase::GameStartSequence()
+{
+	PartyGameState->MultiTriggerSequence();
+
 }
 
 void APartyGameModeBase::GamePause()
