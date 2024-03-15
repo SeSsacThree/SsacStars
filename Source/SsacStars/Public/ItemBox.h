@@ -24,9 +24,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION()
-	void OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	                          UPrimitiveComponent* OtherComp,
-	                          int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnMyCompEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UPROPERTY(EditAnywhere)
 	class UBoxComponent* boxComp;
@@ -35,16 +33,18 @@ public:
 	class UStaticMeshComponent* itemBox;
 
 	UFUNCTION()
-	void GetRandomItem();
+	void GetRandomItem(AKartPlayer* inKartPlayer);
 
 	float currentTime = 0;
 	float delayTime = 8;
 
 	// 아이템 박스 존재 유무
 	bool bItemBox=true;
-	
-
 
 	UPROPERTY(EditAnywhere)
 	class UItemWidget* itemWidget;
+
+	//---------------------------------------
+
+	
 };

@@ -16,7 +16,13 @@ class SSACSTARS_API AKartGameModeBase : public AGameModeBase
 
 public:
 	virtual void BeginPlay() override;
-
+	virtual void Tick(float DeltaTime) override;
 	UFUNCTION()
 	void CountDown();
+
+	UPROPERTY(EditAnywhere)
+	float currentTime = 0;
+
+	UPROPERTY(EditAnywhere)
+	float delayTime = 2.0f;
 };

@@ -10,6 +10,10 @@
 #include "Kismet/GameplayStatics.h"
 #include <GameFramework/RotatingMovementComponent.h>
 
+#include "KartGameModeBase.h"
+#include "MiniGameMainUI.h"
+#include "Components/TextBlock.h"
+
 // Sets default values
 AStar::AStar()
 {
@@ -42,17 +46,32 @@ void AStar::Tick(float DeltaTime)
 	Movement->RotationRate = FRotator(0.0f, rotateSpeed, 0.0f);
 }
 
+
 void AStar::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// 만약 OtherActor가 플레이어라면
-	if (OtherActor->IsA<AKartPlayer>())
-	{
-		auto player = Cast<AKartPlayer>(OtherActor);
-		player->starCountUP();
-		this->Destroy();
 
-		auto manager = Cast<AMiniGameStarManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AMiniGameStarManager::StaticClass()));
-		manager->bSpawn=true;
+	if (AKartPlayer* OverlapPlayer = Cast<AKartPlayer>(OtherActor)) {
+		if (!OverlapPlayer->GetController()) { return; }
+
+		if (OverlapPlayer->GetController()->IsLocalPlayerController()) {
+
+			OverlapPlayer->starCountUP();
+		}
+		// 서버 RPC로 서버에 요청하고
+		ServerDestroy();
 	}
 }
+
+
+void AStar::ServerDestroy_Implementation()
+{
+	auto manager = Cast<AMiniGameStarManager>(UGameplayStatics::GetActorOfClass(GetWorld(), AMiniGameStarManager::StaticClass()));
+	if (manager)
+	{
+		manager->DelaySpawnTimer();
+	}
+	this->Destroy();
+}
+
+
 

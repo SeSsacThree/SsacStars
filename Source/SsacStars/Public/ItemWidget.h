@@ -15,12 +15,8 @@ class SSACSTARS_API UItemWidget : public UUserWidget
 	GENERATED_BODY()
 
 	virtual void NativeConstruct() override;
-	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	
 public:
-	bool bSpeedUp = false;
-	bool bGetSmall = false;
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UImage* ImageItemSpeedUp;
@@ -45,8 +41,16 @@ public:
 	void speedUp();
 
 	UFUNCTION()
-	void getSmall();
+	void shooting();
 
-	float currentTime = 0;
-	float delayTime = 2.5;
+
+	FTimerHandle DelayTimerHandle;
+	//2√  Delay
+	UPROPERTY(EditAnywhere)
+	float DelayTime = 2;
+	//Looping ø©∫Œ
+	UPROPERTY(EditAnywhere)
+	bool bIsLoop = false;
+
+
 };

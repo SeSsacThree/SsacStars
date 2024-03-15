@@ -19,7 +19,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+
+
+	virtual void PossessedBy(AController* NewController) override;
+public:
+
+	void InitializeWidgets();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
@@ -57,10 +63,13 @@ public:
 	class UMiniGameMainUI* MainUI;
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 starCount;
+	int32 starCount=0;
 
 	UFUNCTION()
 	void useItem();
+
+	UFUNCTION()
+	void Boost();
 
 	UFUNCTION()
 	void speedUp();
@@ -71,33 +80,70 @@ public:
 	UFUNCTION()
 	void starCountUP();
 
-	UFUNCTION()
-	void getSmall();
+	FText StarCountText;
 
 	UFUNCTION()
 	void shoot();
 
+	UPROPERTY()
 	bool bSpeedUp=false;
+
 	float currentTime;
-	float speedUpTime = 1.5;
+	float speedUpTime = 2;
 
 	//플레이어가 아이템을 가지고 있는지
+	UPROPERTY()
 	bool hasItem = false;
 	//1 : speed Up  2: small size  
 	int itemNumber = 0;
 
-	float ct = 0;
-	float dt = 6;
 
 	UPROPERTY(EditAnywhere)
 	UClass* bulletFactory;
 
-	UFUNCTION()
-	void GetReadyTimer();
+	/*UFUNCTION()
+	void GetReadyTimer();*/
 
 	UPROPERTY(EditAnywhere)
-	bool isPaused=true;
+	bool isPaused=false;
 
-	UFUNCTION()
-	void CountDown();
+	/*UFUNCTION()
+	void CountDown();*/
+
+	
+
+	// Network ---------------------------------------------------------------
+	UFUNCTION(Server, Reliable)
+	void ServerMoveForward(float Value);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiMoveForward(float Value);
+
+	UFUNCTION(Server, Reliable)
+	void ServerTurnRight(float Value);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiTurnRight(float Value);
+
+	UFUNCTION(Server, Reliable)
+	void ServeUseItem();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiUseItem();
+
+
+	UFUNCTION(Server, Reliable)
+	void ServerSpeedUp();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiSpeedUp();
+
+	UFUNCTION(Server, Reliable)
+	void ServerShoot();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiShoot();
+
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

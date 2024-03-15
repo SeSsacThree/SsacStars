@@ -30,6 +30,9 @@ public:
 		int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UPROPERTY(EditAnywhere)
+	class UMiniGameMainUI* mainUI;
+
+	UPROPERTY(EditAnywhere)
 	class USphereComponent* sphereComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -40,6 +43,11 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	float rotateSpeed=100.0f;
+
+	UFUNCTION(Server,Reliable)
+	void ServerDestroy();
+
+
 
 
 };

@@ -36,7 +36,7 @@ void AMiniGameSpeedBoard::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedCo
 	// 만약 OtherActor가 플레이어라면
 	auto player = Cast<AKartPlayer>(OtherActor);
 	if (player)
-		player->speedUp();
+		player->Boost();
 }
 
 void AMiniGameSpeedBoard::OnMyCompEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,

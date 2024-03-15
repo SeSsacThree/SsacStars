@@ -9,18 +9,18 @@
 #include "TimerManager.h"
 
 
-void UMiniGameMainUI::SetStarCount()
-{
-	auto player = Cast<AKartPlayer>(GetOwningPlayerPawn());
-	if(player)
-	{
-		FText StarCountText = FText::FromString(FString::FromInt(player->starCount));
-		if (StarCount)
-		{
-			StarCount->SetText(StarCountText);
-		}
-	}
-}
+//void UMiniGameMainUI::SetStarCount()
+//{
+//	auto player = Cast<AKartPlayer>(GetOwningPlayerPawn());
+//	if(player)
+//	{
+//		FText StarCountText = FText::FromString(FString::FromInt(player->starCount));
+//		if (StarCount)
+//		{
+//			StarCount->SetText(StarCountText);
+//		}
+//	}
+//}
 
 void UMiniGameMainUI::GetReadyCount()
 {

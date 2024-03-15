@@ -9,15 +9,17 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "ItemWidget.h"
+#include "KartPlayerController.h"
 #include "MiniGameBullet.h"
 #include "MiniGameMainUI.h"
+#include "Star.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/SpringArmComponent.h"
-#include "Components/SphereComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Components/PrimitiveComponent.h"
 #include "TimerManager.h"
 #include "Components/ArrowComponent.h"
+#include "Components/TextBlock.h"
+#include "GameFramework/PlayerState.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 AKartPlayer::AKartPlayer()
@@ -59,35 +61,73 @@ AKartPlayer::AKartPlayer()
 void AKartPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	itemUI = CreateWidget<UItemWidget>(GetWorld(), itemUIFactory);
-	itemUI->AddToViewport();
+
+	InitializeWidgets();
+}
+
+void AKartPlayer::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+
+	InitializeWidgets();
+}
+
+void AKartPlayer::InitializeWidgets()
+{
+	AKartPlayerController* pc = Cast<AKartPlayerController>(GetController());
+
+	if(nullptr == pc || false == IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (GEngine)
+	{
+		FString Message = FString::Printf(TEXT("AStar::InitializeWidgets"));
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, Message);
+	}
 	
+	if(nullptr == pc->itemUI)
+	{
+		pc->itemUI = CreateWidget<UItemWidget>(GetWorld(), itemUIFactory);
+		pc->itemUI->AddToViewport();
+	}
+	itemUI = pc->itemUI;
+
+	if (nullptr == pc->MainUI)
+	{
+		pc->MainUI = CreateWidget<UMiniGameMainUI>(GetWorld(), MainUIFactory);
+		pc->MainUI->AddToViewport();
+	}
+	MainUI = pc->MainUI;
 
 	for (TActorIterator<AItemBox> it(GetWorld()); it; ++it)
 	{
 		AItemBox* box = *it;
 		box->itemWidget = itemUI;
+		break;			//버그면 지우세요
 	}
 
+	for (TActorIterator<AStar> it(GetWorld()); it; ++it)
+	{
+		AStar* star = *it;
+		star->mainUI = MainUI;
+	}
 
-	MainUI = CreateWidget<UMiniGameMainUI>(GetWorld(), MainUIFactory);
-	MainUI->AddToViewport();
-	FTimerHandle Handle;
-	
-	GetWorldTimerManager().SetTimer(Handle, this, &AKartPlayer::GetReadyTimer, 1.0f, true, 3.0f);
-	
-	
-	
+	//FTimerHandle Handle;
+	//GetWorldTimerManager().SetTimer(Handle, this, &AKartPlayer::GetReadyTimer, 1.0f, true, 3.0f);
+	//
+
 	starCount = 0;
-
+	StarCountText = FText::FromString(FString::FromInt(starCount));
+	MainUI->StarCount->SetText(StarCountText);
 }
 
 // Called every frame
 void AKartPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	MainUI->SetStarCount();
-	//MainUI->CountDown();
+
 	if (bSpeedUp)
 	{
 		currentTime += GetWorld()->GetDeltaSeconds();
@@ -97,10 +137,9 @@ void AKartPlayer::Tick(float DeltaTime)
 		if (currentTime > speedUpTime)
 		{
 			speedDown();
+			currentTime = 0;
 		}
 	}
-
-	
 }
 
 
@@ -117,53 +156,98 @@ void AKartPlayer::MoveForward(float Value)
 {
 	if(!isPaused)
 	{
-		AddMovementInput(this->GetActorForwardVector(), Value);
+		ServerMoveForward(Value);
 	}
-	
 }
+void AKartPlayer::ServerMoveForward_Implementation(float Value)
+{
+	MultiMoveForward(Value);
+}
+
+void AKartPlayer::MultiMoveForward_Implementation(float Value)
+{
+	AddMovementInput(this->GetActorForwardVector(), Value);
+}
+
+
 
 void AKartPlayer::TurnRight(float Value)
 {
 	if (!isPaused)
 	{
-		FRotator NewRotation = this->GetActorRotation();
-		NewRotation.Yaw -= Value;
-		this->SetActorRotation(NewRotation);
+		ServerTurnRight(Value);
 	}
 }
+void AKartPlayer::ServerTurnRight_Implementation(float Value)
+{
+	MultiTurnRight(Value);
+}
+void AKartPlayer::MultiTurnRight_Implementation(float Value)
+{
+	FRotator NewRotation = this->GetActorRotation();
+	NewRotation.Yaw -= Value;
+	this->SetActorRotation(NewRotation);
+}
+
+
+
+void AKartPlayer::Boost()
+{
+	bSpeedUp = true;
+}
+
+//---------------------------------------------------------------------------------------
+
 
 void AKartPlayer::useItem()
 {
 	//플레이어가 아이템이 있을 때만 사용 가능
-	if(hasItem)
+	if (hasItem)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USE ITEM"));
-		switch(itemNumber)
-		{
-		case 1 :
-			speedUp();
-			//아이템UI 초기화
-			itemUI->Init();
-			hasItem = false;
-			break;
-		case 2:
-			UE_LOG(LogTemp, Warning, TEXT("use bullet"));
-			shoot();
-			itemUI->Init();
-			hasItem = false;
-			break;
+		itemUI->Init();
+		hasItem = false;
+		ServeUseItem();
+	}
 
-		}
+}
+void AKartPlayer::ServeUseItem_Implementation()
+{
+	MultiUseItem();
+}
+void AKartPlayer::MultiUseItem_Implementation()
+{
+	switch (itemNumber)
+	{
+	case 1:
+		speedUp();
+		break;
+	case 2:
+		shoot();
+		break;
 
 	}
-	
 }
+
+//---------------------------------------------------------------------------------------
 
 void AKartPlayer::speedUp()
 {
-	bSpeedUp = true;
-	currentTime = 0;
+	ServerSpeedUp();
 }
+
+void AKartPlayer::ServerSpeedUp_Implementation()
+{
+	MultiSpeedUp();
+}
+
+
+void AKartPlayer::MultiSpeedUp_Implementation()
+{
+	bSpeedUp = true;
+}
+
+//---------------------------------------------------------------------------------------
 
 void AKartPlayer::speedDown()
 {
@@ -171,40 +255,64 @@ void AKartPlayer::speedDown()
 	//GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity * 0.5f;
 }
 
-void AKartPlayer::starCountUP()
-{
-	starCount += 1;
 
-}
-
-void AKartPlayer::getSmall()
-{
-	/*playerMeshComp->SetRelativeScale3D(FVector(0.1f));
-	playerMeshComp->SetRelativeLocation(FVector(10.1802, 29.3196, -58.129));
-	carMeshComp->SetRelativeScale3D(FVector(40));
-	carMeshComp->SetRelativeLocation(FVector(0, 30, -79));
-
-	ct += GetWorld()->GetDeltaSeconds();
-	if(ct>dt)
-	{
-		
-	}*/
-}
+//---------------------------------------------------------------------------------------
 
 void AKartPlayer::shoot()
 {
+	ServerShoot();
 	
+}
+
+void AKartPlayer::ServerShoot_Implementation()
+{
+	MultiShoot();
+}
+
+void AKartPlayer::MultiShoot_Implementation()
+{
 	FTransform t = firePosition->GetComponentTransform();
 	GetWorld()->SpawnActor<AMiniGameBullet>(bulletFactory, t);
 	UE_LOG(LogTemp, Warning, TEXT("shoot"));
 }
+//---------------------------------------------------------------------------------------
+//게임 시작 전 카운트 다운
+//void AKartPlayer::GetReadyTimer()
+//{
+//	MainUI->GetReadyCount();
+//}
+//
+////타이머
+//void AKartPlayer::CountDown()
+//{
+//	MainUI->CountDown();
+//}
 
-void AKartPlayer::GetReadyTimer()
+
+//---------------------------------------------------------------------------------------
+
+void AKartPlayer::starCountUP()
 {
-	MainUI->GetReadyCount();
+	starCount ++;
+	StarCountText = FText::FromString(FString::FromInt(starCount));
+	if(MainUI && MainUI->StarCount)
+	{
+		MainUI->StarCount->SetText(StarCountText);
+	}
 }
 
-void AKartPlayer::CountDown()
+
+
+void AKartPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	MainUI->CountDown();
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	/*DOREPLIFETIME(AKartPlayer, hasItem);
+	DOREPLIFETIME(AKartPlayer, bSpeedUp);*/
 }
+
+
+
+
+
+

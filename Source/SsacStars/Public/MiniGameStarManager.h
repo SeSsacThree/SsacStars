@@ -20,9 +20,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(Replicated)
 	FVector starLocation;
 
 	UPROPERTY(EditAnywhere)
@@ -30,12 +29,23 @@ public:
 
 	void spawnStar();
 
-	UPROPERTY(EditAnywhere)
-	bool bSpawn = false;
+	void DelaySpawnTimer();
 
+	FTimerHandle DelayTimerHandle;
+	//2√  Delay
 	UPROPERTY(EditAnywhere)
-	float currentTime = 0;
+	float DelayTime = 2;
+	//Looping ø©∫Œ
+	UPROPERTY(EditAnywhere)
+	bool bIsLoop = false;
 
-	UPROPERTY(EditAnywhere)
-	float delayTime = 2.0f;
+	//----------------------
+	UFUNCTION(Server,Reliable)
+	void ServerSpawnStar();
+
+	UPROPERTY()
+	TArray<AActor*> starPointArr;
+
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

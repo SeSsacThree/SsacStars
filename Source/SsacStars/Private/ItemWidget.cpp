@@ -2,7 +2,10 @@
 
 
 #include "ItemWidget.h"
+
+#include "KartPlayer.h"
 #include "Components/Image.h"
+#include "Net/UnrealNetwork.h"
 
 void UItemWidget::NativeConstruct()
 {
@@ -11,38 +14,7 @@ void UItemWidget::NativeConstruct()
 	ImageItemGetSmall->SetVisibility(ESlateVisibility::Hidden);
 	ImageQuestion->SetVisibility(ESlateVisibility::Hidden);
 }
-void UItemWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
-{
-	Super::NativeTick(MyGeometry, InDeltaTime);
 
-	if (bSpeedUp)
-	{
-		currentTime += GetWorld()->GetDeltaSeconds();
-
-		if (currentTime > delayTime)
-		{
-			ImageItemSpeedUp->SetVisibility(ESlateVisibility::Visible);
-			hideQuestion();
-			currentTime = 0;
-			bSpeedUp = false;
-		}
-
-	}
-	if (bGetSmall)
-	{
-		currentTime += GetWorld()->GetDeltaSeconds();
-		
-		if (currentTime > delayTime)
-		{
-			ImageItemGetSmall->SetVisibility(ESlateVisibility::Visible);
-			hideQuestion();
-			currentTime = 0;
-			bGetSmall = false;
-		}
-
-	}
-
-}
 
 
 void UItemWidget::Init()
@@ -50,6 +22,7 @@ void UItemWidget::Init()
 	ImageItemSpeedUp->SetVisibility(ESlateVisibility::Hidden);
 	ImageItemGetSmall->SetVisibility(ESlateVisibility::Hidden);
 	ImageQuestion->SetVisibility(ESlateVisibility::Hidden);
+	UE_LOG(LogTemp, Warning, TEXT("UItemWidget::Init()"));
 }
 
 void UItemWidget::hideQuestion()
@@ -57,17 +30,35 @@ void UItemWidget::hideQuestion()
 	ImageQuestion->SetVisibility(ESlateVisibility::Hidden);
 	StopAnimation(A_Button);
 }
-
+//------------------------------------------------------------------
 void UItemWidget::speedUp()
 {
 	PlayAnimation(A_Button);
 	ImageQuestion->SetVisibility(ESlateVisibility::Visible);
-	bSpeedUp = true;
+
+	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda(
+		[this]()->void
+	{
+		ImageItemSpeedUp->SetVisibility(ESlateVisibility::Visible);
+		hideQuestion();
+	}
+	), DelayTime, bIsLoop);
 }
 
-void UItemWidget::getSmall()
+//------------------------------------------------------------------
+void UItemWidget::shooting()
 {
 	PlayAnimation(A_Button);
 	ImageQuestion->SetVisibility(ESlateVisibility::Visible);
-	bGetSmall = true;
+	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda(
+		[this]()->void
+		{
+			ImageItemGetSmall->SetVisibility(ESlateVisibility::Visible);
+			hideQuestion();
+		}
+	), DelayTime, bIsLoop);
 }
+
+
+
+

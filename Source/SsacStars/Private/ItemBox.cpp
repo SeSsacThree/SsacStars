@@ -9,6 +9,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SlateWrapperTypes.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
@@ -35,7 +36,7 @@ void AItemBox::BeginPlay()
 	Super::BeginPlay();
 	
 	//boxComponent와 begin overlap함수 바인딩하기
-	boxComp->OnComponentBeginOverlap.AddDynamic(this, &AItemBox::OnMyCompBeginOverlap);
+	boxComp->OnComponentEndOverlap.AddDynamic(this, &AItemBox::OnMyCompEndOverlap);
 }
 
 // Called every frame
@@ -43,83 +44,86 @@ void AItemBox::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
-	if(!bItemBox)
-	{
-		currentTime += GetWorld()->GetDeltaSeconds();
-		itemBox->SetVisibility(false);
-		boxComp->SetGenerateOverlapEvents(false);
+}
 
-		if(currentTime>delayTime)
+void AItemBox::OnMyCompEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (AKartPlayer* OverlapPlayer = Cast<AKartPlayer>(OtherActor)) {
+		if (!OverlapPlayer->GetController()) { return; }
+		if (OverlapPlayer->GetController()->IsLocalPlayerController()) {
+
+			bItemBox = false;
+
+			//플레이어가 아이템이 없을때만
+			if (false == OverlapPlayer->hasItem)
+			{
+				OverlapPlayer->hasItem = true;
+
+				//랜덤 아이템 얻기
+				GetRandomItem(OverlapPlayer);
+
+				//UGameplayStatics::PlaySound2D(GetWorld(), itemBoxSound);
+			}
+			else
+			{
+				return;
+			}
+
+			itemBox->SetVisibility(false);
+			boxComp->SetGenerateOverlapEvents(false);
+
+			if (!GEngine) { return; }
+			FString PlayerStateName = FString::Printf(TEXT("Player State ID: %d"), OverlapPlayer->GetPlayerState()->GetPlayerId());
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, PlayerStateName);
+
+		}
+	}
+}
+
+void AItemBox::GetRandomItem(AKartPlayer* inKartPlayer)
+{
+	int index = rand() % 2;
+
+	UE_LOG(LogTemp, Warning, TEXT("AItemBox::GetRandomItem - %s"), *inKartPlayer->GetName());
+
+	switch (index)
+	{
+	case 0:
+		//speed up
+		if (itemWidget) {
+			//Item : speedup
+			itemWidget->speedUp();
+			inKartPlayer->itemNumber = 1;
+		}
+		break;
+	case 1:
+		//shooting
+		if (itemWidget) {
+			itemWidget->shooting();
+			inKartPlayer->itemNumber = 2;
+		}
+		break;
+	}
+
+
+	FTimerHandle DelayTimerHandle;
+	//2초 Delay
+	float DelayTime = 2;
+	//Looping 여부
+	bool bIsLoop = false;
+
+	//Lambda 함수 구조 [REFERENCE 또는 CAPTURE]()-> Return 타입 {구현부}
+	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda(
+		[this]()->void
 		{
 			itemBox->SetVisibility(true);
 			boxComp->SetGenerateOverlapEvents(true);
 			bItemBox = true;
 			currentTime = 0;
 		}
-	}
+	), DelayTime, bIsLoop);
 
-}
-
-void AItemBox::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	// 만약 OtherActor가 플레이어라면
-	if (OtherActor->IsA<AKartPlayer>())
-	{
-		auto player = Cast<AKartPlayer>(OtherActor);
-
-		bItemBox = false;
-
-		//플레이어가 아이템이 없을때만
-		if(false==player->hasItem)
-		{
-			player->hasItem = true;
-			UE_LOG(LogTemp, Warning, TEXT("hasItem : True"));
-
-			//랜덤 아이템 얻기
-			GetRandomItem();
-
-			//UGameplayStatics::PlaySound2D(GetWorld(), itemBoxSound);
-		}
-		else
-		{
-			return;
-		}
-		
-	}
-}
-
-void AItemBox::GetRandomItem()
-{
-	int index = rand() % 2;
-	//int index = 1;
-	//auto itemWidget = Cast<UItemWidget>(UGameplayStatics::GetActorOfClass(GetWorld(), UItemWidget::StaticClass()));
-	auto player= Cast<AKartPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), AKartPlayer::StaticClass()));
+	//ServerGetRandomItem(index);
 	
-	switch (index)
-	{
-	case 0:
-		//speedUp 
-		//player->speedUp();
-		if(itemWidget){
-			//Item : speedup
-			itemWidget->speedUp();
-			player->itemNumber = 1;
-		}
-		break;
-	case 1:
-		//getSmall
-		if (itemWidget) {
-			//Item : get small
-			itemWidget->bGetSmall = true;
-			itemWidget->getSmall();
-			player->itemNumber =2;
-		}
-		break;
-	//case 2:
-	//	//
-	//	break;
-	//case 3:
-	//	break;
-	}
 
 }

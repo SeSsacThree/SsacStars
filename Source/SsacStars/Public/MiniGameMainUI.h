@@ -30,8 +30,8 @@ public:
 	class UTextBlock* Seconds;
 
 
-	UFUNCTION()
-	void SetStarCount();
+	/*UFUNCTION()
+	void SetStarCount();*/
 
 	UFUNCTION()
 	void GetReadyCount();
