@@ -5,21 +5,27 @@
 
 #include "OnlineSessionSettings.h"
 #include "OnlineSubsystem.h"
+#include "Online/OnlineSessionNames.h"
 
 void USsacGameInstance::Init()
 {
 	Super::Init();
+	//playerScore.SetNum( 4 );
+	//playerScore.Init(0,4);
 
 	if (auto subsystem = IOnlineSubsystem::Get())
 	{
 		sessionInterface = subsystem->GetSessionInterface();
+
+		sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &USsacGameInstance::OnMyFindOtherRoomsComplete);
 	}
-	//TimerS
-	//FTimerHandle handle;
-	//GetTimerManager().SetTimer(handle,[&]()
-	//{
-	//	// 호출
-	//}, 5, false);
+	//Timer
+	FTimerHandle handle;
+	GetTimerManager().SetTimer(handle,[&]()
+	{
+		// 호출
+		FindOtherRooms();
+	}, 5, false);
 }
 
 void USsacGameInstance::CreateRoom(int32 maxplayerCount, FString roomName)
@@ -50,4 +56,29 @@ void USsacGameInstance::CreateRoom(int32 maxplayerCount, FString roomName)
 void USsacGameInstance::OnMyCreateRoomComplete(FName sessionName, bool bWasSuccessful)
 {
 	UE_LOG( LogTemp , Warning , TEXT( "CreateRoom Start!! sessionName: %s, bWasSuccessful: %d" ) , *sessionName.ToString() , bWasSuccessful);
+}
+
+void USsacGameInstance::FindOtherRooms()
+{
+	roomSearch = MakeShareable(new FOnlineSessionSearch);
+	roomSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	roomSearch->MaxSearchResults = 10;
+	auto subSys = IOnlineSubsystem::Get();
+	roomSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName().IsEqual("NULL");
+
+	sessionInterface->FindSessions(0, roomSearch.ToSharedRef());
+}
+
+void USsacGameInstance::OnMyFindOtherRoomsComplete(bool bWasSuccessful)
+{
+	UE_LOG(LogTemp, Warning, TEXT("%d"), bWasSuccessful)
+
+	for(auto r:roomSearch->SearchResults)
+	{
+		if (false == r.IsValid())
+		continue;
+		FString roomName;
+		r.Session.SessionSettings.Get(TEXT("ROOM_NAME"), roomName);
+		UE_LOG( LogTemp , Warning , TEXT( "%s" ) , *roomName);
+	}
 }

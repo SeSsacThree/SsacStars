@@ -19,10 +19,21 @@ class SSACSTARS_API USsacGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
+	UPROPERTY(EditDefaultsOnly)
+	TArray<float> playerScore;
+
 	IOnlineSessionPtr sessionInterface;
 
 	FString hostName = TEXT("SSac");
 	void CreateRoom(int32 maxplayerCount, FString roomName);
 
 	void OnMyCreateRoomComplete( FName sessionName , bool bWasSuccessful );
+
+	TSharedPtr<FOnlineSessionSearch> roomSearch;
+
+	void FindOtherRooms();
+
+	void OnMyFindOtherRoomsComplete(bool bWasSuccessful);
 };
+
+
