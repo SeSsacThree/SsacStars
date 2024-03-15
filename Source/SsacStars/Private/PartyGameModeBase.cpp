@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "PartyGameModeBase.h"
 #include "PartyPlayer.h"
@@ -48,7 +48,7 @@ void APartyGameModeBase::BeginPlay()
 
 
 	//StatusUi->AddToViewport();
-	//½ÃÄö½º Æ²°í °ÔÀÓÁ¤Áö½ÃÄ×´Ù°¡ ³¡³ª¸é roundstart
+	//ì‹œí€€ìŠ¤ í‹€ê³  ê²Œì„ì •ì§€ì‹œì¼°ë‹¤ê°€ ëë‚˜ë©´ roundstart
 	//GameStartSequence();
 	//InitialRound();
 }
@@ -81,10 +81,10 @@ void APartyGameModeBase::PlayerSetting()
 	PartyGameState->PlayerList = InitialTurnOrder;
 	for (int i = 0; i < InitialTurnOrder.Num(); i++)
 	{
-		//¸ÇÃ³À½¿¡ ÀÌ´Ï¼Ç ÅÏ¿À´õ ¿¡ °¢ player index°¡ ÇÃ·¹ÀÌ¾î ¿¡°Ôµµ »ı±è 0,1,2,3 ÁöÁ¤
+		//ë§¨ì²˜ìŒì— ì´ë‹ˆì…˜ í„´ì˜¤ë” ì— ê° player indexê°€ í”Œë ˆì´ì–´ ì—ê²Œë„ ìƒê¹€ 0,1,2,3 ì§€ì •
 		InitialTurnOrder[i]->PlayerIndex = i;
 		
-		//¼­¹ö ¿äÃ» ÇÊ¿ä 
+		//ì„œë²„ ìš”ì²­ í•„ìš” 
 		//SetPlayerAppeareance(InitialTurnOrder[i], i);
 		//PartyGameState->ServerUpdateAppeareance(InitialTurnOrder[i], i);
 	}
@@ -183,23 +183,26 @@ void APartyGameModeBase::StartTurn()
 
 	CurrentPlayer = InitialTurnOrder[CurrentPlayerIndex];
 	PartyGameState->CurrentPlayer = CurrentPlayer;
-	//¼­¹ö¿äÃ»ÇÊ¿ä
-	PartyGameState->ServerMoveCameraToPlayer(CurrentPlayer);
+	//ì„œë²„ìš”ì²­í•„ìš”
+	
+		PartyGameState->ServerMoveCameraToPlayer( CurrentPlayer );
 
-	CurrentPlayer->GetCamera();
+		CurrentPlayer->GetCamera();
+
+
 	//ChangeStarSpace();
 
-	//µ¨¸®°ÔÀÌÆ®·Î nextturn½ÇÇà
+	//ë¸ë¦¬ê²Œì´íŠ¸ë¡œ nextturnì‹¤í–‰
 }
 void APartyGameModeBase::NextTurn()
 {
 
-	//CurrentPlayerIndex¸¦ ÇÑ¸íÀÌ ÁÖ»çÀ§¸¦ ´øÁú¶§¸¶ Ãß°¡ÇÑ´Ù
+	//CurrentPlayerIndexë¥¼ í•œëª…ì´ ì£¼ì‚¬ìœ„ë¥¼ ë˜ì§ˆë•Œë§ˆ ì¶”ê°€í•œë‹¤
 	PartyGameState->CurrentPlayerIndex++;
 	//CurrentPlayerIndex++;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NextTurn"));
 
-	//ÇöÀç ÇÃ·¹ÀÌ ÇÏ°í ÀÖ´Â ÇÃ·¹ÀÌ¾îÀÇ ¼ö¶û  ÀÎµ¦½ºÀÇ ¼ö°¡ °°¾ÆÁö¸é ¶ó¿îµåÁ¾·á 
+	//í˜„ì¬ í”Œë ˆì´ í•˜ê³  ìˆëŠ” í”Œë ˆì´ì–´ì˜ ìˆ˜ë‘  ì¸ë±ìŠ¤ì˜ ìˆ˜ê°€ ê°™ì•„ì§€ë©´ ë¼ìš´ë“œì¢…ë£Œ 
 	if (PartyGameState->CurrentPlayerIndex == InitialTurnOrder.Num())
 	{
 		EndRound();
@@ -212,22 +215,23 @@ void APartyGameModeBase::NextTurn()
 }
 void APartyGameModeBase::EndRound()
 {
-	Round++;
+	
 	PartyGameState->CurrentPlayerIndex = 0;
-	//CurrentPlayerIndex = 0;
-	if (PartyGameState->Round > 2)
+	
+	CurrentPlayerIndex = 0;
+	if (PartyGameState->Round > 1)
 	{
 		StartMiniGame();
 	}
 	else
 	{
-		//´Ù½Ã ¸ÇÃ³À½ ÇÃ·¹ÀÌ¾î ºÎÅÍ ÁÖ»çÀ§ »çÀÌÅ¬ ½ÃÀÛ
+		//ë‹¤ì‹œ ë§¨ì²˜ìŒ í”Œë ˆì´ì–´ ë¶€í„° ì£¼ì‚¬ìœ„ ì‚¬ì´í´ ì‹œì‘
 		Round++;
-		PartyGameState++;
+		PartyGameState->Round++;
 		InitialRound();
 	}
 
-	//¹Ì´Ï°ÔÀÓ ½ÃÀÛ 
+	//ë¯¸ë‹ˆê²Œì„ ì‹œì‘ 
 }
 
 void APartyGameModeBase::StartMiniGame()
@@ -238,6 +242,7 @@ void APartyGameModeBase::StartMiniGame()
 		UGameplayStatics::LoadStreamLevel(GetWorld(), LevelName, true, true, FLatentActionInfo());
 		//UGameplayStatics::OpenLevel(GetWorld(),TEXT("MiniGame_Kart"));
 		*/
+	PartyGameState->ServerOpenMinigame();
 }
 
 void APartyGameModeBase::AddSelectBehaviorUi()
@@ -246,7 +251,7 @@ void APartyGameModeBase::AddSelectBehaviorUi()
 	//SelectUi->AddToViewport();
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("addviewport"));
 
-	//ÇöÀç ÇÃ·¹ÀÌ¾î ÅÏÀÇ ÀÎµ¦½º¿¡ ÇØ´çÇÏ´Â ÇÃ·¹ÀÌ¾î¸¸ °¡Áú¼ö ÀÖ°Ô Á¢±ÙÀÌ ÇÊ¿ä
+	//í˜„ì¬ í”Œë ˆì´ì–´ í„´ì˜ ì¸ë±ìŠ¤ì— í•´ë‹¹í•˜ëŠ” í”Œë ˆì´ì–´ë§Œ ê°€ì§ˆìˆ˜ ìˆê²Œ ì ‘ê·¼ì´ í•„ìš”
 	if (PlayerController)
 	{
 		PlayerController->bShowMouseCursor = true;
@@ -264,7 +269,7 @@ void APartyGameModeBase::CloseView()
 	PartyGameState->ServerRemoveSelectUi();
 	//ItemUi->RemoveFromParent();
 	//SelectUi->RemoveFromParent();
-	//ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ ÅÏÀÇ ÀÎµ¦½º¿¡ ÇØ´çÇÏ´Â ÇÃ·¹ÀÌ¾î¸¸ »ç¶óÁö°Ô Á¢±ÙÀÌ ÇÊ¿ä
+	//í˜„ì¬ í”Œë ˆì´ì–´ì˜ í„´ì˜ ì¸ë±ìŠ¤ì— í•´ë‹¹í•˜ëŠ” í”Œë ˆì´ì–´ë§Œ ì‚¬ë¼ì§€ê²Œ ì ‘ê·¼ì´ í•„ìš”
 	if (PlayerController)
 	{
 		PlayerController->bShowMouseCursor = false;
@@ -276,10 +281,10 @@ void APartyGameModeBase::CloseView()
 
 void APartyGameModeBase::ChangeStarSpace()
 {
-	//µû¶ó¼­ °ÔÀÓ½ÃÀÛÇÒ¶§ È£ÃâÇØÁà¾ßÇÔ 
-	//¸Ê»óÀÇ ¸ğµç ¹ßÆÇÁß¿¡¼­ ÇÏ³ª¸¦ °ñ¶ó
+	//ë”°ë¼ì„œ ê²Œì„ì‹œì‘í• ë•Œ í˜¸ì¶œí•´ì¤˜ì•¼í•¨ 
+	//ë§µìƒì˜ ëª¨ë“  ë°œíŒì¤‘ì—ì„œ í•˜ë‚˜ë¥¼ ê³¨ë¼
 
-	// UClass¸¦ ÅëÇØ ÇÊÅÍ¸µÇÒ Å¬·¡½º¸¦ ÁöÁ¤
+	// UClassë¥¼ í†µí•´ í•„í„°ë§í•  í´ë˜ìŠ¤ë¥¼ ì§€ì •
 
 	/*
 	TArray<ABlueBoardSpace*> FoundSpaces;
@@ -287,7 +292,7 @@ void APartyGameModeBase::ChangeStarSpace()
 	{
 		ABlueBoardSpace* Space = *It;
 
-		// "Star" ¶Ç´Â "Warp" »óÅÂ°¡ ¾Æ´Ñ ¹ßÆÇÀ» Ã£À½
+		// "Star" ë˜ëŠ” "Warp" ìƒíƒœê°€ ì•„ë‹Œ ë°œíŒì„ ì°¾ìŒ
 		if (Space->SpaceState != ESpaceState::Star && Space->SpaceState != ESpaceState::Warp)
 		{
 			FoundSpaces.Add(Space);
@@ -296,23 +301,23 @@ void APartyGameModeBase::ChangeStarSpace()
 	}
 	if (FoundSpaces.Num() > 0)
 	{
-		// ·£´ıÇÏ°Ô ¹ßÆÇ ¼±ÅÃ
+		// ëœë¤í•˜ê²Œ ë°œíŒ ì„ íƒ
 		ABlueBoardSpace* SelectedSpace = FoundSpaces[FMath::RandRange(0, FoundSpaces.Num() - 1)];
 
-		// ÇöÀç »óÅÂ¸¦ ÀÌÀü »óÅÂ·Î ÀúÀå
+		// í˜„ì¬ ìƒíƒœë¥¼ ì´ì „ ìƒíƒœë¡œ ì €ì¥
 		CurrentPlayer->CurrentSpace->SpaceState = CurrentPlayer->CurrentSpace->PreviousState;
 
-		// ¼±ÅÃµÈ ¹ßÆÇÀÇ ÀÌÀü»óÅÂ¸¦ ÃÖ½ÅÈ­
+		// ì„ íƒëœ ë°œíŒì˜ ì´ì „ìƒíƒœë¥¼ ìµœì‹ í™”
 		SelectedSpace->PreviousState = SelectedSpace->SpaceState;
-		// ¼±ÅÃµÈ ¹ßÆÇÀ» "Star" »óÅÂ·Î º¯°æ
+		// ì„ íƒëœ ë°œíŒì„ "Star" ìƒíƒœë¡œ ë³€ê²½
 
 		SelectedSpace->SpaceState = ESpaceState::Star;
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StarSwitch"));
 		SelectedSpace->UpdateAppearance();
 	}
-	// ±×¹ßÆÇÀÌ star,warp ¹ßÆÇÀÌ ¾Æ´Ï¶ó¸é
-	// ÇöÀç ÀÚ½ÅÀÇ state¸¦ previousstate¿¡ ÀúÀåÇÏ°í
-	// star state »óÅÂ·Î ¹Ù²Û´Ù
+	// ê·¸ë°œíŒì´ star,warp ë°œíŒì´ ì•„ë‹ˆë¼ë©´
+	// í˜„ì¬ ìì‹ ì˜ stateë¥¼ previousstateì— ì €ì¥í•˜ê³ 
+	// star state ìƒíƒœë¡œ ë°”ê¾¼ë‹¤
 
 
 	Star->ReSpace();
@@ -323,7 +328,7 @@ void APartyGameModeBase::ChangeStarSpace()
 void APartyGameModeBase::AddTrapUi()
 {
 	TrapUi->AddToViewport();
-	»èÁ¦ ¹× º¯È¯ÇÊ¿ä
+	ì‚­ì œ ë° ë³€í™˜í•„ìš”
 }
 */
 /*
@@ -375,23 +380,23 @@ void APartyGameModeBase::UpdateGameInfo(int Index)
 void APartyGameModeBase::UpdateRankInfo()
 {
 	/*
-		//ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ ÀÎµ¦½º¸¦ ³ÖÀ¸¸é ex 1
+		//í˜„ì¬ í”Œë ˆì´ì–´ì˜ ì¸ë±ìŠ¤ë¥¼ ë„£ìœ¼ë©´ ex 1
 		StatusUi->PersonalState->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
 		StatusUi->PersonalState1->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
 		StatusUi->PersonalState2->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
 	//	StatusUi->PersonalState3->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
 
-		//ÇÃ·¹ÀÌ¾î ¸ñ·ÏÀÌ ´ã°ÜÀÖ´Â °¢ ½ºÄÚ¾î¿¡ Á¢±ÙÇÏ¿© ÇÃ·¹ÀÌ¾î ½ºÄÚ¿¡ÀúÀå
+		//í”Œë ˆì´ì–´ ëª©ë¡ì´ ë‹´ê²¨ìˆëŠ” ê° ìŠ¤ì½”ì–´ì— ì ‘ê·¼í•˜ì—¬ í”Œë ˆì´ì–´ ìŠ¤ì½”ì—ì €ì¥
 		for(int i=0;i<InitialTurnOrder.Num();i++ )
 		{
 			if(InitialTurnOrder[i]->Score)
 				PlayerScores[i] = InitialTurnOrder[i]->Score;
 
 		}
-	//¼øÀ§ Á¤·ÄÀ» À§ÇØ TempArray¸¦ ¸¸µé°í
+	//ìˆœìœ„ ì •ë ¬ì„ ìœ„í•´ TempArrayë¥¼ ë§Œë“¤ê³ 
 		TArray<int> TempArray;
 		TempArray.SetNum(InitialTurnOrder.Num());
-	//Initial ÀÇ Å©±â ¸¸Å­ TempÅ©±â¸¦ ¼³Á¤ÇÏ°í
+	//Initial ì˜ í¬ê¸° ë§Œí¼ Tempí¬ê¸°ë¥¼ ì„¤ì •í•˜ê³ 
 		int Count;
 
 		for(int i=0;i< InitialTurnOrder.Num();i++)
@@ -406,7 +411,7 @@ void APartyGameModeBase::UpdateRankInfo()
 			}
 			TempArray[i] = Count + 1;
 		}
-		//3¹øÂ° playerscore ÀÎµ¦½ºÀÇ µî¼ö´Â  temparry3
+		//3ë²ˆì§¸ playerscore ì¸ë±ìŠ¤ì˜ ë“±ìˆ˜ëŠ”  temparry3
 
 
 
@@ -435,7 +440,7 @@ void APartyGameModeBase::GamePause()
 
 	if (PlayerController)
 	{
-		// °ÔÀÓÀ» ÀÏ½ÃÁ¤ÁöÇÕ´Ï´Ù.
+		// ê²Œì„ì„ ì¼ì‹œì •ì§€í•©ë‹ˆë‹¤.
 		PlayerController->SetPause(true);
 	}
 }
@@ -444,7 +449,7 @@ void APartyGameModeBase::GameRelease()
 {
 	if (PlayerController)
 	{
-		// °ÔÀÓÀ» ÀÏ½ÃÁ¤ÁöÇÕ´Ï´Ù.
+		// ê²Œì„ì„ ì¼ì‹œì •ì§€í•©ë‹ˆë‹¤.
 		PlayerController->SetPause(false);
 	}
 }

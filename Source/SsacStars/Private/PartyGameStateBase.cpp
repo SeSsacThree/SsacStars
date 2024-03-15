@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PartyGameStateBase.h"
@@ -20,8 +20,8 @@
 #include "Components/WrapBox.h"
 #include "LevelSequencePlayer.h"
 #include "LevelSequenceActor.h"
-#include "LevelSequence.h"
-#include "MovieSceneSequencePlaybackSettings.h"
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
 #include "PlayerUiCard.h"
 
 
@@ -66,8 +66,8 @@ void APartyGameStateBase::BeginPlay()
 */
 
 	
-		// ¼­¹ö¿¡¼­¸¸ ½ÇÇàµÉ ÃÊ±âÈ­ ÄÚµå
-		// ¿¹: ¼­¹ö¿¡¼­ °ÔÀÓ ½ÃÀÛ ½Ã ½ÃÄö½º¸¦ Àç»ıÇÏµµ·Ï ¼­¹ö¿¡ ¿äÃ»
+		// ì„œë²„ì—ì„œë§Œ ì‹¤í–‰ë  ì´ˆê¸°í™” ì½”ë“œ
+		// ì˜ˆ: ì„œë²„ì—ì„œ ê²Œì„ ì‹œì‘ ì‹œ ì‹œí€€ìŠ¤ë¥¼ ì¬ìƒí•˜ë„ë¡ ì„œë²„ì— ìš”ì²­
 		ServerTriggerSequence();
 	
 }
@@ -154,14 +154,14 @@ void APartyGameStateBase::ServerMoveCameraToPlayer_Implementation(APartyPlayer* 
 void APartyGameStateBase::MultiMoveCameraToPlayer_Implementation(APartyPlayer* InPlayer)
 {
 	/*
-	// Á¸ÀçÇÏ´Â ¸ğµç ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯¸¦ °¡Á®¿Í¼­
+	// ì¡´ì¬í•˜ëŠ” ëª¨ë“  í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ê°€ì ¸ì™€ì„œ
 	for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
 	{
 		APlayerController* PlayerController = Iterator->Get();
-		//ÄÁÆ®·Ñ·¯¸¦ Ã£À¸¸é ±× ÇÃ·¹ÀÌ¾î°¡ client¸¦ ¿ÜÄ¡µµ·ÏÇÑ´Ù
+		//ì»¨íŠ¸ë¡¤ëŸ¬ë¥¼ ì°¾ìœ¼ë©´ ê·¸ í”Œë ˆì´ì–´ê°€ clientë¥¼ ì™¸ì¹˜ë„ë¡í•œë‹¤
 		if (PlayerController)
 		{
-			// °¢ ÇÃ·¹ÀÌ¾îÀÇ Ä«¸Ş¶ó¸¦ GM->CurrentPlayerÀÇ À§Ä¡·Î ÀÌµ¿
+			// ê° í”Œë ˆì´ì–´ì˜ ì¹´ë©”ë¼ë¥¼ GM->CurrentPlayerì˜ ìœ„ì¹˜ë¡œ ì´ë™
 			ClientMoveCameraToPlayer();
 
 		}
@@ -178,11 +178,11 @@ void APartyGameStateBase::MultiMoveCameraToPlayer_Implementation(APartyPlayer* I
 		{
 			APawn* MyPawn = PlayerController->GetPawn();
 
-			// ÆùÀÌ APartyGameCamera Å¬·¡½ºÀÇ ÀÎ½ºÅÏ½ºÀÎÁö È®ÀÎ
+			// í°ì´ APartyGameCamera í´ë˜ìŠ¤ì˜ ì¸ìŠ¤í„´ìŠ¤ì¸ì§€ í™•ì¸
 			APartyGameCamera* MyCamera = Cast<APartyGameCamera>(MyPawn);
 			if (MyCamera)
 			{
-				// ¿©±â¿¡¼­ ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯¿¡ ´ëÇØ ¿øÇÏ´Â ÀÛ¾÷ ¼öÇà
+				// ì—¬ê¸°ì—ì„œ í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ì— ëŒ€í•´ ì›í•˜ëŠ” ì‘ì—… ìˆ˜í–‰
 				MyCamera->MoveCameraLocation();
 			}
 		}
@@ -291,7 +291,7 @@ void APartyGameStateBase::ServerChangeStarSpace_Implementation()
 	{
 		ABlueBoardSpace* Space = *It;
 
-		// "Star" ¶Ç´Â "Warp" »óÅÂ°¡ ¾Æ´Ñ ¹ßÆÇÀ» Ã£À½
+		// "Star" ë˜ëŠ” "Warp" ìƒíƒœê°€ ì•„ë‹Œ ë°œíŒì„ ì°¾ìŒ
 		if (Space->SpaceState != ESpaceState::Star && Space->SpaceState != ESpaceState::Warp)
 		{
 			FoundSpaces.Add(Space);
@@ -310,28 +310,28 @@ void APartyGameStateBase::ServerChangeStarSpace_Implementation()
 
 void APartyGameStateBase::MultiChangeStarSpace_Implementation(ABlueBoardSpace* Space)
 {
-	//¸Ê»ó ¸ğµç ¹ßÆÇÀ» °Ë»çÇØ¼­ FOundSpace¾È¿¡ ³Ö°í
+	//ë§µìƒ ëª¨ë“  ë°œíŒì„ ê²€ì‚¬í•´ì„œ FOundSpaceì•ˆì— ë„£ê³ 
 
-	//°Ë»çÇÏ¿© È®ÀÎµÈ ¹ßÆÇÀÌ ÀÖ´Ù¸é 
+	//ê²€ì‚¬í•˜ì—¬ í™•ì¸ëœ ë°œíŒì´ ìˆë‹¤ë©´ 
 	if (FoundSpaces.Num() > 0)
 	{
-		// ·£´ıÇÏ°Ô ¹ßÆÇ ¼±ÅÃ
+		// ëœë¤í•˜ê²Œ ë°œíŒ ì„ íƒ
 		ABlueBoardSpace* Space = FoundSpaces[FMath::RandRange(0, FoundSpaces.Num() - 1)];
 
-		// ÇöÀç »óÅÂ¸¦ ÀÌÀü »óÅÂ·Î ÀúÀå
+		// í˜„ì¬ ìƒíƒœë¥¼ ì´ì „ ìƒíƒœë¡œ ì €ì¥
 		CurrentPlayer->CurrentSpace->SpaceState = CurrentPlayer->CurrentSpace->PreviousState;
 
-		// ¼±ÅÃµÈ ¹ßÆÇÀÇ ÀÌÀü»óÅÂ¸¦ ÃÖ½ÅÈ­
+		// ì„ íƒëœ ë°œíŒì˜ ì´ì „ìƒíƒœë¥¼ ìµœì‹ í™”
 		Space->PreviousState = Space->SpaceState;
-		// ¼±ÅÃµÈ ¹ßÆÇÀ» "Star" »óÅÂ·Î º¯°æ
+		// ì„ íƒëœ ë°œíŒì„ "Star" ìƒíƒœë¡œ ë³€ê²½
 
 		Space->SpaceState = ESpaceState::Star;
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StarSwitch"));
 		Space->UpdateAppearance();
 	}
-	// ±×¹ßÆÇÀÌ star,warp ¹ßÆÇÀÌ ¾Æ´Ï¶ó¸é
-	// ÇöÀç ÀÚ½ÅÀÇ state¸¦ previousstate¿¡ ÀúÀåÇÏ°í
-	// star state »óÅÂ·Î ¹Ù²Û´Ù
+	// ê·¸ë°œíŒì´ star,warp ë°œíŒì´ ì•„ë‹ˆë¼ë©´
+	// í˜„ì¬ ìì‹ ì˜ stateë¥¼ previousstateì— ì €ì¥í•˜ê³ 
+	// star state ìƒíƒœë¡œ ë°”ê¾¼ë‹¤
 
 
 	Star->ReSpace();
@@ -355,7 +355,7 @@ void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 	}
 	TArray<int> TempArray;
 	TempArray.SetNum(PlayerList.Num());
-	//Initial ÀÇ Å©±â ¸¸Å­ TempÅ©±â¸¦ ¼³Á¤ÇÏ°í
+	//Initial ì˜ í¬ê¸° ë§Œí¼ Tempí¬ê¸°ë¥¼ ì„¤ì •í•˜ê³ 
 	int Count;
 
 	for (int i = 0; i < PlayerList.Num(); i++)
@@ -375,17 +375,17 @@ void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 	/*
 	if (HasAuthority())
 	{
-		//ÇÃ·¹ÀÌ¾î ¸ñ·ÏÀÌ ´ã°ÜÀÖ´Â °¢ ½ºÄÚ¾î¿¡ Á¢±ÙÇÏ¿© ÇÃ·¹ÀÌ¾î ½ºÄÚ¿¡ÀúÀå
+		//í”Œë ˆì´ì–´ ëª©ë¡ì´ ë‹´ê²¨ìˆëŠ” ê° ìŠ¤ì½”ì–´ì— ì ‘ê·¼í•˜ì—¬ í”Œë ˆì´ì–´ ìŠ¤ì½”ì—ì €ì¥
 		for (int i = 0; i < GM->InitialTurnOrder.Num(); i++)
 		{
 			if (GM->InitialTurnOrder[i]->Score)
 				GM->PlayerScores[i] = GM->InitialTurnOrder[i]->Score;
 
 		}
-		//¼øÀ§ Á¤·ÄÀ» À§ÇØ TempArray¸¦ ¸¸µé°í
+		//ìˆœìœ„ ì •ë ¬ì„ ìœ„í•´ TempArrayë¥¼ ë§Œë“¤ê³ 
 		TArray<int> TempArray;
 		TempArray.SetNum(GM->InitialTurnOrder.Num());
-		//Initial ÀÇ Å©±â ¸¸Å­ TempÅ©±â¸¦ ¼³Á¤ÇÏ°í
+		//Initial ì˜ í¬ê¸° ë§Œí¼ Tempí¬ê¸°ë¥¼ ì„¤ì •í•˜ê³ 
 		int Count;
 
 		for (int i = 0; i < GM->InitialTurnOrder.Num(); i++)
@@ -400,7 +400,7 @@ void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 			}
 			TempArray[i] = Count + 1;
 		}
-		//3¹øÂ° playerscore ÀÎµ¦½ºÀÇ µî¼ö´Â  temparry3
+		//3ë²ˆì§¸ playerscore ì¸ë±ìŠ¤ì˜ ë“±ìˆ˜ëŠ”  temparry3
 
 	}
 	//MultiUpdateRankInfo();
@@ -491,7 +491,7 @@ void APartyGameStateBase::ServerUpdateRankInfo_Implementation()
 
 void APartyGameStateBase::MultiUpdateRankInfo_Implementation()
 {
-	//ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ ÀÎµ¦½º¸¦ ³ÖÀ¸¸é ex 1
+	//í˜„ì¬ í”Œë ˆì´ì–´ì˜ ì¸ë±ìŠ¤ë¥¼ ë„£ìœ¼ë©´ ex 1
 	/*
 	StatusUi->PersonalState->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
 	StatusUi->PersonalState1->SetTurnOrderScoreText(CurrentPlayer->PlayerIndex);
@@ -536,7 +536,7 @@ void APartyGameStateBase::MultiCloseView_Implementation()
 	ServerRemoveSelectUi();
 	//ItemUi->RemoveFromParent();
 	//SelectUi->RemoveFromParent();
-	//ÇöÀç ÇÃ·¹ÀÌ¾îÀÇ ÅÏÀÇ ÀÎµ¦½º¿¡ ÇØ´çÇÏ´Â ÇÃ·¹ÀÌ¾î¸¸ »ç¶óÁö°Ô Á¢±ÙÀÌ ÇÊ¿ä
+	//í˜„ì¬ í”Œë ˆì´ì–´ì˜ í„´ì˜ ì¸ë±ìŠ¤ì— í•´ë‹¹í•˜ëŠ” í”Œë ˆì´ì–´ë§Œ ì‚¬ë¼ì§€ê²Œ ì ‘ê·¼ì´ í•„ìš”
 	/*
 	if (PlayerController)
 	{
@@ -570,7 +570,7 @@ void APartyGameStateBase::MultiClickedGetStarButton_Implementation()
 
 
 
-	// µô·¹ÀÌ 1ÃÊ
+	// ë”œë ˆì´ 1ì´ˆ
 	FTimerHandle DelayTimerHandle;
 	float DelayTime = 1;
 	bool bIsLoop = false;
@@ -581,10 +581,10 @@ void APartyGameStateBase::MultiClickedGetStarButton_Implementation()
 			TenCoinsforaStarUi->StarImage->SetVisibility(ESlateVisibility::Visible);
 
 			UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::ClickedButton - Delay"))
-				// º° ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà°ú µ¿½Ã¿¡ WrapBox¶û ¹öÆ° »ç¶óÁü
+				// ë³„ ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ê³¼ ë™ì‹œì— WrapBoxë‘ ë²„íŠ¼ ì‚¬ë¼ì§
 				TenCoinsforaStarUi->GetStarAnimation(TenCoinsforaStarUi->StarImageAnimation);
 
-			//Animation ³¡³ª¸é ÀÚµ¿À¸·Î RemoveWidgetAfterAnimation ½ÇÇàµÊ
+			//Animation ëë‚˜ë©´ ìë™ìœ¼ë¡œ RemoveWidgetAfterAnimation ì‹¤í–‰ë¨
 		}
 	), DelayTime, bIsLoop);
 
@@ -637,13 +637,23 @@ void APartyGameStateBase::ServerOpenMinigame_Implementation()
 
 void APartyGameStateBase::MultiOpenMinigame_Implementation()
 {
+	const FName LevelName = "MiniGame_Kart";
+
+	
+		// Get the World from this actor
+
+		FLatentActionInfo LatentInfo;
+		UGameplayStatics::LoadStreamLevel( this , LevelName , true , true , LatentInfo );
+	
+	
+
 }
 void APartyGameStateBase::ClientTriggerSequence_Implementation()
 {
 	
 	if (SequencePlayer)
 	{
-		// ½ÃÄö½º¸¦ Àç»ıÇÕ´Ï´Ù.
+		// ì‹œí€€ìŠ¤ë¥¼ ì¬ìƒí•©ë‹ˆë‹¤.
 
 		SequencePlayer->Play();
 
@@ -665,17 +675,17 @@ void APartyGameStateBase::MultiTriggerSequence_Implementation()
 
 	UClass* SequenceActorClass = ALevelSequenceActor::StaticClass();
 
-	// ÇöÀç ¸Ê¿¡¼­ ·¹º§ ½ÃÄö½º ¾×ÅÍµéÀ» ¸ğµÎ Ã£½À´Ï´Ù.
+	// í˜„ì¬ ë§µì—ì„œ ë ˆë²¨ ì‹œí€€ìŠ¤ ì•¡í„°ë“¤ì„ ëª¨ë‘ ì°¾ìŠµë‹ˆë‹¤.
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), SequenceActorClass, FoundActors);
 
-	// ¸ğµç ·¹º§ ½ÃÄö½º ¾×ÅÍ¸¦ ¼øÈ¸ÇÏ¿© ½ÃÄö½º¸¦ Àç»ıÇÕ´Ï´Ù.
+	// ëª¨ë“  ë ˆë²¨ ì‹œí€€ìŠ¤ ì•¡í„°ë¥¼ ìˆœíšŒí•˜ì—¬ ì‹œí€€ìŠ¤ë¥¼ ì¬ìƒí•©ë‹ˆë‹¤.
 	for (AActor* FoundActor : FoundActors)
 	{
 		ALevelSequenceActor* SequenceActor = Cast<ALevelSequenceActor>(FoundActor);
 		if (SequenceActor)
 		{
-			// ½ÃÄö½º ¾×ÅÍ¿¡ ¿¬°áµÈ ½ÃÄö½º ÇÃ·¹ÀÌ¾î¸¦ °¡Á®¿É´Ï´Ù.
+			// ì‹œí€€ìŠ¤ ì•¡í„°ì— ì—°ê²°ëœ ì‹œí€€ìŠ¤ í”Œë ˆì´ì–´ë¥¼ ê°€ì ¸ì˜µë‹ˆë‹¤.
 			SequencePlayer = SequenceActor->SequencePlayer;
 
 
@@ -684,7 +694,7 @@ void APartyGameStateBase::MultiTriggerSequence_Implementation()
 
 	if (SequencePlayer)
 	{
-		// ½ÃÄö½º¸¦ Àç»ıÇÕ´Ï´Ù.
+		// ì‹œí€€ìŠ¤ë¥¼ ì¬ìƒí•©ë‹ˆë‹¤.
 
 		SequencePlayer->Play();
 		ClientTriggerSequence();
@@ -699,14 +709,14 @@ void APartyGameStateBase::MultiTriggerSequence_Implementation()
 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CalledMulti"));
 		});
 
-	// ½ÃÄö½º ¾×ÅÍ Ã£±â
+	// ì‹œí€€ìŠ¤ ì•¡í„° ì°¾ê¸°
 	/*
 	if (Controller && LevelSequenceActor)
 	{
-		// °ÔÀÓ ÀÏ½Ã ÁßÁö
+		// ê²Œì„ ì¼ì‹œ ì¤‘ì§€
 		Controller->SetPause(true);
 
-		// ½ÃÄö½º Àç»ı
+		// ì‹œí€€ìŠ¤ ì¬ìƒ
 		LevelSequencePlayer->Play();
 		//auto SequencePlayer = SequenceActor->SequencePlayer;
 		//SequencePlayer->Play();
@@ -736,7 +746,7 @@ void APartyGameStateBase::DelayTime(float WantSeconds, TFunction<void()> InFunct
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [InFunction]()
 		{
-			// Áö¿¬ ÈÄ ½ÇÇàµÉ ÇÔ¼ö È£Ãâ
+			// ì§€ì—° í›„ ì‹¤í–‰ë  í•¨ìˆ˜ í˜¸ì¶œ
 			InFunction();
 		}, WantSeconds, false);
 }

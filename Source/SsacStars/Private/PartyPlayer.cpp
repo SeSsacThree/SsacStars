@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PartyPlayer.h"
@@ -37,7 +37,7 @@ void APartyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//ÀÌº¥Æ® µğ½ºÆäÃ³ È£Ãâ
+	//ì´ë²¤íŠ¸ ë””ìŠ¤í˜ì²˜ í˜¸ì¶œ
 
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	PartyGameState = Cast<APartyGameStateBase>(GetWorld()->GetGameState());
@@ -139,7 +139,7 @@ void APartyPlayer::RollDice()
 
 void APartyPlayer::ItemApply()
 {
-	//¾ÆÀÌÅÛ Àû¿ë
+	//ì•„ì´í…œ ì ìš©
 
 	switch (ToApplyDo)
 	{
@@ -158,19 +158,19 @@ void APartyPlayer::ItemApply()
 		SetActorLocation(TelpLocation);
 		CurrentSpace = GM->Star->StarSpace;
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
-		//CurrentSpace=º° Àü Àå¼Ò 
+		//CurrentSpace=ë³„ ì „ ì¥ì†Œ 
 		break;
 	}
 	case EItem::SwitchCharacter:
 	{
-		//Àå¼Ò ¹Ù²Ù´Â ÇÔ¼ö È£Ãâ
+		//ì¥ì†Œ ë°”ê¾¸ëŠ” í•¨ìˆ˜ í˜¸ì¶œ
 		PlayFun->SwapPlayerPositions(this);
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
 		break;
 	}
 	case EItem::Nothing:
 	{
-		//Àå¼Ò ¹Ù²Ù´Â ÇÔ¼ö È£Ãâ 
+		//ì¥ì†Œ ë°”ê¾¸ëŠ” í•¨ìˆ˜ í˜¸ì¶œ 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
 		break;
 	}
@@ -218,7 +218,7 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		if (!Ai)
 		{
 			Ai = GetWorld()->SpawnActor<AAIController>();
-			// ÇÊ¿äÇÑ °æ¿ì AI ÄÁÆ®·Ñ·¯ ÃÊ±âÈ­ ¹× ¼³Á¤
+			// í•„ìš”í•œ ê²½ìš° AI ì»¨íŠ¸ë¡¤ëŸ¬ ì´ˆê¸°í™” ë° ì„¤ì •
 
 
 		}
@@ -264,14 +264,16 @@ void APartyPlayer::MoveEnded()
 		{
 		case ESpaceState::Blue:
 		{
-			Coin += 3;
+			//Coin += 3;
+			Score += 5;
 			PartyGameState->ServerGetCoinsUi();
 		}
 		break;
 		case ESpaceState::Red:
 		{
 			PartyGameState->ServerGetCoins_PinguUi();
-			Coin -= 3;
+			//Coin -= 3;
+			Score -= 5;
 		}
 		break;
 		case ESpaceState::Item:
@@ -314,13 +316,13 @@ void APartyPlayer::MoveEnded()
 				}
 				else
 				{
-					//ÀÏ´Ü ¾ÆÀÌÅÛ µÎ°³¸¸ º¸À¯ 	
+					//ì¼ë‹¨ ì•„ì´í…œ ë‘ê°œë§Œ ë³´ìœ  	
 				}
 		}
 		break;
 		case ESpaceState::Trap:
 		{
-			//ÇÔÁ¤ À§Á¬ ¿­¾î¼­ Á¾·ù¿¡ µû¶ó ½ÇÇà
+			//í•¨ì • ìœ„ì ¯ ì—´ì–´ì„œ ì¢…ë¥˜ì— ë”°ë¼ ì‹¤í–‰
 			//GM->AddTrapUi();
 			PartyGameState->ServerViewTrapUi();
 		}
@@ -337,7 +339,7 @@ void APartyPlayer::MoveEnded()
 		case ESpaceState::Star:
 		{
 
-			// ÃÖÁ¾ µµÂøÀÌ º°ÀÌ¿©µµ ±×³É ÇÑÄ­ ´õ °£´Ù 
+			// ìµœì¢… ë„ì°©ì´ ë³„ì´ì—¬ë„ ê·¸ëƒ¥ í•œì¹¸ ë” ê°„ë‹¤ 
 			PartyGameState->ServerViewTenCoinsforaStarUi();
 
 			DelayTime(2.0f, [this]()
@@ -357,7 +359,7 @@ void APartyPlayer::MoveEnded()
 		break;
 		}
 
-	//¹ßÆÇ¿¡ ´ëÇÑ Æ¯¼º Àû¿ë ½Ã°£
+	//ë°œíŒì— ëŒ€í•œ íŠ¹ì„± ì ìš© ì‹œê°„
 	if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining <= 0)
 	{
 		DelayTime(4.0f, [this]()
@@ -383,24 +385,24 @@ void APartyPlayer::StopOrGo()
 {
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StopOrGo"));
 
-	//Áß°£ ¸ØÃã Àå¼Ò°¡ º°ÀÌ¶ó¸é , 
+	//ì¤‘ê°„ ë©ˆì¶¤ ì¥ì†Œê°€ ë³„ì´ë¼ë©´ , 
 	if (CurrentSpace->SpaceState == ESpaceState::Star)
 	{
-		//º°À» ¸ÔÀ»°ÇÁö ¹°¾îº¸°í ±³È¯ÇÑ´Ù
-	//¸Ô´Â´Ù¸é
-		//º°ÀÇ À§Ä¡¸¦ ¹Ù²Û´Ù
+		//ë³„ì„ ë¨¹ì„ê±´ì§€ ë¬¼ì–´ë³´ê³  êµí™˜í•œë‹¤
+	//ë¨¹ëŠ”ë‹¤ë©´
+		//ë³„ì˜ ìœ„ì¹˜ë¥¼ ë°”ê¾¼ë‹¤
 
 		PartyGameState->ServerViewTenCoinsforaStarUi();
 		//PartyGameState->ServerChangeStarSpace();
 
 	}
 
-	//Áß°£¸ØÃã Àå¼Ò°¡ º°ÀÌ ¾Æ´Ñµ¥ ÁÖ»çÀ§°¡ ³²À¸¸é ¾ÕÀ¸·Î 
+	//ì¤‘ê°„ë©ˆì¶¤ ì¥ì†Œê°€ ë³„ì´ ì•„ë‹Œë° ì£¼ì‚¬ìœ„ê°€ ë‚¨ìœ¼ë©´ ì•ìœ¼ë¡œ 
 	if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining > 0)
 	{
 		MoveRemaining--;
 		MoveToSpace(CurrentSpace);
-	}//º°ÀÌ¾Æ´Ñµ¥ ÁÖ»çÀ§°¡ ¾øÀ¸¸é ¸ØÃç
+	}//ë³„ì´ì•„ë‹Œë° ì£¼ì‚¬ìœ„ê°€ ì—†ìœ¼ë©´ ë©ˆì¶°
 	else if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CallMoveEnded"));
@@ -417,7 +419,7 @@ void APartyPlayer::DelayTime(float WantSeconds, TFunction<void()> InFunction)
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [InFunction]()
 		{
-			// Áö¿¬ ÈÄ ½ÇÇàµÉ ÇÔ¼ö È£Ãâ
+			// ì§€ì—° í›„ ì‹¤í–‰ë  í•¨ìˆ˜ í˜¸ì¶œ
 			InFunction();
 		}, WantSeconds, false);
 }
