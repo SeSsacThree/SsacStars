@@ -9,7 +9,7 @@
 #include "ItemUI.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SSACSTARS_API UItemUI : public UUserWidget
@@ -18,22 +18,23 @@ class SSACSTARS_API UItemUI : public UUserWidget
 
 
 	void NativeConstruct() override;
+public:
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UButton* Index1Button;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UButton* Index2Button;
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), BlueprintReadWrite)
 	class UImage* A3D1;
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), BlueprintReadWrite)
 	class UImage* WTS1;
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), BlueprintReadWrite)
 	class UImage* SC1;
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), BlueprintReadWrite)
 	class UImage* A3D2;
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), BlueprintReadWrite)
 	class UImage* WTS2;
-	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget), BlueprintReadWrite)
 	class UImage* SC2;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UTextBlock* Item1;
@@ -42,7 +43,8 @@ class SSACSTARS_API UItemUI : public UUserWidget
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AI")
 	APartyGameModeBase* GM;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APartyGameStateBase* PartyGameState;
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UUniformGridPanel* ItemGrid;
 	/*
@@ -55,7 +57,7 @@ public:
 	*/
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UImage> Add3DiceImageFactory;
-	
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class APartyPlayer* CurrentPlayer;
@@ -72,7 +74,11 @@ public:
 	void SwitchItem(EItem SelectedItem);
 
 public:
-	int32 PlayerItemIndex=0;
+	int32 PlayerItemIndex = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated)
 	TArray<EItem> PlayerInventory;
 	TArray<EItem> ButtonStaus;
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

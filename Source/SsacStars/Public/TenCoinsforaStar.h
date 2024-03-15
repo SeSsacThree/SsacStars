@@ -7,7 +7,7 @@
 #include "TenCoinsforaStar.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class SSACSTARS_API UTenCoinsforaStar : public UUserWidget
@@ -32,7 +32,11 @@ public:
 	UPROPERTY(EditAnywhere, meta = (BindWidgetAnim), Transient)
 	class UWidgetAnimation* StarImageAnimation;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APartyGameStateBase* PartyGameState;
 
+
+public:
 	UFUNCTION()
 	void ClickedButton();
 
@@ -47,5 +51,24 @@ public:
 
 	UFUNCTION()
 	void RemoveWidgetAfterAnimation();
+
+
+	UFUNCTION(Server, Reliable)
+	void ServerClickedButton();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiClickedButton();
+	UFUNCTION(Server, Reliable)
+	void ServerRemoveWidgetAfterAnimation();
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiRemoveWidgetAfterAnimation();
+	UFUNCTION(Server, Reliable)
+	void ServerGetStarAnimation(UWidgetAnimation* InWidgetAnimation);
+	UFUNCTION(NetMulticast, Reliable)
+	void MultiGetStarAnimation(UWidgetAnimation* InWidgetAnimation);
+
+
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 
 };

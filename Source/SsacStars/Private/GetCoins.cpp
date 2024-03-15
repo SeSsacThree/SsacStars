@@ -40,18 +40,19 @@ void UGetCoins::DropCoins(UWidgetAnimation* InWidgetAnimation)
 	PlayAnimation(InWidgetAnimation);
 
 	DelayTime(0.1f, [this]()
-	{
-		if (DropCoinsNumber >= 0 && DropCoinsNumber < AnimationArray.Num())
 		{
-		// DropCoinsNumber = (DropCoinsNumber + 1) % AnimationArray.Num();
-			DropCoins(AnimationArray[DropCoinsNumber]);
-			DropCoinsNumber++;
-		}else
-		{
-			SetVisibility(ESlateVisibility::Hidden);
-			return;
-		}
-	});
+			if (DropCoinsNumber >= 0 && DropCoinsNumber < AnimationArray.Num())
+			{
+				// DropCoinsNumber = (DropCoinsNumber + 1) % AnimationArray.Num();
+				DropCoins(AnimationArray[DropCoinsNumber]);
+				DropCoinsNumber++;
+			}
+			else
+			{
+				SetVisibility(ESlateVisibility::Hidden);
+				return;
+			}
+		});
 }
 
 

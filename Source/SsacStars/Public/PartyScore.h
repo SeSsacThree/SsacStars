@@ -10,8 +10,8 @@ UCLASS()
 class SSACSTARS_API APartyScore : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	APartyScore();
 
@@ -19,7 +19,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 public:
@@ -33,10 +33,18 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera", meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* Camera;
 public:
+	UPROPERTY(Replicated)
+	FVector PlayerLocation;
+
+
 	UFUNCTION()
 	void ReSpace();
 	UFUNCTION()
 	void GetCamera();
+	UFUNCTION()
+	float OscillatingValue(float min, float max, float speed);
 
 
+public:
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

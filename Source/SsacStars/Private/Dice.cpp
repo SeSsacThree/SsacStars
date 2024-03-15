@@ -5,27 +5,29 @@
 #include "Components/SceneCaptureComponent2D.h"
 #include "PartyPlayer.h"
 #include "Components/BoxComponent.h"
-
+#include "RollDiceCharacter.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "PartyGameModeBase.h"
+#include "PartyGameStateBase.h"
+#include "Net/UnrealNetwork.h"
 
 
 // Sets default values
 ADice::ADice()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	
+
 
 	SceneCaptureDice = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureDice"));
 	this->SetRootComponent(SceneCaptureDice);
-	
+
 
 	DiceComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("DiceComp"));
 
 	DiceComp->SetupAttachment(SceneCaptureDice);
-	
+
 
 	DiceComp->SetSimulatePhysics(false);
 	//DiceComp->SetSimulatePhysics(true);
@@ -66,7 +68,7 @@ void ADice::BeginPlay()
 	DicePoint6->OnComponentBeginOverlap.AddDynamic(this, &ADice::OnDicePoint6BeginOverlap);
 
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
-
+	PartyGameState = Cast<APartyGameStateBase>(GetWorld()->GetGameState());
 	BeginLocation = DiceComp->GetComponentLocation();
 }
 
@@ -75,17 +77,17 @@ void ADice::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
-	//SceneCaptureDice->ShowOnlyActorComponents(this);
+
+	SceneCaptureDice->ShowOnlyActorComponents(this);
 
 	DiceComp->SetWorldLocation(FVector(BeginLocation.X, BeginLocation.Y, DiceComp->GetComponentLocation().Z));
 
-	if(IsUpMode)
+	if (IsUpMode)
 	{
-		
-		FVector CurrentLocation = DiceComp->GetComponentLocation() +DiceComp->GetUpVector() * 160.0f * GetWorld()->GetDeltaSeconds();
+
+		FVector CurrentLocation = DiceComp->GetComponentLocation() + DiceComp->GetUpVector() * 160.0f * GetWorld()->GetDeltaSeconds();
 		DiceComp->SetWorldLocation(CurrentLocation);
-		
+
 		FVector CurrentScale = DiceComp->GetComponentScale();
 		FVector ScaleToAddVector = FVector(0.07);
 		FVector NewScale = CurrentScale + ScaleToAddVector;
@@ -98,12 +100,12 @@ void ADice::Tick(float DeltaTime)
 		DiceComp->AddWorldRotation(FRotator(10, 10, 10));
 		FVector CurrentLocation = DiceComp->GetComponentLocation();
 		CurrentLocation.Z = RollingLocation.Z;
-		DiceComp->SetWorldLocation(CurrentLocation,true,nullptr,ETeleportType::TeleportPhysics);
+		DiceComp->SetWorldLocation(CurrentLocation, true, nullptr, ETeleportType::TeleportPhysics);
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Isrollingmode"));
 	}
 
 
-	if(IsStopRollingMode)
+	if (IsStopRollingMode)
 	{
 		//미세한 위치 조정 필요
 		DiceComp->SetWorldLocation(StopRollingLocation, false, nullptr, ETeleportType::TeleportPhysics);
@@ -119,7 +121,7 @@ void ADice::OnDicePoint1BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	GM->CurrentPlayer->MoveRemaining = 1;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("1move"));
 	AfterOverlap();
-	
+
 }
 
 void ADice::OnDicePoint2BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -170,7 +172,7 @@ void ADice::OnDicePoint6BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void ADice::ThrowDice()
 {
-	
+	/*
 	DicePoint1->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint2->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint3->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -180,9 +182,43 @@ void ADice::ThrowDice()
 	//DiceComp->SetSimulatePhysics(true);
 	IsUpMode = true;
 	//LaunchDice(1000000);
+	*/
+}
+void ADice::ServerThrowDice_Implementation()
+{
+
+	DicePoint1->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DicePoint2->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DicePoint3->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DicePoint4->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DicePoint5->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	DicePoint6->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	MultiThrowDice();
 }
 
+void ADice::MultiThrowDice_Implementation()
+{
+
+	//DiceComp->SetSimulatePhysics(true);
+	IsUpMode = true;
+	//LaunchDice(1000000);
+}
+
+
 void ADice::StartDiceRolling()
+{
+	/*
+	IsUpMode = false;
+	IsRollingMode = true;
+	RollingLocation = DiceComp->GetComponentLocation();
+	*/
+}
+void ADice::ServerStartDiceRolling_Implementation()
+{
+	MultiStartDiceRolling();
+}
+
+void ADice::MultiStartDiceRolling_Implementation()
 {
 	IsUpMode = false;
 	IsRollingMode = true;
@@ -191,6 +227,7 @@ void ADice::StartDiceRolling()
 
 void ADice::AfterOverlap()
 {
+	/*
 	DicePoint1->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DicePoint2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DicePoint3->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -199,7 +236,7 @@ void ADice::AfterOverlap()
 	DicePoint6->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	DiceComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
-	
+
 	//LaunchDice(200);
 	StopRollingLocation = DiceComp->GetComponentLocation();
 	IsRollingMode = false;
@@ -210,10 +247,42 @@ void ADice::AfterOverlap()
 
 	GM->CurrentPlayer->ItemApply();
 
+	GM->CurrentPlayer->RollDicePlayer->CloseView();
+	*/
+
+	if (HasAuthority())
+	{
+		ServerAfterOverlap();
+	}
+
+}
+void ADice::ServerAfterOverlap_Implementation()
+{
+	MultiAfterOverlap();
+}
+
+void ADice::MultiAfterOverlap_Implementation()
+{
+	DicePoint1->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DicePoint2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DicePoint3->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DicePoint4->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DicePoint5->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DicePoint6->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	DiceComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 
+	//LaunchDice(200);
+	StopRollingLocation = DiceComp->GetComponentLocation();
+	IsRollingMode = false;
+	IsStopRollingMode = true;
+	IsSelected = true;
+	SetRotationToNumber(DiceNumber);
 
-	
+	PartyGameState->CurrentPlayer->ItemApply();
+	//GM->CurrentPlayer->ItemApply();
+	PartyGameState->CurrentPlayer->RollDicePlayer->CloseView();
+	//GM->CurrentPlayer->RollDicePlayer->CloseView();
 }
 
 void ADice::LaunchDice(float LaunchAmount)
@@ -221,7 +290,7 @@ void ADice::LaunchDice(float LaunchAmount)
 	FVector LaunchDirection = FVector::UpVector; // 위쪽으로 띄우기 예시
 	float LaunchStrength = LaunchAmount; // 띄우는 힘의 크기
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Addforce"));
-	DiceComp->AddForce(LaunchDirection*LaunchStrength);
+	DiceComp->AddForce(LaunchDirection * LaunchStrength);
 
 	//LaunchCharacter(LaunchDirection * LaunchStrength, true, true);
 }
@@ -233,8 +302,8 @@ void ADice::SetRotationToNumber(int Number)
 	{
 	case 1:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector(16.666667,0 , -8.333333), FRotator(0,0 ,90 ));
-		
+		DiceComp->SetRelativeLocationAndRotation(FVector(16.666667, 0, -8.333333), FRotator(0, 0, 90));
+
 		break;
 	}
 	case 2:
@@ -244,22 +313,22 @@ void ADice::SetRotationToNumber(int Number)
 	}
 	case 3:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector(( 16.666667, -8.333333,  0.000000)), FRotator(-90, 0, 180));
+		DiceComp->SetRelativeLocationAndRotation(FVector((16.666667, -8.333333, 0.000000)), FRotator(-90, 0, 180));
 		break;
 	}
 	case 4:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector((16.666666, 8.333333,  0.000000)), FRotator(-90, 0, 0));
+		DiceComp->SetRelativeLocationAndRotation(FVector((16.666666, 8.333333, 0.000000)), FRotator(-90, 0, 0));
 		break;
 	}
 	case 5:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector(( 8.333333,  -0.000000, 0.000000)), FRotator(-90, 0, 90));
+		DiceComp->SetRelativeLocationAndRotation(FVector((8.333333, -0.000000, 0.000000)), FRotator(-90, 0, 90));
 		break;
 	}
 	case 6:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector(( 15.000000,  -0.000000,  8.333334)), FRotator(-180, 0, 90));
+		DiceComp->SetRelativeLocationAndRotation(FVector((15.000000, -0.000000, 8.333334)), FRotator(-180, 0, 90));
 		break;
 	}
 
@@ -269,11 +338,22 @@ void ADice::SetRotationToNumber(int Number)
 
 void ADice::ReBack()
 {
-	 IsRollingMode = false;
-	 IsStopRollingMode = false;
-	 IsUpMode = false;
-	 DiceComp->SetWorldLocation(BeginLocation);
-	 DiceComp->SetWorldScale3D(FVector(0.1f));
+	IsRollingMode = false;
+	IsStopRollingMode = false;
+	IsUpMode = false;
+	DiceComp->SetWorldLocation(BeginLocation);
+	DiceComp->SetWorldScale3D(FVector(0.1f));
 
-	 GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ReBack"));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ReBack"));
 }
+
+void ADice::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ADice, DiceComp);
+}
+
+
+
+

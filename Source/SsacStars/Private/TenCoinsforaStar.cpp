@@ -1,18 +1,20 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "TenCoinsforaStar.h"
-
+#include "PartyPlayer.h"
+#include "PartyGameStateBase.h"
 #include "Components/Button.h"
 #include "Components/Image.h"
 #include "Components/WrapBox.h"
 #include "Animation/WidgetAnimation.h"
+#include "Net/UnrealNetwork.h"
 
 void UTenCoinsforaStar::NativeConstruct()
 {
 	Super::NativeConstruct();
-
-	//¹öÆ°ÀÌ¶û ClickedButton ÇÔ¼ö ¹ÙÀÎµù
+	PartyGameState = Cast<APartyGameStateBase>(GetWorld()->GetGameState());
+	//ë²„íŠ¼ì´ëž‘ ClickedButton í•¨ìˆ˜ ë°”ì¸ë”©
 	if (Button)
 	{
 		Button->OnClicked.AddDynamic(this, &UTenCoinsforaStar::ClickedButton);
@@ -22,20 +24,20 @@ void UTenCoinsforaStar::NativeConstruct()
 		PassButton->OnClicked.AddDynamic(this, &UTenCoinsforaStar::ClickedPassButton);
 	}
 
-	if(WrapBox && StarImage)
+	if (WrapBox && StarImage)
 	{
-		//WrapBox ¼û±è
+		//WrapBox ìˆ¨ê¹€
 		WrapBox->SetVisibility(ESlateVisibility::Hidden);
-		//ÀÌ¹ÌÁö ¼û±è
+		//ì´ë¯¸ì§€ ìˆ¨ê¹€
 		StarImage->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	if (StarImageAnimation)
 	{
-		//AnimationÀÌ¶û Delegate ¹ÙÀÎµù
+		//Animationì´ëž‘ Delegate ë°”ì¸ë”©
 		//BindToAnimationFinished(StarImageAnimation, StarAnimationEvent);
 
-		//Delegate¶û RemoveWidgetAfterAnimation ÇÔ¼ö ¹ÙÀÎµù
+		//Delegateëž‘ RemoveWidgetAfterAnimation í•¨ìˆ˜ ë°”ì¸ë”©
 		StarAnimationEvent.BindDynamic(this, &UTenCoinsforaStar::RemoveWidgetAfterAnimation);
 		BindToAnimationFinished(StarImageAnimation, StarAnimationEvent);
 	}
@@ -45,15 +47,16 @@ void UTenCoinsforaStar::NativeConstruct()
 
 void UTenCoinsforaStar::ClickedButton()
 {
-	//WrapBox º¸ÀÓ
+	/*
+	//WrapBox ë³´ìž„
 	if (WrapBox)
 	{
 		WrapBox->SetVisibility(ESlateVisibility::Visible);
 	}
 
-	
 
-	// µô·¹ÀÌ 1ÃÊ
+
+	// ë”œë ˆì´ 1ì´ˆ
 	FTimerHandle DelayTimerHandle;
 	float DelayTime = 1;
 	bool bIsLoop = false;
@@ -64,37 +67,110 @@ void UTenCoinsforaStar::ClickedButton()
 			StarImage->SetVisibility(ESlateVisibility::Visible);
 
 			UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::ClickedButton - Delay"))
-			// º° ¾Ö´Ï¸ÞÀÌ¼Ç ½ÇÇà°ú µ¿½Ã¿¡ WrapBox¶û ¹öÆ° »ç¶óÁü
+			// ë³„ ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ê³¼ ë™ì‹œì— WrapBoxëž‘ ë²„íŠ¼ ì‚¬ë¼ì§
 			GetStarAnimation(StarImageAnimation);
 
-			//Animation ³¡³ª¸é ÀÚµ¿À¸·Î RemoveWidgetAfterAnimation ½ÇÇàµÊ
+			//Animation ëë‚˜ë©´ ìžë™ìœ¼ë¡œ RemoveWidgetAfterAnimation ì‹¤í–‰ë¨
 		}
 	), DelayTime, bIsLoop);
-	
 
+	*/
 
-	
-	
+	PartyGameState->ServerClickedGetStarButton();
+	//ServerClickedButton();
 
 }
+void UTenCoinsforaStar::ServerClickedButton_Implementation()
+{
+	MultiClickedButton();
+}
 
+void UTenCoinsforaStar::MultiClickedButton_Implementation()
+{
+	//WrapBox ë³´ìž„
+
+	PartyGameState->CurrentPlayer->Score+=10;
+	PartyGameState->ServerUpdateGameInfo(PartyGameState->PlayerCount);
+	//	GM->UpdateGameInfo(PlayerIndex);
+	PartyGameState->ServerUpdateRankInfo();
+	//GM->UpdateRankInfo();
+	PartyGameState->ServerChangeStarSpace();
+	//GM->ChangeStarSpace();
+
+
+	if (WrapBox)
+	{
+		WrapBox->SetVisibility(ESlateVisibility::Visible);
+	}
+
+
+
+	// ë”œë ˆì´ 1ì´ˆ
+	FTimerHandle DelayTimerHandle;
+	float DelayTime = 1;
+	bool bIsLoop = false;
+
+	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda(
+		[this]()->void
+		{
+			StarImage->SetVisibility(ESlateVisibility::Visible);
+
+			UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::ClickedButton - Delay"))
+				// ë³„ ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰ê³¼ ë™ì‹œì— WrapBoxëž‘ ë²„íŠ¼ ì‚¬ë¼ì§
+				GetStarAnimation(StarImageAnimation);
+
+			//Animation ëë‚˜ë©´ ìžë™ìœ¼ë¡œ RemoveWidgetAfterAnimation ì‹¤í–‰ë¨
+		}
+	), DelayTime, bIsLoop);
+
+}
 
 void UTenCoinsforaStar::GetStarAnimation(UWidgetAnimation* InWidgetAnimation)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::GetStarAnimation"))
-	PlayAnimation(InWidgetAnimation);
+	ServerGetStarAnimation(StarImageAnimation);
+}
+void UTenCoinsforaStar::ServerGetStarAnimation_Implementation(UWidgetAnimation* InWidgetAnimation)
+{
+	MultiGetStarAnimation(StarImageAnimation);
 }
 
+void UTenCoinsforaStar::MultiGetStarAnimation_Implementation(UWidgetAnimation* InWidgetAnimation)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::GetStarAnimation"))
+		PlayAnimation(InWidgetAnimation);
+}
 void UTenCoinsforaStar::ClickedPassButton()
 {
 	UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::ClickedPassButton"))
-	RemoveWidgetAfterAnimation();
+		//RemoveWidgetAfterAnimation();
+		PartyGameState->ServerPressPassButton();
+	//ServerRemoveWidgetAfterAnimation();
 }
 
 void UTenCoinsforaStar::RemoveWidgetAfterAnimation()
 {
+	ServerRemoveWidgetAfterAnimation();
+}
+
+
+
+
+void UTenCoinsforaStar::ServerRemoveWidgetAfterAnimation_Implementation()
+{
+	MultiRemoveWidgetAfterAnimation();
+}
+
+void UTenCoinsforaStar::MultiRemoveWidgetAfterAnimation_Implementation()
+{
 	UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::RemoveWidgetAfterAnimation"))
-	// ¾Ö´Ï¸ÞÀÌ¼ÇÀÌ ³¡³ª¸é
-	// À§Á¬ »ç¶óÁü
-	RemoveFromParent();
+		// ì• ë‹ˆë©”ì´ì…˜ì´ ëë‚˜ë©´
+		// ìœ„ì ¯ ì‚¬ë¼ì§
+		RemoveFromParent();
+	PartyGameState->CurrentPlayer->MoveToSpace(PartyGameState->CurrentPlayer->CurrentSpace);
+}
+
+void UTenCoinsforaStar::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
 }

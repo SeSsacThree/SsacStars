@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PartyPlayer.h"
@@ -11,9 +11,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Runtime/AIModule/Classes/AIController.h"
+#include "NavigationSystem.h"
 #include "Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
+#include "PartyGameStateBase.h"
 // Sets default values
 
 
@@ -22,7 +24,7 @@
 
 APartyPlayer::APartyPlayer()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	DiceRemainWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("DiceRemainWidget"));
@@ -35,14 +37,18 @@ void APartyPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//¿Ã∫•∆Æ µΩ∫∆‰√≥ »£√‚
+	//Ïù¥Î≤§Ìä∏ ÎîîÏä§ÌéòÏ≤ò Ìò∏Ï∂ú
+
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
+	PartyGameState = Cast<APartyGameStateBase>(GetWorld()->GetGameState());
+	//PartyGameState = GetGameState<APartyGameStateBase>();
 	RollDicePlayer = Cast<ARollDiceCharacter>(UGameplayStatics::GetActorOfClass(GetWorld(), ARollDiceCharacter::StaticClass()));
 	Ai = Cast<AAIController>(this->GetController());
 	PlayFun = Cast<AMap_SpaceFunction>(UGameplayStatics::GetActorOfClass(GetWorld(), AMap_SpaceFunction::StaticClass()));
 	Inventory.SetNum(MaxInventorySize);
 	Inventory.Init(EItem::Nothing, MaxInventorySize);
 	ToApplyDo = EItem::Nothing;
+	//PartyGameState->ServerTriggerSequence();
 }
 
 // Called every frame
@@ -52,10 +58,10 @@ void APartyPlayer::Tick(float DeltaTime)
 
 
 
-	
-	
 
-	
+
+
+
 }
 
 // Called to bind functionality to input
@@ -66,12 +72,23 @@ void APartyPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 
+void APartyPlayer::ServerChangeAppereance_Implementation()
+{
+	MultiChangeAppereance();
+
+}
+
+void APartyPlayer::MultiChangeAppereance_Implementation()
+{
+
+}
 
 void APartyPlayer::GetCamera()
 {
-	
-	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
-	OurPlayerController->SetViewTargetWithBlend(this, 1.0f);
+
+
+	//APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
+	//OurPlayerController->SetViewTargetWithBlend(this, 1.0f);
 
 	DelayTime(1.0f, [this]()
 		{
@@ -79,29 +96,32 @@ void APartyPlayer::GetCamera()
 		});
 
 
-	
+
 }
 void APartyPlayer::SelectBehavior()
 {
-	GM->AddSelectBehaviorUi();
-
+	//GM->AddSelectBehaviorUi();
+	PartyGameState->ServerUpdateGameInfo(PlayerIndex);
+	PartyGameState->ServerViewSelectUi();
 }
 void APartyPlayer::RollDice()
 {
 	//RollDicePlayer->GetSignal();
-	
-	//MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
-	
 
-	GM->CloseView();
-	RollDicePlayer->AddView();
+	//MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
+
+	PartyGameState->ServerCloseView();
+	//GM->CloseView();
+	//RollDicePlayer->AddView();
+	RollDicePlayer->ServerViewThrowDiceUi();
 	RollDicePlayer->GetSignal();
 	DelayTime(2.0f, [this]()
 		{
 			RollDicePlayer->StartRolling();
+
 		});
 
-
+	/*
 	DelayTime(30.0f, [this]()
 		{
 			if (RollDicePlayer->Dice->IsSelected == false)
@@ -110,7 +130,7 @@ void APartyPlayer::RollDice()
 				RollDicePlayer->CloseView();
 			}
 		});
-
+		*/
 
 
 }
@@ -119,59 +139,63 @@ void APartyPlayer::RollDice()
 
 void APartyPlayer::ItemApply()
 {
-	//æ∆¿Ã≈€ ¿˚øÎ
+	//ÏïÑÏù¥ÌÖú Ï†ÅÏö©
 
 	switch (ToApplyDo)
 	{
-		case EItem::Add3Dice:
-			{
-				MoveRemaining += 3;
-				
-				PlayFun->PlusThreeSpaces(this);
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItema3d"));
-				break;
-			}
-		case EItem::WarpToStar:
-		{
-			CurrentSpace = GM->Star->StarSpace;
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
-				//CurrentSpace=∫∞ ¿¸ ¿Âº“ 
-			break;
-		}
-		case EItem::SwitchCharacter:
-		{
-				//¿Âº“ πŸ≤Ÿ¥¬ «‘ºˆ »£√‚
-			PlayFun->SwapPlayerPositions(this);
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
-			break;
-		}
-		case EItem::Nothing:
-		{
-			//¿Âº“ πŸ≤Ÿ¥¬ «‘ºˆ »£√‚ 
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
-			break;
-		}
+	case EItem::Add3Dice:
+	{
+		MoveRemaining += 3;
+
+		PlayFun->PlusThreeSpaces(this);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItema3d"));
+		break;
 	}
-	
+	case EItem::WarpToStar:
+	{
+		FVector TelpLocation = GetActorLocation();
+		TelpLocation.Z += 100;
+		SetActorLocation(TelpLocation);
+		CurrentSpace = GM->Star->StarSpace;
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
+		//CurrentSpace=Î≥Ñ Ï†Ñ Ïû•ÏÜå 
+		break;
+	}
+	case EItem::SwitchCharacter:
+	{
+		//Ïû•ÏÜå Î∞îÍæ∏Îäî Ìï®Ïàò Ìò∏Ï∂ú
+		PlayFun->SwapPlayerPositions(this);
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
+		break;
+	}
+	case EItem::Nothing:
+	{
+		//Ïû•ÏÜå Î∞îÍæ∏Îäî Ìï®Ïàò Ìò∏Ï∂ú 
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
+		break;
+	}
+	}
+
 	//PlayFun->SwapPlayerPositions(this);
 	DelayTime(2.0f, [this]()
 		{
-				MoveToSpace(CurrentSpace);
+			MoveToSpace(CurrentSpace);
 
 		});
-	
+
 }
 void APartyPlayer::ChooseItem()
 {
-	GM->SelectUi->RemoveFromParent();
-	GM->AddItemUseUi();
-
+	PartyGameState->ServerRemoveSelectUi();
+	//	GM->SelectUi->RemoveFromParent();
+		//GM->AddItemUseUi();
+	PartyGameState->ServerViewItemUi();
 
 	DelayTime(5.0f, [this]()
 		{
 			RollDice();
 		});
-	
+
 }
 
 
@@ -187,32 +211,37 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 	}
 
 
-		
+
 	if (!Ai)
 	{
 		Ai = Cast<AAIController>(this->GetController());
 		if (!Ai)
 		{
 			Ai = GetWorld()->SpawnActor<AAIController>();
-			// « ø‰«— ∞ÊøÏ AI ƒ¡∆Æ∑—∑Ø √ ±‚»≠ π◊ º≥¡§
+			// ÌïÑÏöîÌïú Í≤ΩÏö∞ AI Ïª®Ìä∏Î°§Îü¨ Ï¥àÍ∏∞Ìôî Î∞è ÏÑ§Ï†ï
+
+
 		}
 	}
 
 	if (Ai)
 	{
 		FAIMoveRequest MoveRequest;
-		MoveRequest.SetGoalActor(CurrentSpace);
-		MoveRequest.SetAcceptanceRadius(5.f);
+		FVector MoveLoc = CurrentSpace->GetActorLocation();
+		MoveLoc.Y -=20;
+		MoveRequest.SetGoalLocation(MoveLoc);
+		//MoveRequest.SetGoalActor(CurrentSpace);
+		MoveRequest.SetAcceptanceRadius(0.1f);
 		FNavPathSharedPtr NavPath;
+		FAIMoveCompletedSignature Move;
+		//Ai->MoveToActor(CurrentSpace, 0.1f, false);
+		Ai->MoveTo(MoveRequest, &NavPath);
 
-		Ai->MoveToActor(CurrentSpace, 0.1f, false);
-		//Ai->MoveTo(MoveRequest, &NavPath, FAIMoveDoneSignature::CreateUObject(this, &APartyPlayer::OnMoveCompleted));
 
-		 
-		DelayTime(1.0f,[this]()
-		{
+		DelayTime(1.0f, [this]()
+			{
 				StopOrGo();
-		});
+			});
 
 
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerMove"));
@@ -222,51 +251,55 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerCantMove"));
 	}
 
-	
-	
-} 
+
+
+}
 
 void APartyPlayer::MoveEnded()
 {
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::MoveEnded - Start"))
 
-	switch (CurrentSpace->SpaceState)
-	{
+		switch (CurrentSpace->SpaceState)
+		{
 		case ESpaceState::Blue:
 		{
-			Coin += 3;
+			//Coin += 3;
+			Score += 5;
+			PartyGameState->ServerGetCoinsUi();
 		}
 		break;
 		case ESpaceState::Red:
 		{
-			Coin -= 3;
+			PartyGameState->ServerGetCoins_PinguUi();
+			//Coin -= 3;
+			Score -= 5;
 		}
 		break;
 		case ESpaceState::Item:
 		{
 
-				
+
 			int RanItemNum = UKismetMathLibrary::RandomIntegerInRange(1, 3);
 
 			UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::ItemSpace"))
-			if(Inventoryindex<3)
-			{
-				switch (RanItemNum)
+				if (Inventoryindex < 3)
 				{
+					switch (RanItemNum)
+					{
 					case 1:
-						{
+					{
 
-							Inventory[Inventoryindex] = EItem::Add3Dice;
-							GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
-							//GM->ItemUi->Add3DiceItem();
-							break;
-						}
-				case 2:
+						Inventory[Inventoryindex] = EItem::Add3Dice;
+						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
+						//GM->ItemUi->Add3DiceItem();
+						break;
+					}
+					case 2:
 					{
 						Inventory[Inventoryindex] = EItem::WarpToStar;
 						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("wts"));
-							//GM->ItemUi->WarpToStarItem();
+						//GM->ItemUi->WarpToStarItem();
 						break;
 					}
 					case 3:
@@ -276,38 +309,43 @@ void APartyPlayer::MoveEnded()
 						//GM->ItemUi->SwitchSpaceItem();
 						break;
 					}
+					}
+
+					Inventoryindex++;
+
 				}
-				
-				Inventoryindex++;
-				
-			}
-			else
-			{
-				
-			}
+				else
+				{
+					//ÏùºÎã® ÏïÑÏù¥ÌÖú ÎëêÍ∞úÎßå Î≥¥Ïú† 	
+				}
 		}
 		break;
 		case ESpaceState::Trap:
 		{
-			//«‘¡§ ¿ß¡¨ ø≠æÓº≠ ¡æ∑˘ø° µ˚∂Û Ω««‡
-			GM->AddTrapUi();
+			//Ìï®Ï†ï ÏúÑÏ†Ø Ïó¥Ïñ¥ÏÑú Ï¢ÖÎ•òÏóê Îî∞Îùº Ïã§Ìñâ
+			//GM->AddTrapUi();
+			PartyGameState->ServerViewTrapUi();
 		}
 		break;
 		case ESpaceState::Warp:
 		{
 			//AMap_SpaceFunction Map_SpaceFunction;
 			//Map_SpaceFunction.SwapPlayerPositions(this);
-			
+
 			SetActorLocation(CurrentSpace->WarpSpace->GetActorLocation());
+			CurrentSpace = CurrentSpace->WarpSpace;
 		}
 		break;
 		case ESpaceState::Star:
 		{
 
+			// ÏµúÏ¢Ö ÎèÑÏ∞©Ïù¥ Î≥ÑÏù¥Ïó¨ÎèÑ Í∑∏ÎÉ• ÌïúÏπ∏ Îçî Í∞ÑÎã§ 
+			PartyGameState->ServerViewTenCoinsforaStarUi();
 
 			DelayTime(2.0f, [this]()
 				{
-					GM->ChangeStarSpace();
+					PartyGameState->ServerChangeStarSpace();
+					//GM->ChangeStarSpace();
 					MoveToSpace(CurrentSpace);
 
 				});
@@ -319,51 +357,69 @@ void APartyPlayer::MoveEnded()
 
 		}
 		break;
+		}
+
+	//Î∞úÌåêÏóê ÎåÄÌïú ÌäπÏÑ± Ï†ÅÏö© ÏãúÍ∞Ñ
+	if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining <= 0)
+	{
+		DelayTime(4.0f, [this]()
+			{
+				RollDicePlayer->CloseView();
+
+				if (true == IsLocallyControlled())
+				{
+					PartyGameState->ServerUpdateEndInfo(PlayerIndex);
+					GM->NextTurn();
+				}
+
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("End"));
+			});
 	}
 
 
-	DelayTime(4.0f, [this]()
-		{
-			RollDicePlayer->CloseView();
-			GM->NextTurn();
-
-		});
-	
-
-	
 
 
 }
 
 void APartyPlayer::StopOrGo()
 {
-	
-	if(CurrentSpace->SpaceState==ESpaceState::Star)
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StopOrGo"));
+
+	//Ï§ëÍ∞Ñ Î©àÏ∂§ Ïû•ÏÜåÍ∞Ä Î≥ÑÏù¥ÎùºÎ©¥ , 
+	if (CurrentSpace->SpaceState == ESpaceState::Star)
 	{
-		//∫∞¿ª ∏‘¿ª∞«¡ˆ π∞æÓ∫∏∞Ì ±≥»Ø«—¥Ÿ
-	//∏‘¥¬¥Ÿ∏È
-		//∫∞¿« ¿ßƒ°∏¶ πŸ≤€¥Ÿ
-		GM->ChangeStarSpace();
-		MoveToSpace(CurrentSpace);
+		//Î≥ÑÏùÑ Î®πÏùÑÍ±¥ÏßÄ Î¨ºÏñ¥Î≥¥Í≥† ÍµêÌôòÌïúÎã§
+	//Î®πÎäîÎã§Î©¥
+		//Î≥ÑÏùò ÏúÑÏπòÎ•º Î∞îÍæºÎã§
+
+		PartyGameState->ServerViewTenCoinsforaStarUi();
+		//PartyGameState->ServerChangeStarSpace();
+
 	}
 
-	MoveRemaining--;
-	if (MoveRemaining > 0)
+	//Ï§ëÍ∞ÑÎ©àÏ∂§ Ïû•ÏÜåÍ∞Ä Î≥ÑÏù¥ ÏïÑÎãåÎç∞ Ï£ºÏÇ¨ÏúÑÍ∞Ä ÎÇ®ÏúºÎ©¥ ÏïûÏúºÎ°ú 
+	if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining > 0)
 	{
+		MoveRemaining--;
 		MoveToSpace(CurrentSpace);
-	}
-	else
+	}//Î≥ÑÏù¥ÏïÑÎãåÎç∞ Ï£ºÏÇ¨ÏúÑÍ∞Ä ÏóÜÏúºÎ©¥ Î©àÏ∂∞
+	else if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining == 0)
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CallMoveEnded"));
+	//PartyGameState->ServerUpdateGameInfo(PlayerIndex);
+		//	GM->UpdateGameInfo(PlayerIndex);
+		//	GM->UpdateRankInfo();
+		//PartyGameState->ServerUpdateRankInfo();
 		MoveEnded();
 	}
 }
 
-void APartyPlayer::DelayTime(float WantSeconds,TFunction<void()> InFunction)
+void APartyPlayer::DelayTime(float WantSeconds, TFunction<void()> InFunction)
 {
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [InFunction]()
 		{
-			// ¡ˆø¨ »ƒ Ω««‡µ… «‘ºˆ »£√‚
+			// ÏßÄÏó∞ ÌõÑ Ïã§ÌñâÎê† Ìï®Ïàò Ìò∏Ï∂ú
 			InFunction();
 		}, WantSeconds, false);
 }

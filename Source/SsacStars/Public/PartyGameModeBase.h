@@ -11,7 +11,7 @@
 //class UMainUI;
 class APartyPlayer;
 /**
- * 
+ *
  */
 UCLASS()
 class SSACSTARS_API APartyGameModeBase : public AGameModeBase
@@ -39,55 +39,29 @@ protected:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<APartyPlayer*>  TurnOrder;
+	TArray<class APartyPlayer*>  TurnOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<APartyPlayer*>  RoundOrder;
+	TArray<APartyPlayer*> InitialTurnOrder;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<APartyPlayer*>  InitialTurnOrder;
-	
+	class APartyPlayer* CurrentPlayer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	APartyPlayer* CurrentPlayer;
+	class APlayerController* PlayerController;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	APlayerController* PlayerController;
+	class APartyScore* Star;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	APartyScore* Star;
+	class ARollDiceCharacter* RollDiceCharacter;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APartyGameStateBase* PartyGameState;
 
-public:
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UMainUI> SelectUiFactory;
-	UPROPERTY()
-	class UMainUI* SelectUi;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UUserWidget> StatusUiFactory;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UItemUI> ItemUiFactory;
-	UPROPERTY()
-	class UItemUI* ItemUi;
-	UPROPERTY()
-	class UUserWidget* StatusUi;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UTrapWidget> TrapUiFactory;
-	UPROPERTY()
-	class UTrapWidget* TrapUi;
-
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class URandomItemWidget> GetItemUiFactory;
-	UPROPERTY()
-	class URandomItemWidget* GetItemUi;
-	UPROPERTY()
-	class UPlayerUiCard* PlayerUiCard;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UPlayerUiCard> PlayerUiCardFactory;
-	UPROPERTY()
-	class UTenCoinsforaStar* TenCoinsforaStarUi;
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<class UTenCoinsforaStar> TenCoinsforaStarUiFactory;
-	
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Round;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int>PlayerCoins;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<int>PlayerScores;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int CurrentPlayerIndex;
 
 
 public:
@@ -101,13 +75,24 @@ public:
 	class USkeletalMesh* Mesh4;
 public:
 	void PlayerSetting();
+	void SetPlayerAppeareance(APartyPlayer* Player, int Index);
+	void SetRollerAppeareance(ARollDiceCharacter* Player, int Index);
 	void AddItemUseUi();
 	void InitialRound();
 	void StartTurn();
 	void NextTurn();
 	void EndRound();
-	void StartMiniGame();void AddSelectBehaviorUi();
+	void StartMiniGame();
+	void AddSelectBehaviorUi();
 	void CloseView();
 	void ChangeStarSpace();
 	void AddTrapUi();
+	void AddGetItemUi();
+	void AddTenCoinsforaStar();
+	void UpdateGameInfo(int Index);
+	void UpdateRankInfo();
+	UFUNCTION(BlueprintCallable, Category = "Game")
+	void GameStartSequence();
+	void GamePause();
+	void GameRelease();
 };

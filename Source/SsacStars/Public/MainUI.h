@@ -26,9 +26,11 @@ public:
 	class UButton* Item;
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UButton* Map;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	APartyGameModeBase* GM;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class APartyGameStateBase* PartyGameState;
 
 public:
 	UFUNCTION()

@@ -2,8 +2,8 @@
 
 
 #include "MainUI.h"
-
 #include "PartyGameModeBase.h"
+#include "PartyGameStateBase.h"
 #include "PartyPlayer.h"
 #include "Components/Button.h"
 
@@ -13,7 +13,7 @@ void UMainUI::NativeConstruct()
 	Dice->OnClicked.AddDynamic(this, &UMainUI::DiceAction);
 	Item->OnClicked.AddDynamic(this, &UMainUI::ItemAction);
 	Map->OnClicked.AddDynamic(this, &UMainUI::MapAction);
-
+	PartyGameState = Cast<APartyGameStateBase>(GetWorld()->GetGameState());
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	Dice->SetVisibility(ESlateVisibility::Visible);
 	
@@ -21,8 +21,8 @@ void UMainUI::NativeConstruct()
 
 void UMainUI::DiceAction()
 {
-	GM->CurrentPlayer->RollDice();
-	
+	//PartyGameState->CurrentPlayer->RollDice();
+	PartyGameState->ServerRollDice();
 }
 
 void UMainUI::ItemAction()
