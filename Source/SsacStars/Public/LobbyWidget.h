@@ -104,6 +104,6 @@ public:
 	void SetFindActive(bool bActive);
 
 	UPROPERTY( EditDefaultsOnly , meta = (BindWidget) )
-	class UTextBlock* edit_nickName;
+	class UEditableText* edit_nickName;
 	
 };
