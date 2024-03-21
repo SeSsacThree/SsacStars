@@ -6,18 +6,32 @@
 #include "SsacGameInstance.h"
 #include "Components/Button.h"
 #include "Components/EditableText.h"
+#include "Components/ScrollBox.h"
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
+#include "Components/WidgetSwitcher.h"
+#include "RoomInfoWidget.h"
+#include "Blueprint/UserWidget.h"
+
+const int SWITCHER_INDEX_MENU = 0;
+const int SWITCHER_INDEX_CREATEROOM = 1;
+const int SWITCHER_INDEX_FINDROOM = 2;
 
 void ULobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	PlayAnimation( Image_bg_Animation,0,0 );
+	// PlayAnimation( Image_bg_Animation,0,0 );
 
 	gi = GetWorld()->GetGameInstance<USsacGameInstance>();
+	if (gi)
+	{
+		gi->onAddRoomInfoDelegate.AddDynamic(this, &ULobbyWidget::AddRoomInfoWidget);
+		gi->OnFindingRoomsDelegate.AddDynamic(this, &ULobbyWidget::SetFindActive);
+	}
 
 	btn_doCreateRoom->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyClicked_doCreateRoom);
+	btn_doFindRoomList->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyDoFindRoomList);
 
 	// 마우스 커서
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
@@ -62,4 +76,68 @@ void ULobbyWidget::OnMyClicked_doCreateRoom()
 void ULobbyWidget::OnMyValueChange_maxplayer(float value)
 {
 	text_maxplayer->SetText(FText::AsNumber(value));
+}
+
+void ULobbyWidget::SwitchPanel(int32 index)
+{
+	WidgetSwitcherLobby->SetActiveWidgetIndex(index);
+}
+
+void ULobbyWidget::OnMyGoMenu()
+{
+	SwitchPanel(SWITCHER_INDEX_MENU);
+}
+
+void ULobbyWidget::OnMyGoCreateRoom()
+{
+	if (gi)
+	{
+		gi->myNickName = edit_nickName->GetText().ToString();
+	}else
+	{
+		edit_nickName->SetText(FText::FromString(gi->myNickName));
+	}
+	SwitchPanel(SWITCHER_INDEX_CREATEROOM);
+	OnMyDoFindRoomList();
+}
+
+void ULobbyWidget::OnMyGoFindRoom()
+{
+	SwitchPanel(SWITCHER_INDEX_FINDROOM);
+	OnMyDoFindRoomList();
+}
+
+void ULobbyWidget::OnMyDoFindRoomList()
+{
+	scroll_roomList->ClearChildren();
+	if(gi)
+	{
+		gi->FindOtherRooms();
+	}
+}
+
+void ULobbyWidget::AddRoomInfoWidget(const FRoomInfo& info)
+{
+	if (nullptr == scroll_roomList || nullptr == roomInfoFactory)
+	return;
+
+	auto ui = CreateWidget<URoomInfoWidget>(GetWorld(), roomInfoFactory);
+	ui->SetInfo( info );
+	if (scroll_roomList)
+	{
+		scroll_roomList->AddChild(ui);
+	}
+}
+
+void ULobbyWidget::SetFindActive(bool bActive)
+{
+	if (bActive)
+	{
+		btn_doFindRoomList->SetIsEnabled(false);
+		txt_findingRooms->SetVisibility(ESlateVisibility::Visible);
+	}else
+	{
+		btn_doFindRoomList->SetIsEnabled(true);
+		txt_findingRooms->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

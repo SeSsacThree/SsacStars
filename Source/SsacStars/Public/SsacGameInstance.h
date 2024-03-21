@@ -7,10 +7,32 @@
 #include "Interfaces/OnlineSessionInterface.h"
 #include "SsacGameInstance.generated.h"
 
+USTRUCT()
+struct FRoomInfo
+{
+	GENERATED_BODY()
 
-/**
- * 
- */
+	UPROPERTY(EditDefaultsOnly)
+	int32 index;
+	UPROPERTY(EditDefaultsOnly)
+	FString roomName;
+	UPROPERTY( EditDefaultsOnly )
+	FString hostName;
+	UPROPERTY( EditDefaultsOnly )
+	FString playerCount;
+	UPROPERTY( EditDefaultsOnly )
+	FString pingMS;
+
+	FORCEINLINE void printLog()const
+	{
+		UE_LOG( LogTemp , Warning , TEXT( "RoomName: %s, HostName: %s, PlayerCount: %s, Ping: %s" ) , *roomName , *hostName , *playerCount , *pingMS );
+	}
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FAddRoomInfoDelegate, const FRoomInfo&, roomInfo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FFindingRoomsDelegate, bool, bActive);
+
+
 UCLASS()
 class SSACSTARS_API USsacGameInstance : public UGameInstance
 {
@@ -24,7 +46,13 @@ public:
 
 	IOnlineSessionPtr sessionInterface;
 
-	FString hostName = TEXT("SSac");
+	FAddRoomInfoDelegate onAddRoomInfoDelegate;
+
+	FFindingRoomsDelegate OnFindingRoomsDelegate;
+
+	FString myNickName;
+	FString myRoomName;
+
 	void CreateRoom(int32 maxplayerCount, FString roomName);
 
 	void OnMyCreateRoomComplete( FName sessionName , bool bWasSuccessful );
@@ -34,6 +62,10 @@ public:
 	void FindOtherRooms();
 
 	void OnMyFindOtherRoomsComplete(bool bWasSuccessful);
+
+	void JoinRoom(int32 index);
+
+	void OnMyJoinRoomsComplete(FName sessionName , EOnJoinSessionCompleteResult::Type result);
 };
 
 

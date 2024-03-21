@@ -18,14 +18,20 @@ void USsacGameInstance::Init()
 		sessionInterface = subsystem->GetSessionInterface();
 
 		sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &USsacGameInstance::OnMyFindOtherRoomsComplete);
+
+		sessionInterface->OnFindSessionsCompleteDelegates.AddUObject(this, &USsacGameInstance::OnMyFindOtherRoomsComplete);
+
+		sessionInterface->OnJoinSessionCompleteDelegates.AddUObject(this, &USsacGameInstance::OnMyJoinRoomsComplete);
+
 	}
 	//Timer
+	/*
 	FTimerHandle handle;
 	GetTimerManager().SetTimer(handle,[&]()
 	{
 		// 호출
 		FindOtherRooms();
-	}, 5, false);
+	}, 5, false);*/
 }
 
 void USsacGameInstance::CreateRoom(int32 maxplayerCount, FString roomName)
@@ -42,7 +48,7 @@ void USsacGameInstance::CreateRoom(int32 maxplayerCount, FString roomName)
 	setting.bAllowJoinInProgress = true;
 	setting.bAllowJoinViaPresence = true;
 	setting.NumPublicConnections = maxplayerCount;
-	setting.Set(TEXT("HOST_NAME"), hostName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
+	setting.Set(TEXT("HOST_NAME"), myNickName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	setting.Set(TEXT("ROOM_NAME"), roomName, EOnlineDataAdvertisementType::ViaOnlineServiceAndPing);
 	FUniqueNetIdPtr netID = GetWorld()->GetFirstLocalPlayerFromController()->GetUniqueNetIdForPlatformUser().GetUniqueNetId();
 
@@ -56,6 +62,12 @@ void USsacGameInstance::CreateRoom(int32 maxplayerCount, FString roomName)
 void USsacGameInstance::OnMyCreateRoomComplete(FName sessionName, bool bWasSuccessful)
 {
 	UE_LOG( LogTemp , Warning , TEXT( "CreateRoom Start!! sessionName: %s, bWasSuccessful: %d" ) , *sessionName.ToString() , bWasSuccessful);
+	if (bWasSuccessful)
+	{
+		myRoomName = sessionName.ToString();
+		FString url = TEXT("/Game/JYS/Map/WorldMap?listen");
+		GetWorld()->ServerTravel(url);
+	}
 }
 
 void USsacGameInstance::FindOtherRooms()
@@ -67,18 +79,73 @@ void USsacGameInstance::FindOtherRooms()
 	roomSearch->bIsLanQuery = IOnlineSubsystem::Get()->GetSubsystemName().IsEqual("NULL");
 
 	sessionInterface->FindSessions(0, roomSearch.ToSharedRef());
+
+	if(OnFindingRoomsDelegate.IsBound())
+	{
+		OnFindingRoomsDelegate.Broadcast(true);
+	}
 }
 
 void USsacGameInstance::OnMyFindOtherRoomsComplete(bool bWasSuccessful)
 {
+	if (OnFindingRoomsDelegate.IsBound())
+	{
+		OnFindingRoomsDelegate.Broadcast( false );
+	}
 	UE_LOG(LogTemp, Warning, TEXT("%d"), bWasSuccessful)
 
-	for(auto r:roomSearch->SearchResults)
+	for(int i =0; i <roomSearch->SearchResults.Num(); i++)
 	{
+		auto r = roomSearch->SearchResults[i];
 		if (false == r.IsValid())
 		continue;
-		FString roomName;
-		r.Session.SessionSettings.Get(TEXT("ROOM_NAME"), roomName);
-		UE_LOG( LogTemp , Warning , TEXT( "%s" ) , *roomName);
+
+		FRoomInfo info;
+
+		info.index = i;
+
+		r.Session.SessionSettings.Get(TEXT("ROOM_NAME"), info.roomName );
+
+		r.Session.SessionSettings.Get(TEXT("HOST_NAME"), info.hostName);
+
+		int32 max = r.Session.SessionSettings.NumPublicConnections;
+
+		int32 current = max - r.Session.NumOpenPublicConnections;
+		info.playerCount = FString::Printf(TEXT("%d/%d"), current, max);
+
+		info.pingMS = FString::Printf(TEXT("%dms"), r.PingInMs);
+
+		info.printLog();
+
+		if (onAddRoomInfoDelegate.IsBound())
+		{
+			onAddRoomInfoDelegate.Broadcast(info);
+		}
 	}
 }
+
+void USsacGameInstance::JoinRoom(int32 index)
+{
+	auto r = roomSearch->SearchResults[index];
+	FString sessionName;
+	r.Session.SessionSettings.Get(TEXT("ROOM_NAME"), sessionName);
+	sessionInterface->JoinSession(0,FName(*sessionName),r);
+}
+
+void USsacGameInstance::OnMyJoinRoomsComplete(FName sessionName, EOnJoinSessionCompleteResult::Type result )
+{
+	if (EOnJoinSessionCompleteResult::Success == result)
+	{
+		myRoomName = sessionName.ToString();
+		FString url;
+		sessionInterface->GetResolvedConnectString(sessionName, url);
+
+		auto pc = GetWorld()->GetFirstPlayerController();
+		pc->ClientTravel(url, TRAVEL_Absolute);
+	}else
+	{
+		UE_LOG(LogTemp,Warning, TEXT("Join Session Faild... : %s, result"));
+	}
+}
+
+

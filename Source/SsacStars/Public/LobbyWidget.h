@@ -36,26 +36,74 @@ public:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	class UImage* Image4;
 
-	UPROPERTY( EditDefaultsOnly , meta = (BindWidget) )
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
 	class UEditableText* edit_roomName;
 
-	UPROPERTY( EditDefaultsOnly , meta = (BindWidget) )
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
 	class USlider* Slider_maxPlayer;
 
-	UPROPERTY( EditDefaultsOnly , meta = (BindWidget) )
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
 	class UTextBlock* text_maxplayer;
 
-	UPROPERTY( EditDefaultsOnly , meta = (BindWidget) )
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
 	class UButton* btn_doCreateRoom;
 
 	UPROPERTY( EditDefaultsOnly , meta = (BindWidgetAnim), Transient)
 	class UWidgetAnimation* Image_bg_Animation;
-
 
 	UFUNCTION()
 	void OnMyClicked_doCreateRoom();
 
 	UFUNCTION()
 	void OnMyValueChange_maxplayer(float value);
+
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
+	class UWidgetSwitcher* WidgetSwitcherLobby;
+
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
+	class UButton* btn_goCreateRoom;
+
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
+	class UButton* btn_goFindRoom;
+
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
+	class UButton* btn_doMenuFromCreateRoom;
+
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
+	class UButton* btn_doMenuFromFindRoom;
+
+	void SwitchPanel(int32 index);
+
+	UFUNCTION()
+	void OnMyGoMenu();
+
+	UFUNCTION()
+	void OnMyGoCreateRoom();
+
+	UFUNCTION()
+	void OnMyGoFindRoom();
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UScrollBox* scroll_roomList;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<class URoomInfoWidget> roomInfoFactory;
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UButton* btn_doFindRoomList;
+
+	UFUNCTION()
+	void OnMyDoFindRoomList();
+
+	UFUNCTION()
+	void AddRoomInfoWidget(const struct FRoomInfo& info);
+
+	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
+	class UTextBlock* txt_findingRooms;
+
+	void SetFindActive(bool bActive);
+
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidget) )
+	class UTextBlock* edit_nickName;
 	
 };
