@@ -202,6 +202,8 @@ void APartyGameModeBase::NextTurn()
 	
 	//CurrentPlayerIndex를 한명이 주사위를 던질때마 추가한다
 	PartyGameState->CurrentPlayerIndex++;
+
+	PartyGameState->ServerSoundVoice( PartyGameState->TurnEndSound );
 	//CurrentPlayerIndex++;
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NextTurn"));
 

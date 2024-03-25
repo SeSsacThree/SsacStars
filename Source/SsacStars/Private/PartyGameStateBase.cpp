@@ -138,7 +138,7 @@ void APartyGameStateBase::MultiUpdateAppeareance_Implementation(APartyPlayer* Pl
 	case 0:
 	{
 		Player->GetMesh()->SetSkeletalMeshAsset(Mesh1);
-		Player->GetMesh()->SetWorldScale3D(FVector(22));
+		Player->GetMesh()->SetWorldScale3D(FVector(30));
 		//UPinguAnimInstance* PinguAnimaion = LoadObject<UPinguAnimInstance>(nullptr, TEXT("D:\Projects\SsacStars\Content\JYS\Blueprints"));
 		//Player->GetMesh()->GetSkeletalMeshAsset()-
 			//SetAnimInstanceClass(PinguAnimaion);
@@ -154,13 +154,13 @@ void APartyGameStateBase::MultiUpdateAppeareance_Implementation(APartyPlayer* Pl
 	case 2:
 	{
 		Player->GetMesh()->SetSkeletalMeshAsset(Mesh3);
-		Player->GetMesh()->SetWorldScale3D(FVector(17));
+		Player->GetMesh()->SetWorldScale3D(FVector(20));
 		break;
 	}
 	case 3:
 	{
 		Player->GetMesh()->SetSkeletalMeshAsset(Mesh4);
-		Player->GetMesh()->SetWorldScale3D(FVector(1));
+		Player->GetMesh()->SetWorldScale3D(FVector(2));
 		break;
 	}
 	}
