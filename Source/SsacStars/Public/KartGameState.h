@@ -29,7 +29,7 @@ public:
 	TSubclassOf<class UCountDownWidget> CountDownUIFactory;
 
 	UPROPERTY( Replicated )
-	int32 min = 1;
+	int32 min = 2;
 
 	UPROPERTY( Replicated )
 	int32 sec = 0;

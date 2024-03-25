@@ -4,6 +4,7 @@
 #include "MiniGameSpeedBoard.h"
 #include "KartPlayer.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 // Sets default values
 
 AMiniGameSpeedBoard::AMiniGameSpeedBoard()
@@ -36,6 +37,7 @@ void AMiniGameSpeedBoard::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedCo
 	if (AKartPlayer* OverlapPlayer = Cast<AKartPlayer>( OtherActor ))
 	{
 		OverlapPlayer->Boost();
+		UGameplayStatics::PlaySound2D( GetWorld() , boostSound );
 	}
 
 }

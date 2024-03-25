@@ -18,8 +18,16 @@ void AKartGameState::BeginPlay()
 	countDownUI = CreateWidget<UCountDownWidget>( GetWorld() , CountDownUIFactory );
 	countDownUI->AddToViewport();
 
-	FTimerHandle Handle1;
-	GetWorldTimerManager().SetTimer( Handle1 , this , &AKartGameState::ReadyTimer , 1.0f , true , 3.0 );
+	FTimerHandle Handle4;
+	GetWorld()->GetTimerManager().SetTimer( Handle4 , FTimerDelegate::CreateLambda(
+		[this]()->void
+		{
+			FTimerHandle Handle1;
+			GetWorldTimerManager().SetTimer( Handle1 , this , &AKartGameState::ReadyTimer , 1.0f , true , 3.0 );
+		} 
+	) , 6 , false );
+
+	
 
 	FTimerHandle Handle2;
 	GetWorld()->GetTimerManager().SetTimer( Handle2 , FTimerDelegate::CreateLambda(
@@ -34,7 +42,7 @@ void AKartGameState::BeginPlay()
 			) , DelayTime , true );
 			
 		}
-	) , 5 , false );
+	) , 11 , false );
 }
 
 void AKartGameState::CountDown()

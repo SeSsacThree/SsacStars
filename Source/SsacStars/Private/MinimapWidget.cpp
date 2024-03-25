@@ -35,11 +35,11 @@ void UMinimapWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 	// 상위 4명의 정보를 각각의 랭킹에 출력
 	if (FirstPlayer != nullptr)
-		RankingFirst->SetText( FText::FromString( FString::Printf( TEXT( "%s : %d점" ) , *FirstPlayer->GetPlayerName() , FMath::RoundToInt( FirstPlayer->GetScore() ) ) ) );
+		RankingFirst->SetText( FText::FromString( FString::Printf( TEXT( "%s    %d점" ) , *FirstPlayer->GetPlayerName() , FMath::RoundToInt( FirstPlayer->GetScore() ) ) ) );
 	if (SecondPlayer != nullptr)
-		RankingSecond->SetText( FText::FromString( FString::Printf( TEXT( "%s : %d점" ) , *SecondPlayer->GetPlayerName() , FMath::RoundToInt( SecondPlayer->GetScore() ) ) ) );
+		RankingSecond->SetText( FText::FromString( FString::Printf( TEXT( "%s    %d점" ) , *SecondPlayer->GetPlayerName() , FMath::RoundToInt( SecondPlayer->GetScore() ) ) ) );
 	if (ThirdPlayer != nullptr)
-		RankingThird->SetText( FText::FromString( FString::Printf( TEXT( "%s : %d점" ) , *ThirdPlayer->GetPlayerName() , FMath::RoundToInt( ThirdPlayer->GetScore() ) ) ) );
+		RankingThird->SetText( FText::FromString( FString::Printf( TEXT( "%s    %d점" ) , *ThirdPlayer->GetPlayerName() , FMath::RoundToInt( ThirdPlayer->GetScore() ) ) ) );
 	if (FourthPlayer != nullptr)
-		RankingFourth->SetText( FText::FromString( FString::Printf( TEXT( "%s : %d점" ) , *FourthPlayer->GetPlayerName() , FMath::RoundToInt( FourthPlayer->GetScore() ) ) ) );
+		RankingFourth->SetText( FText::FromString( FString::Printf( TEXT( "%s    %d점" ) , *FourthPlayer->GetPlayerName() , FMath::RoundToInt( FourthPlayer->GetScore() ) ) ) );
 }
