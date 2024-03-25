@@ -1,24 +1,29 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "KartPlayer.h"
 
+#include "EndingWidget.h"
 #include "EngineUtils.h"
 #include "ItemBox.h"
 #include "Components/CapsuleComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "ItemWidget.h"
+#include "KartGameState.h"
 #include "KartPlayerController.h"
+#include "KartPlayerState.h"
 #include "MiniGameBullet.h"
 #include "MiniGameMainUI.h"
 #include "Star.h"
 #include "../../../../../../../Source/Runtime/Engine/Classes/GameFramework/SpringArmComponent.h"
 #include "Components/PrimitiveComponent.h"
 #include "TimerManager.h"
+#include "Camera/CameraActor.h"
 #include "Components/ArrowComponent.h"
 #include "Components/TextBlock.h"
 #include "GameFramework/PlayerState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -49,7 +54,7 @@ AKartPlayer::AKartPlayer()
 	cameraComp->SetupAttachment(springArmComp);
 
 	firePosition = CreateDefaultSubobject<UArrowComponent>(TEXT("firePosition"));
-	// ∑Á∆Æø° ∫Ÿ¿Ã∞ÌΩÕ¥Ÿ.
+	// Î£®Ìä∏Ïóê Î∂ôÏù¥Í≥†Ïã∂Îã§.
 	firePosition->SetupAttachment(RootComponent);
 
 
@@ -81,11 +86,6 @@ void AKartPlayer::InitializeWidgets()
 		return;
 	}
 
-	if (GEngine)
-	{
-		FString Message = FString::Printf(TEXT("AStar::InitializeWidgets"));
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, Message);
-	}
 	
 	if(nullptr == pc->itemUI)
 	{
@@ -105,7 +105,7 @@ void AKartPlayer::InitializeWidgets()
 	{
 		AItemBox* box = *it;
 		box->itemWidget = itemUI;
-		break;			//πˆ±◊∏È ¡ˆøÏººø‰
+		break;			
 	}
 
 	for (TActorIterator<AStar> it(GetWorld()); it; ++it)
@@ -114,9 +114,6 @@ void AKartPlayer::InitializeWidgets()
 		star->mainUI = MainUI;
 	}
 
-	//FTimerHandle Handle;
-	//GetWorldTimerManager().SetTimer(Handle, this, &AKartPlayer::GetReadyTimer, 1.0f, true, 3.0f);
-	//
 
 	starCount = 0;
 	StarCountText = FText::FromString(FString::FromInt(starCount));
@@ -193,15 +190,50 @@ void AKartPlayer::MultiTurnRight_Implementation(float Value)
 
 void AKartPlayer::Boost()
 {
-	bSpeedUp = true;
+	ServerBoost();
+}
+void AKartPlayer::ServerBoost_Implementation()
+{
+	MultiBoost();
 }
 
+void AKartPlayer::MultiBoost_Implementation()
+{
+	bSpeedUp = true;
+}
 //---------------------------------------------------------------------------------------
 
 
+void AKartPlayer::OnRep_UpdateStarCountUI()
+{
+	StarCountText = FText::FromString( FString::FromInt( starCount ) );
+	if (MainUI && MainUI->StarCount)
+	{
+		MainUI->StarCount->SetText( StarCountText );
+		UE_LOG( LogTemp , Warning , TEXT( " AKartPlayer::OnRep_UpdateStarCountUI()" ) );
+	}
+	else
+	{
+		UE_LOG( LogTemp , Warning , TEXT( " AKartPlayer::OnRep_UpdateStarCountUI() - NO UI" ) );
+	}
+}
+
+void AKartPlayer::ServerSetStarCount_Implementation(int32 InStarCount)
+{
+	starCount = starCount + InStarCount;
+	
+	UE_LOG( LogTemp , Warning , TEXT( "AKartPlayer::ServerSetStarCount : %d Í∞ú"  ) , starCount );
+	//PlayerStateÏóê Ï†êÏàò Ï†ÄÏû•
+	auto ps = Cast<AKartPlayerController>( Controller )->GetPlayerState<AKartPlayerState>();
+	ps->SetScore( starCount );
+	//ÏÑúÎ≤ÑÏóêÏÑúÎäî ÏûêÎèô Ìò∏Ï∂úÏù¥ ÏïàÎêòÍ∏∞ ÎïåÎ¨∏Ïóê ÏßÅÏ†ë Ìò∏Ï∂ú
+	OnRep_UpdateStarCountUI();
+
+}
+
 void AKartPlayer::useItem()
 {
-	//«√∑π¿ÃæÓ∞° æ∆¿Ã≈€¿Ã ¿÷¿ª ∂ß∏∏ ªÁøÎ ∞°¥…
+	//ÌîåÎ†àÏù¥Ïñ¥Í∞Ä ÏïÑÏù¥ÌÖúÏù¥ ÏûàÏùÑ ÎïåÎßå ÏÇ¨Ïö© Í∞ÄÎä•
 	if (hasItem)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("USE ITEM"));
@@ -234,6 +266,7 @@ void AKartPlayer::MultiUseItem_Implementation()
 void AKartPlayer::speedUp()
 {
 	ServerSpeedUp();
+	UGameplayStatics::PlaySound2D( GetWorld() , speedSound );
 }
 
 void AKartPlayer::ServerSpeedUp_Implementation()
@@ -251,6 +284,15 @@ void AKartPlayer::MultiSpeedUp_Implementation()
 
 void AKartPlayer::speedDown()
 {
+	ServerSpeedDown();
+}
+void AKartPlayer::ServerSpeedDown_Implementation()
+{
+	MultiSpeedDown();
+}
+
+void AKartPlayer::MultiSpeedDown_Implementation()
+{
 	bSpeedUp = false;
 	//GetCharacterMovement()->Velocity = GetCharacterMovement()->Velocity * 0.5f;
 }
@@ -261,51 +303,29 @@ void AKartPlayer::speedDown()
 void AKartPlayer::shoot()
 {
 	ServerShoot();
-	
+	UGameplayStatics::PlaySound2D( GetWorld() , shootingSound );
 }
+
+
 
 void AKartPlayer::ServerShoot_Implementation()
 {
-	MultiShoot();
+	FTransform t = firePosition->GetComponentTransform();
+	GetWorld()->SpawnActor<AMiniGameBullet>( bulletFactory , t );
+	UE_LOG( LogTemp , Warning , TEXT( "shoot" ) );
 }
 
 void AKartPlayer::MultiShoot_Implementation()
 {
-	FTransform t = firePosition->GetComponentTransform();
-	GetWorld()->SpawnActor<AMiniGameBullet>(bulletFactory, t);
-	UE_LOG(LogTemp, Warning, TEXT("shoot"));
+	
 }
-//---------------------------------------------------------------------------------------
-//∞‘¿” Ω√¿€ ¿¸ ƒ´øÓ∆Æ ¥ŸøÓ
-//void AKartPlayer::GetReadyTimer()
-//{
-//	MainUI->GetReadyCount();
-//}
-//
-////≈∏¿Ã∏”
-//void AKartPlayer::CountDown()
-//{
-//	MainUI->CountDown();
-//}
-
-
-//---------------------------------------------------------------------------------------
-
-void AKartPlayer::starCountUP()
-{
-	starCount ++;
-	StarCountText = FText::FromString(FString::FromInt(starCount));
-	if(MainUI && MainUI->StarCount)
-	{
-		MainUI->StarCount->SetText(StarCountText);
-	}
-}
-
 
 
 void AKartPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME( AKartPlayer , starCount);
 
 	/*DOREPLIFETIME(AKartPlayer, hasItem);
 	DOREPLIFETIME(AKartPlayer, bSpeedUp);*/

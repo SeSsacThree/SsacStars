@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Star.h"
@@ -55,9 +55,10 @@ void AStar::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 
 		if (OverlapPlayer->GetController()->IsLocalPlayerController()) {
 
-			OverlapPlayer->starCountUP();
+			UGameplayStatics::PlaySound2D( GetWorld() , starSound );
+			OverlapPlayer->ServerSetStarCount( 1 );
 		}
-		// ¼­¹ö RPC·Î ¼­¹ö¿¡ ¿äÃ»ÇÏ°í
+		// ì„œë²„ RPCë¡œ ì„œë²„ì— ìš”ì²­í•˜ê³ 
 		ServerDestroy();
 	}
 }

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ItemBox.h"
@@ -35,7 +35,7 @@ void AItemBox::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//boxComponent¿Í begin overlapÇÔ¼ö ¹ÙÀÎµùÇÏ±â
+	//boxComponentì™€ begin overlapí•¨ìˆ˜ ë°”ì¸ë”©í•˜ê¸°
 	boxComp->OnComponentEndOverlap.AddDynamic(this, &AItemBox::OnMyCompEndOverlap);
 }
 
@@ -49,34 +49,30 @@ void AItemBox::Tick(float DeltaTime)
 void AItemBox::OnMyCompEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	if (AKartPlayer* OverlapPlayer = Cast<AKartPlayer>(OtherActor)) {
-		if (!OverlapPlayer->GetController()) { return; }
+
+		if (!OverlapPlayer->GetController()|| OverlapPlayer->hasItem) { return; }
+
 		if (OverlapPlayer->GetController()->IsLocalPlayerController()) {
 
 			bItemBox = false;
 
-			//ÇÃ·¹ÀÌ¾î°¡ ¾ÆÀÌÅÛÀÌ ¾øÀ»¶§¸¸
-			if (false == OverlapPlayer->hasItem)
-			{
-				OverlapPlayer->hasItem = true;
+			OverlapPlayer->hasItem = true;
+			UE_LOG( LogTemp , Warning , TEXT( "OverlapPlayer->hasItem = true;" ) );
 
-				//·£´ý ¾ÆÀÌÅÛ ¾ò±â
-				GetRandomItem(OverlapPlayer);
-
-				//UGameplayStatics::PlaySound2D(GetWorld(), itemBoxSound);
-			}
-			else
-			{
-				return;
-			}
+			UGameplayStatics::PlaySound2D( GetWorld() , ItemSound );
+			//ëžœë¤ ì•„ì´í…œ ì–»ê¸°
+			GetRandomItem( OverlapPlayer );
+			//UGameplayStatics::PlaySound2D(GetWorld(), itemBoxSound);
 
 			itemBox->SetVisibility(false);
 			boxComp->SetGenerateOverlapEvents(false);
 
 			if (!GEngine) { return; }
-			FString PlayerStateName = FString::Printf(TEXT("Player State ID: %d"), OverlapPlayer->GetPlayerState()->GetPlayerId());
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, PlayerStateName);
+			/*FString PlayerStateName = FString::Printf(TEXT("Player State ID: %d"), OverlapPlayer->GetPlayerState()->GetPlayerId());
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, PlayerStateName);*/
 
 		}
+		
 	}
 }
 
@@ -90,16 +86,16 @@ void AItemBox::GetRandomItem(AKartPlayer* inKartPlayer)
 	{
 	case 0:
 		//speed up
-		if (itemWidget) {
+		if (inKartPlayer->itemUI) {
 			//Item : speedup
-			itemWidget->speedUp();
+			inKartPlayer->itemUI->speedUp();
 			inKartPlayer->itemNumber = 1;
 		}
 		break;
 	case 1:
 		//shooting
-		if (itemWidget) {
-			itemWidget->shooting();
+		if (inKartPlayer->itemUI) {
+			inKartPlayer->itemUI->shooting();
 			inKartPlayer->itemNumber = 2;
 		}
 		break;
@@ -107,12 +103,12 @@ void AItemBox::GetRandomItem(AKartPlayer* inKartPlayer)
 
 
 	FTimerHandle DelayTimerHandle;
-	//2ÃÊ Delay
+	//2ì´ˆ Delay
 	float DelayTime = 2;
-	//Looping ¿©ºÎ
+	//Looping ì—¬ë¶€
 	bool bIsLoop = false;
 
-	//Lambda ÇÔ¼ö ±¸Á¶ [REFERENCE ¶Ç´Â CAPTURE]()-> Return Å¸ÀÔ {±¸ÇöºÎ}
+	//Lambda í•¨ìˆ˜ êµ¬ì¡° [REFERENCE ë˜ëŠ” CAPTURE]()-> Return íƒ€ìž… {êµ¬í˜„ë¶€}
 	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda(
 		[this]()->void
 		{
