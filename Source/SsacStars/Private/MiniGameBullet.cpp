@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MiniGameBullet.h"
@@ -19,7 +19,7 @@ AMiniGameBullet::AMiniGameBullet()
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("meshComp"));
 	meshComp->SetupAttachment(RootComponent);
 
-	
+	boxComp->SetGenerateOverlapEvents( true );
 	boxComp->SetCollisionProfileName(TEXT("Bullet"));
 	
 	meshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -46,5 +46,29 @@ void AMiniGameBullet::Tick(float DeltaTime)
 void AMiniGameBullet::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (AKartPlayer* OverlapPlayer = Cast<AKartPlayer>( OtherActor )) {
+
+		if (!OverlapPlayer->GetController())
+		{
+			UE_LOG( LogTemp , Warning , TEXT( "!OverlapPlayer->GetController()" ) );
+			return;
+		}
+		
+		//부딪힌 플레이어가 로컬 플레이어가 아니라면
+		if (OverlapPlayer->GetController() && !OverlapPlayer->GetController()->IsLocalPlayerController())
+		{
+			UE_LOG( LogTemp , Warning , TEXT( "!OverlapPlayer->GetController()->IsLocalPlayerController()" ) );
+			OverlapPlayer->ServerSetStarCount(-1);
+		}
+		//서버 destroy
+		/*FTimerHandle DelayTimerHandle;
+		GetWorld()->GetTimerManager().SetTimer( DelayTimerHandle , FTimerDelegate::CreateLambda(
+			[this]()->void
+			{
+				Destroy();
+			}
+		) , 10 , false );*/
+		
+	}
 }
 

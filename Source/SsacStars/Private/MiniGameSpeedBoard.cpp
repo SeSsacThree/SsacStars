@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+癤�// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "MiniGameSpeedBoard.h"
@@ -33,17 +33,19 @@ void AMiniGameSpeedBoard::Tick(float DeltaTime)
 
 void AMiniGameSpeedBoard::OnMyCompBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	// 만약 OtherActor가 플레이어라면
-	auto player = Cast<AKartPlayer>(OtherActor);
-	if (player)
-		player->Boost();
+	if (AKartPlayer* OverlapPlayer = Cast<AKartPlayer>( OtherActor ))
+	{
+		OverlapPlayer->Boost();
+	}
+
 }
 
 void AMiniGameSpeedBoard::OnMyCompEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	auto player = Cast<AKartPlayer>(OtherActor);
-	if (player)
-		player->speedDown();
+	if (AKartPlayer* OverlapPlayer = Cast<AKartPlayer>( OtherActor ))
+	{
+		OverlapPlayer->speedDown();
+	}
 }
 

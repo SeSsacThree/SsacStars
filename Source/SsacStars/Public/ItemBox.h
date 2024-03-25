@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -38,12 +38,13 @@ public:
 	float currentTime = 0;
 	float delayTime = 8;
 
-	// ¾ÆÀÌÅÛ ¹Ú½º Á¸Àç À¯¹«
+	// ì•„ì´í…œ ë°•ìŠ¤ ì¡´ì¬ ìœ ë¬´
 	bool bItemBox=true;
 
 	UPROPERTY(EditAnywhere)
 	class UItemWidget* itemWidget;
-
+	UPROPERTY( EditAnywhere )
+	class USoundBase* ItemSound;
 	//---------------------------------------
 
 	

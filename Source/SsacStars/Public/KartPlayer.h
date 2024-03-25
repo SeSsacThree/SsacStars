@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -62,8 +62,27 @@ public:
 	UPROPERTY()
 	class UMiniGameMainUI* MainUI;
 
-	UPROPERTY(EditDefaultsOnly)
-	int32 starCount=0;
+	UPROPERTY( EditDefaultsOnly )
+	TSubclassOf<class UEndingWidget> EndingUIFactory;
+
+	UPROPERTY()
+	UEndingWidget* EndingUI;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly)
+	bool isEnd = false;
+
+	
+
+	UPROPERTY(ReplicatedUsing = OnRep_UpdateStarCountUI, EditDefaultsOnly)
+	int32 starCount = 0;
+
+	FText StarCountText;
+
+	UFUNCTION()
+	void OnRep_UpdateStarCountUI();
+
+	UFUNCTION(Server, Reliable)
+	void ServerSetStarCount( int32 InStarCount );
 
 	UFUNCTION()
 	void useItem();
@@ -77,10 +96,6 @@ public:
 	UFUNCTION()
 	void speedDown();
 
-	UFUNCTION()
-	void starCountUP();
-
-	FText StarCountText;
 
 	UFUNCTION()
 	void shoot();
@@ -91,24 +106,22 @@ public:
 	float currentTime;
 	float speedUpTime = 2;
 
-	//«√∑π¿ÃæÓ∞° æ∆¿Ã≈€¿ª ∞°¡ˆ∞Ì ¿÷¥¬¡ˆ
+	//ÌîåÎ†àÏù¥Ïñ¥Í∞Ä ÏïÑÏù¥ÌÖúÏùÑ Í∞ÄÏßÄÍ≥† ÏûàÎäîÏßÄ
 	UPROPERTY()
 	bool hasItem = false;
 	//1 : speed Up  2: small size  
 	int itemNumber = 0;
 
+	UPROPERTY( EditAnywhere )
+	class USoundBase* speedSound;
+	UPROPERTY( EditAnywhere )
+	class USoundBase* shootingSound;
 
 	UPROPERTY(EditAnywhere)
 	UClass* bulletFactory;
 
-	/*UFUNCTION()
-	void GetReadyTimer();*/
-
 	UPROPERTY(EditAnywhere)
-	bool isPaused=false;
-
-	/*UFUNCTION()
-	void CountDown();*/
+	bool isPaused=true;
 
 	
 
@@ -131,6 +144,11 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiUseItem();
 
+	UFUNCTION( Server , Reliable )
+	void ServerBoost();
+
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiBoost();
 
 	UFUNCTION(Server, Reliable)
 	void ServerSpeedUp();
@@ -138,12 +156,17 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiSpeedUp();
 
+	UFUNCTION( Server , Reliable )
+	void ServerSpeedDown();
+
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiSpeedDown();
+
 	UFUNCTION(Server, Reliable)
 	void ServerShoot();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiShoot();
-
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
