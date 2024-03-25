@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "PlayerUiCard.h"
@@ -49,11 +49,13 @@ void UPlayerUiCard::SetTurnOrderScoreText(int32 Score)
 
 	if (TurnIndex == Score)
 	{
-		TurnOrderScore->SetText(FText::FromString(TEXT("MyTurn")));
+		TurnOrderScore->SetText( FText::FromString( TEXT( "MyTurn" ) ) );
+		MyTurnColor->SetRenderOpacity( 1 );
 	}
 	else
 	{
 		TurnOrderScore->SetText(FText::FromString(TEXT("")));
+		MyTurnColor->SetRenderOpacity( 0 );
 	}
 
 }

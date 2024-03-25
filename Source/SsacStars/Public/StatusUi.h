@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -28,5 +28,8 @@ public:
 	class UPlayerUiCard* PersonalState3;
 
 
-
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidgetAnim) , Transient )
+	class UWidgetAnimation* TurnStartAnimation;
+	UPROPERTY( EditDefaultsOnly , meta = (BindWidgetAnim) , Transient )
+	class UWidgetAnimation* TurnEndAnimation;
 };

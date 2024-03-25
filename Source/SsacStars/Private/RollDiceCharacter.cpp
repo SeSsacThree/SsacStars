@@ -1,15 +1,18 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+Ôªø// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "RollDiceCharacter.h"
-#include "Blueprint/UserWidget.h"
+#include "PartyGameStateBase.h"
+#include "RollDiceCharacter.h"
 #include "Dice.h"
+#include "PartyPlayer.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Components/SceneCaptureComponent.h"
 #include "ThrowDiceCharacterUi.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+
 // Sets default values
 
 class UStaticMeshComponent;
@@ -20,15 +23,15 @@ ARollDiceCharacter::ARollDiceCharacter()
 
 
 
-	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureComponent"));
-	this->SetRootComponent(SceneCaptureComponent);
+	SceneCaptureComponent = CreateDefaultSubobject<USceneCaptureComponent2D>( TEXT( "SceneCaptureComponent" ) );
+	this->SetRootComponent( SceneCaptureComponent );
 
 
-	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("MeshComp"));
-	MeshComp->SetupAttachment(SceneCaptureComponent);
+	MeshComp = CreateDefaultSubobject<USkeletalMeshComponent>( TEXT( "MeshComp" ) );
+	MeshComp->SetupAttachment( SceneCaptureComponent );
 
-	handComp = CreateDefaultSubobject<USceneComponent>(TEXT("handComp"));
-	handComp->SetupAttachment(MeshComp);
+	handComp = CreateDefaultSubobject<USceneComponent>( TEXT( "handComp" ) );
+	handComp->SetupAttachment( SceneCaptureComponent );
 
 
 
@@ -38,22 +41,24 @@ ARollDiceCharacter::ARollDiceCharacter()
 void ARollDiceCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	Dice = Cast<ADice>(UGameplayStatics::GetActorOfClass(GetWorld(), ADice::StaticClass()));
-	ThrowDiceUi = NewObject<UThrowDiceCharacterUi>(this, ThrowDiceUiFactory);
-
-	ServerCreateDice();
+	Dice = Cast<ADice>( UGameplayStatics::GetActorOfClass( GetWorld() , ADice::StaticClass() ) );
+	//ThrowDiceUi = NewObject<UThrowDiceCharacterUi>( this , ThrowDiceUiFactory );
+	PartyGameState=Cast<APartyGameStateBase>( GetWorld()->GetGameState() );
+	//if(HasAuthority())
+		//ServerCreateDice();
 	//CreateDice();
+	//ServerGrabDice( Dice );
 	BeginLocation = GetActorLocation();
 
-
+	SceneCaptureComponent->ShowOnlyActorComponents( this,true );
 }
 
 // Called every frame
-void ARollDiceCharacter::Tick(float DeltaTime)
+void ARollDiceCharacter::Tick( float DeltaTime )
 {
-	Super::Tick(DeltaTime);
-	SceneCaptureComponent->ShowOnlyActorComponents(this);
-	SetActorLocation(FVector(BeginLocation.X, BeginLocation.Y, GetActorLocation().Z));
+	Super::Tick( DeltaTime );
+	
+	//SetActorLocation( FVector( BeginLocation.X , BeginLocation.Y , GetActorLocation().Z ) );
 }
 
 // Called to bind functionality to input
@@ -81,17 +86,17 @@ void ARollDiceCharacter::CreateDice()
 
 	if (bHits)
 	{
-		// ¿¸√º ∞Àªˆ«ÿº≠
+		// Ï†ÑÏ≤¥ Í≤ÄÏÉâÌï¥ÏÑú
 		for (auto result : OutOverlaps)
 		{
 
-			// ∏∏æ‡ æ◊≈Õ¿« ¿Ã∏ßø° BP_Dice¿Ã ∆˜«‘µ«æÓ¿÷¥Ÿ∏È
+			// ÎßåÏïΩ Ïï°ÌÑ∞Ïùò Ïù¥Î¶ÑÏóê BP_DiceÏù¥ Ìè¨Ìï®ÎêòÏñ¥ÏûàÎã§Î©¥
 			if (result.GetActor()->GetActorNameOrLabel().Contains(TEXT("BP_Dice")))
 			{
-				// ±◊∞Õ¿ª grabPistol∑Œ «œ∞ÌΩÕ¥Ÿ.
+				// Í∑∏Í≤ÉÏùÑ grabPistolÎ°ú ÌïòÍ≥†Ïã∂Îã§.
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("overlap"));
 				Dice = result.GetActor();
-				// π›∫π¿ª ±◊∏∏«œ∞ÌΩÕ¥Ÿ.
+				// Î∞òÎ≥µÏùÑ Í∑∏ÎßåÌïòÍ≥†Ïã∂Îã§.
 				break;
 			}
 		}
@@ -101,16 +106,32 @@ void ARollDiceCharacter::CreateDice()
 
 	if (Dice)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Dice"));
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Dice" ) );
 		//GrapDice(Dice);
-		ServerGrabDice(Dice);
+		ServerGrabDice( Dice );
 	}
 
 
 }
 void ARollDiceCharacter::ServerCreateDice_Implementation()
 {
-	MultiCreateDice();
+	/*
+	if (Dice)
+	{
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Dice" ) );
+		//GrapDice(Dice);
+		ServerGrabDice( Dice );
+	}
+	*/
+	Dice->ReBack();
+	Dice->IsStopRollingMode = false;
+	auto mesh = Dice->GetComponentByClass<USkeletalMeshComponent>();
+	//mesh->SetSimulatePhysics(false);
+	//mesh->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	mesh->AttachToComponent( handComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale );
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "GrabDice" ) );
+	Dice->SetOwner( this );
+	//MultiCreateDice();
 }
 
 void ARollDiceCharacter::MultiCreateDice_Implementation()
@@ -119,7 +140,7 @@ void ARollDiceCharacter::MultiCreateDice_Implementation()
 
 	/*
 	TArray<struct FOverlapResult> OutOverlaps;
-	FCollisionObjectQueryParams ObjectQueryParams(FCollisionObjectQueryParams::InitType::AllObjects);
+	FCollisio	bjectQueryParams ObjectQueryParams(FCollisionObjectQueryParams::InitType::AllObjects);
 	bool bHits = GetWorld()->OverlapMultiByObjectType(
 		OutOverlaps,
 		GetActorLocation(),
@@ -129,17 +150,17 @@ void ARollDiceCharacter::MultiCreateDice_Implementation()
 
 	if (bHits)
 	{
-		// ¿¸√º ∞Àªˆ«ÿº≠
+		// Ï†ÑÏ≤¥ Í≤ÄÏÉâÌï¥ÏÑú
 		for (auto result : OutOverlaps)
 		{
 
-			// ∏∏æ‡ æ◊≈Õ¿« ¿Ã∏ßø° BP_Dice¿Ã ∆˜«‘µ«æÓ¿÷¥Ÿ∏È
+			// ÎßåÏïΩ Ïï°ÌÑ∞Ïùò Ïù¥Î¶ÑÏóê BP_DiceÏù¥ Ìè¨Ìï®ÎêòÏñ¥ÏûàÎã§Î©¥
 			if (result.GetActor()->GetActorNameOrLabel().Contains(TEXT("BP_Dice")))
 			{
-				// ±◊∞Õ¿ª grabPistol∑Œ «œ∞ÌΩÕ¥Ÿ.
+				// Í∑∏Í≤ÉÏùÑ grabPistolÎ°ú ÌïòÍ≥†Ïã∂Îã§.
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("overlap"));
 				Dice = result.GetActor();
-				// π›∫π¿ª ±◊∏∏«œ∞ÌΩÕ¥Ÿ.
+				// Î∞òÎ≥µÏùÑ Í∑∏ÎßåÌïòÍ≥†Ïã∂Îã§.
 				break;
 			}
 		}
@@ -147,99 +168,104 @@ void ARollDiceCharacter::MultiCreateDice_Implementation()
 	*/
 
 
-	if (Dice)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Dice"));
-		//GrapDice(Dice);
-		ServerGrabDice(Dice);
-	}
+
 }
 
-void ARollDiceCharacter::ThrowDice(const AActor* Actor)
+void ARollDiceCharacter::ThrowDice( const AActor* Actor )
 {
-	/*
+	
 	if (nullptr == Actor)
 		return;
 	//Dice->SetActorEnableCollision(false);
 
 	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
-	// pistol π∞∏Æ∏¶ ƒ—∞ÌΩÕ¥Ÿ.
+	// pistol Î¨ºÎ¶¨Î•º ÏºúÍ≥†Ïã∂Îã§.
 	//mesh->SetSimulatePhysics(true);
 	//mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	//mesh->SetCollisionResponseToAllChannels(ECR_Block);
-	// handø°º≠ ∂º∞ÌΩÕ¥Ÿ.
+	// handÏóêÏÑú ÎñºÍ≥†Ïã∂Îã§.
 	mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Throw"));
-	*/
+	Dice->SetOwner( nullptr );
 
 }
-void ARollDiceCharacter::ServerThrowDice_Implementation(const AActor* Actor)
+void ARollDiceCharacter::ServerThrowDice_Implementation( const AActor* Actor )
 {
-	MultiThrowDice(Actor);
+	//UE_LOG( LogTemp , Warning , TEXT( " ARollDiceCharacter::ServerThrowDice_Implementation(" ) );
+	MultiThrowDice( Actor );
 }
 
-void ARollDiceCharacter::MultiThrowDice_Implementation(const AActor* Actor)
+void ARollDiceCharacter::MultiThrowDice_Implementation( const AActor* Actor )
 {
 	if (nullptr == Actor)
 		return;
 	//Dice->SetActorEnableCollision(false);
 
 	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
-	// pistol π∞∏Æ∏¶ ƒ—∞ÌΩÕ¥Ÿ.
+	// pistol Î¨ºÎ¶¨Î•º ÏºúÍ≥†Ïã∂Îã§.
 	//mesh->SetSimulatePhysics(true);
-	//mesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	//mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	//mesh->SetCollisionResponseToAllChannels(ECR_Block);
-	// handø°º≠ ∂º∞ÌΩÕ¥Ÿ.
-	mesh->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Throw"));
+	// handÏóêÏÑú ÎñºÍ≥†Ïã∂Îã§.
+	mesh->DetachFromComponent( FDetachmentTransformRules::KeepWorldTransform );
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Throw" ) );
+	UE_LOG( LogTemp , Warning , TEXT( " ARollDiceCharacter::MultiThrowDice_Implementation(" ) );
+
+	//Dice->SetOwner( nullptr );
 }
 
-void ARollDiceCharacter::GrapDice(const AActor* Actor)
+void ARollDiceCharacter::GrapDice( const AActor* Actor )
 {
-	/*
+	
 	Dice->ReBack();
 	Dice->IsStopRollingMode = false;
 	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
 	//mesh->SetSimulatePhysics(false);
 	mesh->AttachToComponent(handComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GrabDice"));
-	*/
+	Dice->SetOwner( this );
 }
 
-void ARollDiceCharacter::ServerGrabDice_Implementation(const AActor* Actor)
+void ARollDiceCharacter::ServerGrabDice_Implementation( const AActor* Actor )
 {
-	MultiGrabDice(Actor);
+	MultiGrabDice( Actor );
 }
 
-void ARollDiceCharacter::MultiGrabDice_Implementation(const AActor* Actor)
+void ARollDiceCharacter::MultiGrabDice_Implementation( const AActor* Actor )
 {
 	Dice->ReBack();
 	Dice->IsStopRollingMode = false;
 	auto mesh = Actor->GetComponentByClass<USkeletalMeshComponent>();
 	//mesh->SetSimulatePhysics(false);
-	mesh->AttachToComponent(handComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("GrabDice"));
+	//mesh->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	mesh->AttachToComponent( handComp , FAttachmentTransformRules::SnapToTargetNotIncludingScale );
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "GrabDice" ) );
+	Dice->SetOwner( this );
 }
 void ARollDiceCharacter::GetSignal()
 {
-	ServerThrowDice(Dice);
+	UE_LOG( LogTemp , Warning , TEXT( " ARollDiceCharacter::GetSignal(" ) );
+	//ServerThrowDice( Dice );
 	//ThrowDice(Dice);
-	//Dice->ThrowDice();
-	Dice->ServerThrowDice();
+	Dice->ThrowDice();
+	//Dice->ServerThrowDice();
 	//Dice->IsUpMode = true;
 }
 
 void ARollDiceCharacter::StartRolling()
 {
-	//Dice->StartDiceRolling();
-	Dice->MultiStartDiceRolling();
+	Dice->StartDiceRolling();
+	//Dice->ServerStartDiceRolling();
+	if(HasAuthority())
+		UE_LOG( LogTemp , Warning , TEXT( "RemainStartRolling" ) );
 }
 
 void ARollDiceCharacter::AddView()
 {
+	/*
 	if (ThrowDiceUi)
 		ThrowDiceUi->AddToViewport();
-
+		*/
 }
 
 void ARollDiceCharacter::CloseView()
@@ -248,47 +274,57 @@ void ARollDiceCharacter::CloseView()
 
 
 
-	DelayTime(1.0f, [this]()
+	DelayTime( 1.0f , [this]()
 		{
-			//∫Ø»Ø« ø‰
-			ServerGrabDice(Dice);
+			//Î≥ÄÌôòÌïÑÏöî
+			//ServerGrabDice( Dice );
 			//GrapDice(Dice);
-			ServerRemoveThrowDiceUi();
+			//ServerRemoveThrowDiceUi();
+			Dice->ReBack();
+			PartyGameState->ServerRemoveThrowDiceUi();
 			//ThrowDiceUi->RemoveFromParent();
 
-		});
+		} );
 
 }
 
-void ARollDiceCharacter::Jump(float LaunchAmount)
+void ARollDiceCharacter::Jump( float LaunchAmount )
 {
-	FVector LaunchDirection = FVector::UpVector; // ¿ß¬ ¿∏∑Œ ∂ÁøÏ±‚ øπΩ√
-	float LaunchStrength = LaunchAmount; // ∂ÁøÏ¥¬ »˚¿« ≈©±‚
+	FVector LaunchDirection = FVector::UpVector; // ÏúÑÏ™ΩÏúºÎ°ú ÎùÑÏö∞Í∏∞ ÏòàÏãú
+	float LaunchStrength = LaunchAmount; // ÎùÑÏö∞Îäî ÌûòÏùò ÌÅ¨Í∏∞
 
 
 }
 
-void ARollDiceCharacter::DelayTime(float WantSeconds, TFunction<void()> InFunction)
+void ARollDiceCharacter::DelayTime( float WantSeconds , TFunction<void()> InFunction )
 {
 
 	FTimerHandle TimerHandle;
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [InFunction]()
+	GetWorld()->GetTimerManager().SetTimer( TimerHandle , [InFunction]()
 		{
-			// ¡ˆø¨ »ƒ Ω««‡µ… «‘ºˆ »£√‚
+			// ÏßÄÏó∞ ÌõÑ Ïã§ÌñâÎê† Ìï®Ïàò Ìò∏Ï∂ú
 			InFunction();
-		}, WantSeconds, false);
+		} , WantSeconds , false );
 }
 
 
 
 void ARollDiceCharacter::ServerRemoveThrowDiceUi_Implementation()
 {
-	MultiRemoveThrowDiceUi();
+	
+	//MultiRemoveThrowDiceUi();
+	
 }
 
 void ARollDiceCharacter::MultiRemoveThrowDiceUi_Implementation()
 {
-	ThrowDiceUi->RemoveFromParent();
+	/*
+	if(ThrowDiceUi)
+	{
+		ThrowDiceUi->RemoveFromParent();
+
+	}
+	*/
 }
 
 void ARollDiceCharacter::ServerViewThrowDiceUi_Implementation()
@@ -298,15 +334,22 @@ void ARollDiceCharacter::ServerViewThrowDiceUi_Implementation()
 
 void ARollDiceCharacter::MultiViewThrowDiceUi_Implementation()
 {
-	ThrowDiceUi->AddToViewport();
+	/*
+	if (ThrowDiceUi)
+	{
+		ThrowDiceUi->AddToViewport();
+	}
+	*/
 }
 
 
 
 
-void ARollDiceCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+void ARollDiceCharacter::GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps ) const
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(ARollDiceCharacter, Dice);
-	DOREPLIFETIME(ARollDiceCharacter, ThrowDiceUi);
+	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
+	DOREPLIFETIME( ARollDiceCharacter , Dice );
+	DOREPLIFETIME( ARollDiceCharacter , SceneCaptureComponent );
+	//DOREPLIFETIME( ARollDiceCharacter , handComp );
+	
 }

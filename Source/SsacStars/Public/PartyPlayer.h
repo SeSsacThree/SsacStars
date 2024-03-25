@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -33,7 +33,7 @@ public:
 	APartyPlayer();
 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Replicated)
 	class UWidgetComponent* DiceRemainWidget;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<class UUserWidget> DiceRemainWidgetFactory;
@@ -60,13 +60,13 @@ public:
 
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Replicated)
 	int MoveRemaining;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Coin;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int Score = 0;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Replicated)
 	int PlayerIndex;
 public:
 	bool IsMoving;
@@ -77,7 +77,7 @@ public:
 	class ABlueBoardSpace* CurrentSpace;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class APartyGameStateBase* PartyGameState;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Replicated)
 	class ARollDiceCharacter* RollDicePlayer;
 	UPROPERTY(EditDefaultsOnly)
 	class AMap_SpaceFunction* PlayFun;
@@ -105,21 +105,34 @@ public:
 	void ServerChangeAppereance();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiChangeAppereance();
+	UFUNCTION()
 	void GetCamera();
+	UFUNCTION()
 	void SelectBehavior();
+	UFUNCTION()
 	void RollDice();
+	UFUNCTION()
 	void ItemApply();
+	UFUNCTION()
 	void ChooseItem();
+	
 	void MoveToSpace(ABlueBoardSpace* currentSpace);
+	UFUNCTION()
 	void MoveEnded();
+	UFUNCTION()
 	void StopOrGo();
+	UFUNCTION()
+	void ApplyTrap(int Index);
+
 
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
+	UFUNCTION()
 	void MyTurnStart();
+	UFUNCTION()
 	void MyTurnEnd();
 	void CommandCloseView();
 
-
+	virtual void GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps ) const override;
 public:
 
 

@@ -75,7 +75,7 @@ void UTenCoinsforaStar::ClickedButton()
 	), DelayTime, bIsLoop);
 
 	*/
-
+	
 	PartyGameState->ServerClickedGetStarButton();
 	//ServerClickedButton();
 
@@ -88,12 +88,24 @@ void UTenCoinsforaStar::ServerClickedButton_Implementation()
 void UTenCoinsforaStar::MultiClickedButton_Implementation()
 {
 	//WrapBox 보임
+	//점수 올리고 ui 최신화하고
+	int32 choice = FMath::RandRange( 1 , 2 );
 
-	PartyGameState->CurrentPlayer->Score+=10;
+	// 선택 결과 출력
+	if (choice == 1) {
+		PartyGameState->CurrentPlayer->Score += 10;
+	}
+	else {
+		PartyGameState->CurrentPlayer->Score /= 2;;
+	}
+
+
+	
 	PartyGameState->ServerUpdateGameInfo(PartyGameState->PlayerCount);
 	//	GM->UpdateGameInfo(PlayerIndex);
 	PartyGameState->ServerUpdateRankInfo();
 	//GM->UpdateRankInfo();
+	//별위치 바꾸고 
 	PartyGameState->ServerChangeStarSpace();
 	//GM->ChangeStarSpace();
 
@@ -166,7 +178,28 @@ void UTenCoinsforaStar::MultiRemoveWidgetAfterAnimation_Implementation()
 		// 애니메이션이 끝나면
 		// 위젯 사라짐
 		RemoveFromParent();
-	PartyGameState->CurrentPlayer->MoveToSpace(PartyGameState->CurrentPlayer->CurrentSpace);
+
+	PartyGameState->ServerMoveCameraToStar();
+	DelayTime( 4.0f , [this]()
+	{
+		PartyGameState->ServerMoveCameraToPlayer( PartyGameState->CurrentPlayer );
+		DelayTime( 3.0f , [this]()
+		{
+			PartyGameState->CurrentPlayer->MoveToSpace( PartyGameState->CurrentPlayer->CurrentSpace );
+		} );
+	} );
+
+	
+}
+
+void UTenCoinsforaStar::DelayTime(float WantSeconds, TFunction<void()> InFunction)
+{
+	FTimerHandle TimerHandle;
+	GetWorld()->GetTimerManager().SetTimer( TimerHandle , [InFunction]()
+		{
+			// 지연 후 실행될 함수 호출
+			InFunction();
+		} , WantSeconds , false );
 }
 
 void UTenCoinsforaStar::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
