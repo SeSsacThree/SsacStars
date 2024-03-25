@@ -34,6 +34,12 @@ void USsacGameInstance::Init()
 	}, 5, false);*/
 }
 
+bool USsacGameInstance::IsInRoom()
+{
+	FUniqueNetIdPtr netID = GetWorld()->GetFirstLocalPlayerFromController()->GetUniqueNetIdForPlatformUser().GetUniqueNetId();
+	return sessionInterface->IsPlayerInSession(FName(*myRoomName), *netID);
+}
+
 void USsacGameInstance::CreateRoom(int32 maxplayerCount, FString roomName)
 {
 	UE_LOG(LogTemp, Warning, TEXT("CreatRoom!!"))

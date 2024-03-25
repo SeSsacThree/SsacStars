@@ -21,7 +21,7 @@ void ULobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	// PlayAnimation( Image_bg_Animation,0,0 );
+	PlayAnimation( Image_bg_Animation,0,0 );
 
 	gi = GetWorld()->GetGameInstance<USsacGameInstance>();
 	if (gi)
@@ -32,6 +32,11 @@ void ULobbyWidget::NativeConstruct()
 
 	btn_doCreateRoom->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyClicked_doCreateRoom);
 	btn_doFindRoomList->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyDoFindRoomList);
+
+	btn_goCreateRoom->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyGoCreateRoom);
+	btn_goFindRoom->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyGoFindRoom);
+	btn_goMenuFromCreateRoom->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyGoMenu);
+	btn_goMenuFromFindRoom->OnClicked.AddDynamic(this, &ULobbyWidget::OnMyGoMenu);
 
 	// 마우스 커서
 	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
@@ -98,18 +103,28 @@ void ULobbyWidget::OnMyGoCreateRoom()
 		edit_nickName->SetText(FText::FromString(gi->myNickName));
 	}
 	SwitchPanel(SWITCHER_INDEX_CREATEROOM);
-	OnMyDoFindRoomList();
+	// OnMyDoFindRoomList();
 }
 
 void ULobbyWidget::OnMyGoFindRoom()
 {
+	if (gi)
+	{
+		if (false == edit_nickName->GetText().IsEmpty())
+		{
+			gi->myNickName = edit_nickName->GetText().ToString();
+		}else
+		{
+			edit_nickName->SetText(FText::FromString(gi->myNickName));
+		}
+	}
 	SwitchPanel(SWITCHER_INDEX_FINDROOM);
 	OnMyDoFindRoomList();
 }
 
 void ULobbyWidget::OnMyDoFindRoomList()
 {
-	scroll_roomList->ClearChildren();
+	scroll_RoomList->ClearChildren();
 	if(gi)
 	{
 		gi->FindOtherRooms();
@@ -118,14 +133,14 @@ void ULobbyWidget::OnMyDoFindRoomList()
 
 void ULobbyWidget::AddRoomInfoWidget(const FRoomInfo& info)
 {
-	if (nullptr == scroll_roomList || nullptr == roomInfoFactory)
+	if (nullptr == scroll_RoomList || nullptr == roomInfoFactory)
 	return;
 
 	auto ui = CreateWidget<URoomInfoWidget>(GetWorld(), roomInfoFactory);
 	ui->SetInfo( info );
-	if (scroll_roomList)
+	if (scroll_RoomList)
 	{
-		scroll_roomList->AddChild(ui);
+		scroll_RoomList->AddChild(ui);
 	}
 }
 
