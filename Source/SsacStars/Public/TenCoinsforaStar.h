@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -65,7 +65,7 @@ public:
 	void ServerGetStarAnimation(UWidgetAnimation* InWidgetAnimation);
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiGetStarAnimation(UWidgetAnimation* InWidgetAnimation);
-
+	void DelayTime( float WantSeconds , TFunction<void()> InFunction );
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

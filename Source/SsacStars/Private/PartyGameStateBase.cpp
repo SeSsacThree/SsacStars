@@ -3,10 +3,11 @@
 
 #include "PartyGameStateBase.h"
 #include "MainUI.h"
+#include "ThrowDiceCharacterUi.h"
 #include "StatusUi.h"
 #include "ItemUI.h"
 #include "TenCoinsforaStar.h"
-
+#include "PartyGameEnd.h"
 #include "Components/Image.h"
 #include "TrapWidget.h"
 #include "RandomItemWidget.h"
@@ -16,13 +17,16 @@
 #include "EngineUtils.h"
 #include "GetCoins.h"
 #include "GetCoins_Pingu.h"
-
+#include "Blueprint/UserWidget.h"
 #include "Components/WrapBox.h"
 #include "LevelSequencePlayer.h"
 #include "LevelSequenceActor.h"
 #include "CoreMinimal.h"
+#include "Dice.h"
 #include "GameFramework/Actor.h"
 #include "PlayerUiCard.h"
+#include "RollDiceCharacter.h"
+#include "Components/BoxComponent.h"
 
 
 APartyGameStateBase::APartyGameStateBase()
@@ -42,19 +46,20 @@ APartyGameStateBase::APartyGameStateBase()
 void APartyGameStateBase::BeginPlay()
 {
 	Super::BeginPlay();
+	ThrowDiceUi = NewObject<UThrowDiceCharacterUi>( this , ThrowDiceUiFactory );
 	SelectUi = NewObject<UMainUI>(this, SelectUiFactory);
 	StatusUi = NewObject<UStatusUi>(this, StatusUiFactory);
 	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
 	GetCoinsUi = NewObject<UGetCoins>(this, GetCoinsUiFactory);
 	UGetCoins_PinguUi = NewObject<UGetCoins_Pingu>(this, UGetCoins_PinguUiFactory);
 	TrapUi = NewObject<UTrapWidget>(this, TrapUiFactory);
-	ItemUi = NewObject<UItemUI>(this, ItemUiFactory);
-	TrapUi = NewObject<UTrapWidget>(this, TrapUiFactory);
+
 	GetItemUi = NewObject<URandomItemWidget>(this, GetItemUiFactory);
 	TenCoinsforaStarUi = NewObject<UTenCoinsforaStar>(this, TenCoinsforaStarUiFactory);
-
+	EndGameUi= NewObject<UPartyGameEnd>( this , EndGameUiFactory );
 	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 	Star = Cast<APartyScore>(UGameplayStatics::GetActorOfClass(GetWorld(), APartyScore::StaticClass()));
+	Dice = Cast<ADice>( UGameplayStatics::GetActorOfClass( GetWorld() , ADice::StaticClass() ) );
 	PlayerScores.SetNum(PlayerList.Num());
 	PlayerScores.Init(0, PlayerList.Num());
 	
@@ -68,13 +73,44 @@ void APartyGameStateBase::BeginPlay()
 	
 		// 서버에서만 실행될 초기화 코드
 		// 예: 서버에서 게임 시작 시 시퀀스를 재생하도록 서버에 요청
-		ServerTriggerSequence();
+		if(HasAuthority())
+			ServerTriggerSequence();
 	
+}
+
+void APartyGameStateBase::ServerThrowDiceUi_Implementation()
+{
+	MultiThrowDiceUi();
+}
+
+void APartyGameStateBase::MultiThrowDiceUi_Implementation()
+{
+
+		if (ThrowDiceUi)
+			ThrowDiceUi->AddToViewport();
+	
+}
+
+void APartyGameStateBase::ServerViewEndGameUi_Implementation()
+{
+	MultiViewEndGameUi();
+}
+
+void APartyGameStateBase::MultiViewEndGameUi_Implementation()
+{
+	EndGameUi->AddToViewport();
+	EndGameUi->PlayAnimation(EndGameUi->PartyGameEnd );
+	DelayTime( 3.0f , [this]()
+		{
+
+			EndGameUi->PlayAnimation( EndGameUi->Score );
+		} );
 }
 
 void APartyGameStateBase::ServerMoveCameraToStar_Implementation()
 {
-	MultiMoveCameraToPlayer(CurrentPlayer);
+	MultiMoveCameraToStar();
+
 }
 
 void APartyGameStateBase::MultiMoveCameraToStar_Implementation()
@@ -82,7 +118,7 @@ void APartyGameStateBase::MultiMoveCameraToStar_Implementation()
 	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	OurPlayerController->SetViewTargetWithBlend(Star, 1.0f);
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StarChange"));
-	DelayTime(1.0f, [this]()
+	DelayTime(2.0f, [this]()
 		{
 
 			ServerMoveCameraToPlayer(CurrentPlayer);
@@ -170,6 +206,9 @@ void APartyGameStateBase::MultiMoveCameraToPlayer_Implementation(APartyPlayer* I
 	*/
 	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	OurPlayerController->SetViewTargetWithBlend(InPlayer, 1.0f);
+	
+	//StatusUi->PlayAnimation( StatusUi->TurnStartAnimation );
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "playAnimaion" ) );
 	/*
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
@@ -215,6 +254,7 @@ void APartyGameStateBase::ServerViewItemUi_Implementation()
 void APartyGameStateBase::MultiViewItemUi_Implementation()
 {
 	ItemUi->AddToViewport();
+	//PlaySound()
 }
 
 void APartyGameStateBase::ServerViewSelectUi_Implementation()
@@ -234,6 +274,7 @@ void APartyGameStateBase::ServerViewTrapUi_Implementation()
 void APartyGameStateBase::MultiViewTrapUi_Implementation()
 {
 	TrapUi->AddToViewport();
+	PlaySound( TrapSound );
 }
 
 void APartyGameStateBase::ServerViewTenCoinsforaStarUi_Implementation()
@@ -271,7 +312,10 @@ void APartyGameStateBase::ServerRemoveSelectUi_Implementation()
 
 void APartyGameStateBase::MultiRemoveSelectUi_Implementation()
 {
-	SelectUi->RemoveFromParent();
+	if(SelectUi)
+	{
+		SelectUi->RemoveFromParent();
+	}
 }
 
 void APartyGameStateBase::ServerRemoveItemUi_Implementation()
@@ -281,7 +325,10 @@ void APartyGameStateBase::ServerRemoveItemUi_Implementation()
 
 void APartyGameStateBase::MultiRemoveItemUi_Implementation()
 {
-	ItemUi->RemoveFromParent();
+	if(ItemUi)
+	{
+		ItemUi->RemoveFromParent();
+	}
 }
 
 void APartyGameStateBase::ServerChangeStarSpace_Implementation()
@@ -303,7 +350,28 @@ void APartyGameStateBase::ServerChangeStarSpace_Implementation()
 		ABlueBoardSpace* SelectedSpace = FoundSpaces[FMath::RandRange(0, FoundSpaces.Num() - 1)];
 		MultiChangeStarSpace(SelectedSpace);
 	}
+	if (FoundSpaces.Num() > 0)
+	{
+		// 랜덤하게 발판 선택
+		ABlueBoardSpace* Space = FoundSpaces[FMath::RandRange( 0 , FoundSpaces.Num() - 1 )];
 
+		// 현재 상태를 이전 상태로 저장
+		CurrentPlayer->CurrentSpace->SpaceState = CurrentPlayer->CurrentSpace->PreviousState;
+
+		// 선택된 발판의 이전상태를 최신화
+		Space->PreviousState = Space->SpaceState;
+		// 선택된 발판을 "Star" 상태로 변경
+
+		Space->SpaceState = ESpaceState::Star;
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "StarSwitch" ) );
+		Space->UpdateAppearance();
+	}
+	// 그발판이 star,warp 발판이 아니라면
+	// 현재 자신의 state를 previousstate에 저장하고
+	// star state 상태로 바꾼다
+
+
+	Star->ReSpace();
 
 
 }
@@ -311,7 +379,7 @@ void APartyGameStateBase::ServerChangeStarSpace_Implementation()
 void APartyGameStateBase::MultiChangeStarSpace_Implementation(ABlueBoardSpace* Space)
 {
 	//맵상 모든 발판을 검사해서 FOundSpace안에 넣고
-
+	/*
 	//검사하여 확인된 발판이 있다면 
 	if (FoundSpaces.Num() > 0)
 	{
@@ -335,9 +403,9 @@ void APartyGameStateBase::MultiChangeStarSpace_Implementation(ABlueBoardSpace* S
 
 
 	Star->ReSpace();
-	ServerMoveCameraToStar();
+	//ServerMoveCameraToStar();
 
-
+	*/
 }
 
 
@@ -417,6 +485,7 @@ void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 		StatusUi->PersonalState->SetSpaceTypeBorder(CurrentPlayer);
 		StatusUi->PersonalState->SetMainScoreText(CurrentPlayer->Rank);
 		StatusUi->PersonalState->SetTurnOrderScoreText(CurrentPlayerIndex);
+		
 		break;
 	}
 	case 1:
@@ -441,6 +510,7 @@ void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 		StatusUi->PersonalState3->SetSpaceTypeBorder(CurrentPlayer);
 		StatusUi->PersonalState3->SetMainScoreText(CurrentPlayer->Rank);
 		StatusUi->PersonalState3->SetTurnOrderScoreText(CurrentPlayerIndex);
+
 		break;
 	}
 
@@ -455,6 +525,7 @@ void APartyGameStateBase::ServerUpdateEndInfo_Implementation(int Index)
 
 void APartyGameStateBase::MultiUpdateEndInfo_Implementation(int Index)
 {
+	
 	switch (Index)
 	{
 	case 0:
@@ -513,11 +584,12 @@ void APartyGameStateBase::MultiUpdateRankInfo_Implementation()
 
 void APartyGameStateBase::ServerRollDice_Implementation()
 {
+	CurrentPlayer->RollDice();
 	MultiRollDice();
 }
 void APartyGameStateBase::MultiRollDice_Implementation()
 {
-	CurrentPlayer->RollDice();
+	
 }
 void APartyGameStateBase::ServerChooseItem_Implementation()
 {
@@ -532,10 +604,11 @@ void APartyGameStateBase::ServerCloseView_Implementation()
 
 void APartyGameStateBase::MultiCloseView_Implementation()
 {
-	ServerRemoveItemUi();
-	ServerRemoveSelectUi();
-	//ItemUi->RemoveFromParent();
-	//SelectUi->RemoveFromParent();
+	//ServerRemoveItemUi();
+	//ServerRemoveSelectUi();
+
+	ItemUi->RemoveFromParent();
+	SelectUi->RemoveFromParent();
 	//현재 플레이어의 턴의 인덱스에 해당하는 플레이어만 사라지게 접근이 필요
 	/*
 	if (PlayerController)
@@ -554,7 +627,10 @@ void APartyGameStateBase::ServerClickedGetStarButton_Implementation()
 
 void APartyGameStateBase::MultiClickedGetStarButton_Implementation()
 {
-	CurrentPlayer->Score++;
+
+	PlaySound(GetStarSound);
+
+	CurrentPlayer->Score+=50;
 	ServerUpdateGameInfo(PlayerCount);
 	//	GM->UpdateGameInfo(PlayerIndex);
 	//ServerUpdateRankInfo();
@@ -632,19 +708,23 @@ void APartyGameStateBase::MultiClickedItem2Button_Implementation()
 
 void APartyGameStateBase::ServerOpenMinigame_Implementation()
 {
-	MultiOpenMinigame();
+	DelayTime( 8.0f , [this]()
+	{
+		MultiOpenMinigame();
+	} );
+	
+	
 }
 
 void APartyGameStateBase::MultiOpenMinigame_Implementation()
 {
-	const FName LevelName = "MiniGame_Kart";
+	
 
 	
 		// Get the World from this actor
-
-		FLatentActionInfo LatentInfo;
-		UGameplayStatics::LoadStreamLevel( this , LevelName , true , true , LatentInfo );
-	
+	auto pc = GetWorld()->GetFirstPlayerController();
+	FString url = TEXT( "MiniGame_Kart" );
+	pc->ClientTravel( url , TRAVEL_Absolute );
 	
 
 }
@@ -739,7 +819,89 @@ void APartyGameStateBase::MultiSequenceEnded_Implementation()
 }
 
 
+void APartyGameStateBase::ServerTurnStartUi_Implementation()
+{
+	MultiTurnStartUi();
+}
 
+void APartyGameStateBase::MultiTurnStartUi_Implementation()
+{
+	StatusUi->PlayAnimation( StatusUi->TurnStartAnimation );
+}
+
+void APartyGameStateBase::ServerDiceOverlap_Implementation()
+{
+	Dice->DicePoint1->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	Dice->DicePoint2->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	Dice->DicePoint3->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	Dice->DicePoint4->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	Dice->DicePoint5->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	Dice->DicePoint6->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	Dice->DiceComp->SetCollisionEnabled( ECollisionEnabled::QueryAndPhysics );
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "overlapimple" ) );
+
+	//LaunchDice(200);
+	Dice->StopRollingLocation = Dice->DiceComp->GetComponentLocation();
+	Dice->IsRollingMode = false;
+	Dice->IsStopRollingMode = true;
+	Dice->IsSelected = true;
+	Dice->SetRotationToNumber( Dice->DiceNumber );
+
+	CurrentPlayer->ItemApply();
+	//GM->CurrentPlayer->ItemApply();
+
+	CurrentPlayer->RollDicePlayer->CloseView();
+	//GM->CurrentPlayer->RollDicePlayer->CloseView();
+	MultiDiceOverlap();
+}
+
+void APartyGameStateBase::MultiDiceOverlap_Implementation()
+{
+
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "ServerOverlap" ) );
+	
+	
+}
+
+void APartyGameStateBase::ServerRemoveThrowDiceUi_Implementation()
+{
+	MultiRemoveThrowDiceUi();
+}
+
+void APartyGameStateBase::MultiRemoveThrowDiceUi_Implementation()
+{
+	if (ThrowDiceUi)
+	{
+		ThrowDiceUi->RemoveFromParent();
+	}
+}
+
+void APartyGameStateBase::ServerSoundVoice_Implementation(USoundBase* MySound)
+{
+	MultiSoundVoice( MySound );
+}
+
+void APartyGameStateBase::MultiSoundVoice_Implementation(USoundBase* MySound)
+{
+	if (MySound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation( this , MySound , CurrentPlayer->GetActorLocation() );
+	}
+}
+
+void APartyGameStateBase::ServerOverlap_Implementation()
+{
+	CurrentPlayer->ItemApply();
+	CurrentPlayer->RollDicePlayer->CloseView();
+}
+
+void APartyGameStateBase::PlaySound(USoundBase* MySound)
+{
+	if (MySound != nullptr)
+	{
+		UGameplayStatics::PlaySoundAtLocation( this , MySound , CurrentPlayer->GetActorLocation() );
+	}
+}
 
 void APartyGameStateBase::DelayTime(float WantSeconds, TFunction<void()> InFunction)
 {
@@ -759,9 +921,10 @@ void APartyGameStateBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& 
 	DOREPLIFETIME(APartyGameStateBase, CurrentPlayerIndex);
 	DOREPLIFETIME(APartyGameStateBase, CurrentPlayer);
 	DOREPLIFETIME(APartyGameStateBase, TenCoinsforaStarUi);
+	DOREPLIFETIME( APartyGameStateBase , ThrowDiceUi );
 	DOREPLIFETIME(APartyGameStateBase, Star);
 	DOREPLIFETIME(APartyGameStateBase, SequencePlayer);
 
-	
+
 }
 

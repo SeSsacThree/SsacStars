@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -39,4 +39,12 @@ public:
 	void ItemAction();
 	UFUNCTION()
 	void MapAction();
+
+	UFUNCTION(Server,Reliable)
+	void ServerDiceAction();
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiDiceAction();
+
+
+	virtual void GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& OutLifetimeProps ) const override;
 };

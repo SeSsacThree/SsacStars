@@ -10,6 +10,7 @@
 #include "PartyController.h"
 #include "PartyGameStateBase.h"
 #include "PartyScore.h"
+#include "SsacGameInstance.h"
 #include "StatusUi.h"
 
 
@@ -134,6 +135,7 @@ void APartyGameModeBase::SetPlayerAppeareance(APartyPlayer* Player, int Index)
 
 void APartyGameModeBase::SetRollerAppeareance(ARollDiceCharacter* Player, int Index)
 {
+	/*
 	switch (Index)
 	{
 	case 0:
@@ -162,6 +164,7 @@ void APartyGameModeBase::SetRollerAppeareance(ARollDiceCharacter* Player, int In
 	}
 
 	}
+	*/
 }
 void APartyGameModeBase::AddItemUseUi()
 {
@@ -196,7 +199,7 @@ void APartyGameModeBase::StartTurn()
 }
 void APartyGameModeBase::NextTurn()
 {
-
+	
 	//CurrentPlayerIndex를 한명이 주사위를 던질때마 추가한다
 	PartyGameState->CurrentPlayerIndex++;
 	//CurrentPlayerIndex++;
@@ -221,6 +224,15 @@ void APartyGameModeBase::EndRound()
 	CurrentPlayerIndex = 0;
 	if (PartyGameState->Round > 1)
 	{
+		PartyGameState->ServerViewEndGameUi();
+
+		auto gi = Cast<USsacGameInstance>( GetWorld()->GetGameInstance() );
+		for (int i = 0; i < gi->playerScore.Num(); i++)
+		{
+			gi->playerScore[i] = PlayerScores[i];
+		}
+
+		PartyGameState->ServerSoundVoice( PartyGameState->ResultSound );
 		StartMiniGame();
 	}
 	else
@@ -242,6 +254,8 @@ void APartyGameModeBase::StartMiniGame()
 		UGameplayStatics::LoadStreamLevel(GetWorld(), LevelName, true, true, FLatentActionInfo());
 		//UGameplayStatics::OpenLevel(GetWorld(),TEXT("MiniGame_Kart"));
 		*/
+
+	
 	PartyGameState->ServerOpenMinigame();
 }
 

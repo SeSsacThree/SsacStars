@@ -4,18 +4,21 @@
 #include "PartyPlayer.h"
 #include "BlueBoardSpace.h"
 #include "Dice.h"
-#include "MainUI.h"
+#include "StatusUi.h"
+#include "ItemUi.h"
+#include "MainUi.h"
 #include "Map_SpaceFunction.h"
 #include "PartyGameModeBase.h"
 #include "RollDiceCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Runtime/AIModule/Classes/AIController.h"
-#include "NavigationSystem.h"
+#include "GameFramework/PlayerController.h"
 #include "Runtime/AIModule/Classes/Navigation/PathFollowingComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/WidgetComponent.h"
 #include "PartyGameStateBase.h"
+#include "Net/UnrealNetwork.h"
 // Sets default values
 
 
@@ -57,11 +60,6 @@ void APartyPlayer::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-
-
-
-
-
 }
 
 // Called to bind functionality to input
@@ -89,7 +87,7 @@ void APartyPlayer::GetCamera()
 
 	//APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	//OurPlayerController->SetViewTargetWithBlend(this, 1.0f);
-
+	PartyGameState->ServerTurnStartUi();
 	DelayTime(1.0f, [this]()
 		{
 			SelectBehavior();
@@ -111,10 +109,18 @@ void APartyPlayer::RollDice()
 	//MoveRemaining = UKismetMathLibrary::RandomIntegerInRange(1, 6);
 
 	PartyGameState->ServerCloseView();
-	//GM->CloseView();
+
+	if(HasAuthority())
+		UE_LOG( LogTemp , Warning , TEXT( "RemainRollDice" ) );
+
+	
 	//RollDicePlayer->AddView();
-	RollDicePlayer->ServerViewThrowDiceUi();
-	RollDicePlayer->GetSignal();
+	//RollDicePlayer->ServerViewThrowDiceUi();
+	PartyGameState->ServerThrowDiceUi();
+	UE_LOG( LogTemp , Warning , TEXT( "	RollDicePlayer->ServerViewThrowDiceUi();" ) );
+	if(HasAuthority())
+		RollDicePlayer->GetSignal();
+	UE_LOG( LogTemp , Warning , TEXT( "	RollDicePlayer->GetSignal();" ) );
 	DelayTime(2.0f, [this]()
 		{
 			RollDicePlayer->StartRolling();
@@ -226,6 +232,7 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 
 	if (Ai)
 	{
+		// 이동 하고 
 		FAIMoveRequest MoveRequest;
 		FVector MoveLoc = CurrentSpace->GetActorLocation();
 		MoveLoc.Y -=20;
@@ -237,7 +244,7 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 		//Ai->MoveToActor(CurrentSpace, 0.1f, false);
 		Ai->MoveTo(MoveRequest, &NavPath);
 
-
+		//1초후에 멈춰라 
 		DelayTime(1.0f, [this]()
 			{
 				StopOrGo();
@@ -265,7 +272,7 @@ void APartyPlayer::MoveEnded()
 		case ESpaceState::Blue:
 		{
 			//Coin += 3;
-			Score += 5;
+			Score += 20;
 			PartyGameState->ServerGetCoinsUi();
 		}
 		break;
@@ -273,7 +280,7 @@ void APartyPlayer::MoveEnded()
 		{
 			PartyGameState->ServerGetCoins_PinguUi();
 			//Coin -= 3;
-			Score -= 5;
+			Score -= 20;
 		}
 		break;
 		case ESpaceState::Item:
@@ -325,14 +332,30 @@ void APartyPlayer::MoveEnded()
 			//함정 위젯 열어서 종류에 따라 실행
 			//GM->AddTrapUi();
 			PartyGameState->ServerViewTrapUi();
+
+			
+				DelayTime( 2.0f , [this]()
+				{
+
+					int RandTrap = UKismetMathLibrary::RandomIntegerInRange( 0 , 2 );
+
+					ApplyTrap( RandTrap );
+
+				} 
+				
+				);
 		}
 		break;
 		case ESpaceState::Warp:
 		{
 			//AMap_SpaceFunction Map_SpaceFunction;
 			//Map_SpaceFunction.SwapPlayerPositions(this);
+			PartyGameState->ServerSoundVoice( PartyGameState->WarpSound );
+			FVector TelpLoc = CurrentSpace->WarpSpace->GetActorLocation();
 
-			SetActorLocation(CurrentSpace->WarpSpace->GetActorLocation());
+			TelpLoc.Z += 1000;
+			SetActorLocation( TelpLoc );
+			SetActorRotation( FRotator( 0 ) );
 			CurrentSpace = CurrentSpace->WarpSpace;
 		}
 		break;
@@ -341,13 +364,16 @@ void APartyPlayer::MoveEnded()
 
 			// 최종 도착이 별이여도 그냥 한칸 더 간다 
 			PartyGameState->ServerViewTenCoinsforaStarUi();
+				//교환 할거냐 물어보기 
 
-			DelayTime(2.0f, [this]()
+			DelayTime(4.0f, [this]()
 				{
 					PartyGameState->ServerChangeStarSpace();
 					//GM->ChangeStarSpace();
-					MoveToSpace(CurrentSpace);
-
+						DelayTime( 2.0f , [this]()
+						{
+							MoveToSpace(CurrentSpace);
+						} );
 				});
 
 		}
@@ -368,8 +394,27 @@ void APartyPlayer::MoveEnded()
 
 				if (true == IsLocallyControlled())
 				{
-					PartyGameState->ServerUpdateEndInfo(PlayerIndex);
-					GM->NextTurn();
+
+					FAIMoveRequest MoveRequest;
+					FVector MoveLoc = CurrentSpace->GetActorLocation();
+					//MoveLoc.X += 150;
+					MoveLoc.Y += 150;
+					MoveRequest.SetGoalLocation( MoveLoc );
+					//MoveRequest.SetGoalActor(CurrentSpace);
+					MoveRequest.SetAcceptanceRadius( 0.1f );
+					FNavPathSharedPtr NavPath;
+					FAIMoveCompletedSignature Move;
+					//Ai->MoveToActor(CurrentSpace, 0.1f, false);
+					Ai->MoveTo( MoveRequest , &NavPath );
+					PartyGameState->StatusUi->PlayAnimation( PartyGameState->StatusUi->TurnEndAnimation );
+					
+					DelayTime( 4.0f , [this]()
+					{
+						PartyGameState->ServerUpdateEndInfo( PlayerIndex );
+						GM->NextTurn();
+					});
+
+
 				}
 
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("End"));
@@ -410,7 +455,30 @@ void APartyPlayer::StopOrGo()
 		//	GM->UpdateGameInfo(PlayerIndex);
 		//	GM->UpdateRankInfo();
 		//PartyGameState->ServerUpdateRankInfo();
+
 		MoveEnded();
+	}
+}
+
+void APartyPlayer::ApplyTrap(int Index)
+{
+	switch (Index)
+	{
+		case 0:
+			{
+				Score -= 30;
+				break;
+			}
+		case 1:
+			{
+				Score /= 2;
+				break;
+			}
+		case 2:
+			{
+				Score = 0;
+				break;
+			}
 	}
 }
 
@@ -433,7 +501,15 @@ void APartyPlayer::MyTurnStart()
 void APartyPlayer::MyTurnEnd()
 {
 
+}
 
+void APartyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME( APartyPlayer , MoveRemaining );
+	DOREPLIFETIME( APartyPlayer , PlayerIndex );
+	DOREPLIFETIME( APartyPlayer , RollDicePlayer );
 }
 
 

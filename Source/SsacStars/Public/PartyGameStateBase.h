@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -68,6 +68,20 @@ public:
 	class UTenCoinsforaStar* TenCoinsforaStarUi;
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UTenCoinsforaStar> TenCoinsforaStarUiFactory;
+
+	UPROPERTY( EditDefaultsOnly )
+	class UPartyGameEnd* EndGameUi;
+	UPROPERTY( EditDefaultsOnly )
+	TSubclassOf<class UPartyGameEnd> EndGameUiFactory;
+
+	UPROPERTY( EditDefaultsOnly )
+	TSubclassOf<class UThrowDiceCharacterUi> ThrowDiceUiFactory;
+	UPROPERTY(Replicated)
+	class UThrowDiceCharacterUi* ThrowDiceUi;
+
+
+	UPROPERTY( EditDefaultsOnly )
+	class ADice* Dice;
 	UPROPERTY(EditDefaultsOnly)
 	class APlayerController* Controller;
 	/*
@@ -100,6 +114,16 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated)
 	int Round = 1;
 public:
+	UPROPERTY( EditAnywhere )
+	class USoundBase* TrapSound;
+	UPROPERTY( EditAnywhere )
+	class USoundBase* GetStarSound;
+	UPROPERTY( EditAnywhere )
+	class USoundBase* ResultSound;
+	UPROPERTY( EditAnywhere )
+	class USoundBase* WarpSound;
+
+public:
 	UFUNCTION(Server, Reliable)
 	void ServerMoveCameraToPlayer(APartyPlayer* InPlayer);
 	UFUNCTION(NetMulticast, Reliable)
@@ -116,10 +140,18 @@ public:
 	void MultiUpdateAppeareance(APartyPlayer* Player, int Index);
 
 public:
+	UFUNCTION( Server , Reliable )
+	void ServerThrowDiceUi();
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiThrowDiceUi();
 	UFUNCTION(Server, Reliable)
 	void ServerViewStatusUi();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiViewStatusUi();
+	UFUNCTION( Server , Reliable )
+	void ServerViewEndGameUi();
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiViewEndGameUi();
 	UFUNCTION(Server, Reliable)
 	void ServerViewItemUi();
 	UFUNCTION(NetMulticast, Reliable)
@@ -146,6 +178,10 @@ public:
 	void MultiGetCoins_PinguUi();
 
 public:
+	UFUNCTION( Server , Reliable )
+	void ServerRemoveThrowDiceUi();
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiRemoveThrowDiceUi();
 	UFUNCTION(Server, Reliable)
 	void ServerRemoveSelectUi();
 	UFUNCTION(NetMulticast, Reliable)
@@ -158,6 +194,8 @@ public:
 	void ServerCloseView();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiCloseView();
+	UFUNCTION( Server , Reliable )
+	void ServerOverlap();
 
 public:
 	UFUNCTION(Server, Reliable)
@@ -181,6 +219,10 @@ public:
 	void ServerRollDice();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiRollDice();
+	UFUNCTION( Server , Reliable )
+	void ServerDiceOverlap();
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiDiceOverlap();
 	UFUNCTION(Server, Reliable)
 	void ServerChooseItem();
 	UFUNCTION(Server, Reliable)
@@ -215,9 +257,17 @@ public:
 	void ServerSequenceEnded();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiSequenceEnded();
+public:
+	UFUNCTION( Server , Reliable )
+	void ServerTurnStartUi();
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiTurnStartUi();
+	UFUNCTION( Server , Reliable )
+	void ServerSoundVoice( USoundBase* MySound );
+	UFUNCTION( NetMulticast , Reliable )
+	void MultiSoundVoice( USoundBase* MySound );
 
-
-
+	void PlaySound( USoundBase* MySound );
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -42,15 +42,17 @@ public:
 
 
 public:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere , Replicated )
 	class USceneCaptureComponent2D* SceneCaptureComponent;
 
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dice)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Dice,Replicated)
 	class USceneComponent* handComp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* MeshComp;
+	UPROPERTY( EditAnywhere , BlueprintReadWrite )
+	class APartyGameStateBase* PartyGameState;
 	//UPROPERTY()
 	//class AActor* Dice;
 
@@ -62,19 +64,27 @@ public:
 public:
 	FVector BeginLocation;
 public:
+	/*
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class UThrowDiceCharacterUi> ThrowDiceUiFactory;
-	UPROPERTY(Replicated)
+	//UPROPERTY(Replicated)
 	class UThrowDiceCharacterUi* ThrowDiceUi;
-
-
+	*/
+	UFUNCTION()
 	void CreateDice();
+	UFUNCTION()
 	void ThrowDice(const AActor* Actor);
+	UFUNCTION()
 	void GrapDice(const AActor* Actor);
+	UFUNCTION()
 	void GetSignal();
+	UFUNCTION()
 	void StartRolling();
+	UFUNCTION()
 	void AddView();
+	UFUNCTION()
 	void CloseView();
+	UFUNCTION()
 	void Jump(float LaunchAmount);
 	void DelayTime(float WantSeconds, TFunction<void()> InFunction);
 
@@ -103,6 +113,8 @@ public:
 	void ServerCreateDice();
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiCreateDice();
+
+
 
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;

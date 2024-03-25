@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Dice.h"
@@ -9,6 +9,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "PartyGameModeBase.h"
 #include "PartyGameStateBase.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 
@@ -52,24 +53,36 @@ ADice::ADice()
 	DicePoint4->SetCollisionProfileName("Pawn");
 	DicePoint5->SetCollisionProfileName("Pawn");
 	DicePoint6->SetCollisionProfileName("Pawn");
-
-
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
 void ADice::BeginPlay()
 {
 	Super::BeginPlay();
-	DicePoint1->OnComponentBeginOverlap.AddDynamic(this, &ADice::OnDicePoint1BeginOverlap);
-	DicePoint2->OnComponentBeginOverlap.AddDynamic(this, &ADice::OnDicePoint2BeginOverlap);
-	DicePoint3->OnComponentBeginOverlap.AddDynamic(this, &ADice::OnDicePoint3BeginOverlap);
-	DicePoint4->OnComponentBeginOverlap.AddDynamic(this, &ADice::OnDicePoint4BeginOverlap);
-	DicePoint5->OnComponentBeginOverlap.AddDynamic(this, &ADice::OnDicePoint5BeginOverlap);
-	DicePoint6->OnComponentBeginOverlap.AddDynamic(this, &ADice::OnDicePoint6BeginOverlap);
+	if (HasAuthority())
+	{
+		DicePoint1->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint1BeginOverlap );
+		DicePoint2->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint2BeginOverlap );
+		DicePoint3->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint3BeginOverlap );
+		DicePoint4->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint4BeginOverlap );
+		DicePoint5->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint5BeginOverlap );
+		DicePoint6->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint6BeginOverlap );
+		UE_LOG( LogTemp , Warning , TEXT( "There Is Server" ) );
+		PartyGameState = Cast<APartyGameStateBase>( GetWorld()->GetGameState() );
+		BeginLocation = DiceComp->GetComponentLocation();
+		RollDiceCharacter = Cast<ARollDiceCharacter>( UGameplayStatics::GetActorOfClass( GetWorld() , ARollDiceCharacter::StaticClass() ) );
+		BeginTransform = DiceComp->GetComponentTransform();
+		SceneCaptureDice->ShowOnlyActorComponents( this,true );
+	}
+	else
+	{
+		//ServerSetting();
+		UE_LOG( LogTemp , Warning , TEXT( "There Is No Server" ) );
+	}
+	//GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
 
-	GM = Cast<APartyGameModeBase>(GetWorld()->GetAuthGameMode());
-	PartyGameState = Cast<APartyGameStateBase>(GetWorld()->GetGameState());
-	BeginLocation = DiceComp->GetComponentLocation();
+
 }
 
 // Called every frame
@@ -78,36 +91,38 @@ void ADice::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	SceneCaptureDice->ShowOnlyActorComponents(this);
 
 	DiceComp->SetWorldLocation(FVector(BeginLocation.X, BeginLocation.Y, DiceComp->GetComponentLocation().Z));
 
 	if (IsUpMode)
 	{
-
-		FVector CurrentLocation = DiceComp->GetComponentLocation() + DiceComp->GetUpVector() * 160.0f * GetWorld()->GetDeltaSeconds();
-		DiceComp->SetWorldLocation(CurrentLocation);
+		
+		//FVector CurrentLocation = DiceComp->GetComponentLocation();
+		DiceComp->GetUpVector() * 200.0f * GetWorld()->GetDeltaSeconds();
+		//DiceComp->SetWorldLocation(CurrentLocation);
 
 		FVector CurrentScale = DiceComp->GetComponentScale();
 		FVector ScaleToAddVector = FVector(0.07);
 		FVector NewScale = CurrentScale + ScaleToAddVector;
 		DiceComp->SetWorldScale3D(NewScale);
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Isupmode" ) );
 	}
 
 
 	if (IsRollingMode)
 	{
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "IsUpmode" ) );
 		DiceComp->AddWorldRotation(FRotator(10, 10, 10));
-		FVector CurrentLocation = DiceComp->GetComponentLocation();
-		CurrentLocation.Z = RollingLocation.Z;
-		DiceComp->SetWorldLocation(CurrentLocation, true, nullptr, ETeleportType::TeleportPhysics);
+		//FVector CurrentLocation = DiceComp->GetComponentLocation();
+		//CurrentLocation.Z = RollingLocation.Z;
+		//DiceComp->SetWorldLocation( RollingLocation , true, nullptr, ETeleportType::TeleportPhysics);
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Isrollingmode"));
 	}
 
 
 	if (IsStopRollingMode)
 	{
-		//¹Ì¼¼ÇÑ À§Ä¡ Á¶Á¤ ÇÊ¿ä
+		//ë¯¸ì„¸í•œ ìœ„ì¹˜ ì¡°ì • í•„ìš”
 		DiceComp->SetWorldLocation(StopRollingLocation, false, nullptr, ETeleportType::TeleportPhysics);
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NeedStop"));
 	}
@@ -117,56 +132,73 @@ void ADice::Tick(float DeltaTime)
 void ADice::OnDicePoint1BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DiceNumber = 1;
-	GM->CurrentPlayer->MoveRemaining = 1;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("1move"));
-	AfterOverlap();
+
+		DiceNumber = 1;
+		PartyGameState->CurrentPlayer->MoveRemaining = 1;
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "1move" ) );
+		AfterOverlap();
+	
 
 }
 
 void ADice::OnDicePoint2BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DiceNumber = 2;
-	GM->CurrentPlayer->MoveRemaining = 2;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("2move"));
-	AfterOverlap();
+
+		DiceNumber = 2;
+		PartyGameState->CurrentPlayer->MoveRemaining = 2;
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "2move" ) );
+		AfterOverlap();
+	
+
 }
 
 void ADice::OnDicePoint3BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DiceNumber = 3;
-	GM->CurrentPlayer->MoveRemaining = 3;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("3move"));
-	AfterOverlap();
+
+		DiceNumber = 3;
+		PartyGameState->CurrentPlayer->MoveRemaining = 3;
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "3move" ) );
+		AfterOverlap();
+	
+
 }
 
 void ADice::OnDicePoint4BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DiceNumber = 4;
-	GM->CurrentPlayer->MoveRemaining = 4;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("4move"));
-	AfterOverlap();
+	
+		DiceNumber = 4;
+		PartyGameState->CurrentPlayer->MoveRemaining = 4;
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "4move" ) );
+		AfterOverlap();
+	
+
 }
 
 void ADice::OnDicePoint5BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DiceNumber = 5;
-	GM->CurrentPlayer->MoveRemaining = 5;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("5move"));
-	AfterOverlap();
+
+		DiceNumber = 5;
+		PartyGameState->CurrentPlayer->MoveRemaining = 5;
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "5move" ) );
+		AfterOverlap();
+	
+
 }
 
 void ADice::OnDicePoint6BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	DiceNumber = 6;
-	GM->CurrentPlayer->MoveRemaining = 6;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("6move"));
-	AfterOverlap();
+	
+		DiceNumber = 6;
+		PartyGameState->CurrentPlayer->MoveRemaining = 6;
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "6move" ) );
+		AfterOverlap();
+	
+		
 }
 
 
@@ -183,22 +215,29 @@ void ADice::ThrowDice()
 	IsUpMode = true;
 	//LaunchDice(1000000);
 	*/
+	if(HasAuthority())
+	{
+		ServerThrowDice();
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Serverthrowdice" ) );
+	}
 }
 void ADice::ServerThrowDice_Implementation()
 {
-
+	UE_LOG( LogTemp , Warning , TEXT( " ADice::ServerThrowDice_Implementation" ) );
 	DicePoint1->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint2->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint3->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint4->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint5->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	DicePoint6->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	MultiThrowDice();
+	IsUpMode = true;
+	//MultiThrowDice();
+
 }
 
 void ADice::MultiThrowDice_Implementation()
 {
-
+	UE_LOG( LogTemp , Warning , TEXT( " ADice::ServerThrowDice_Implementation" ) );
 	//DiceComp->SetSimulatePhysics(true);
 	IsUpMode = true;
 	//LaunchDice(1000000);
@@ -207,19 +246,25 @@ void ADice::MultiThrowDice_Implementation()
 
 void ADice::StartDiceRolling()
 {
-	/*
+	
 	IsUpMode = false;
 	IsRollingMode = true;
 	RollingLocation = DiceComp->GetComponentLocation();
-	*/
+	if(HasAuthority())
+	{
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "StartRoll" ) );
+	}
+	
 }
 void ADice::ServerStartDiceRolling_Implementation()
 {
+	UE_LOG( LogTemp , Warning , TEXT( "ADice::ServerStartDiceRolling_Implementation" ) );
 	MultiStartDiceRolling();
 }
 
 void ADice::MultiStartDiceRolling_Implementation()
 {
+	UE_LOG( LogTemp , Warning , TEXT( "ADice::MultiStartDiceRolling_Implementation" ) );
 	IsUpMode = false;
 	IsRollingMode = true;
 	RollingLocation = DiceComp->GetComponentLocation();
@@ -227,68 +272,78 @@ void ADice::MultiStartDiceRolling_Implementation()
 
 void ADice::AfterOverlap()
 {
-	/*
-	DicePoint1->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint3->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint4->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint5->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint6->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DiceComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-
-	//LaunchDice(200);
-	StopRollingLocation = DiceComp->GetComponentLocation();
-	IsRollingMode = false;
-	IsStopRollingMode = true;
-	IsSelected = true;
-	SetRotationToNumber(DiceNumber);
-
-
-	GM->CurrentPlayer->ItemApply();
-
-	GM->CurrentPlayer->RollDicePlayer->CloseView();
-	*/
-
 	if (HasAuthority())
 	{
-		ServerAfterOverlap();
-	}
+		UE_LOG( LogTemp , Warning , TEXT( "RemainOverlap" ) );
+		DicePoint1->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+		DicePoint2->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+		DicePoint3->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+		DicePoint4->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+		DicePoint5->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+		DicePoint6->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+		DiceComp->SetCollisionEnabled( ECollisionEnabled::QueryAndPhysics );
+		StopRollingLocation = DiceComp->GetComponentLocation();
+		IsRollingMode = false;
+		IsStopRollingMode = true;
+		IsSelected = true;
+		SetRotationToNumber( DiceNumber );
+		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Overlap" ) );
 
+		//PartyGameState->ServerOverlap();
+		PartyGameState->CurrentPlayer->ItemApply();
+		PartyGameState->CurrentPlayer->RollDicePlayer->CloseView();
+	}
+	//ServerAfterOverlap();
+	
+	//PartyGameState->CurrentPlayer->ItemApply();
+	//GM->CurrentPlayer->ItemApply();
+	//PartyGameState->CurrentPlayer->RollDicePlayer->CloseView();
+
+	
+
+	
 }
 void ADice::ServerAfterOverlap_Implementation()
 {
-	MultiAfterOverlap();
-}
-
-void ADice::MultiAfterOverlap_Implementation()
-{
-	DicePoint1->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint2->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint3->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint4->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint5->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DicePoint6->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	DiceComp->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-
-	//LaunchDice(200);
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "ServerDice" ) );
+	DicePoint1->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	DicePoint2->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	DicePoint3->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	DicePoint4->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	DicePoint5->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	DicePoint6->SetCollisionEnabled( ECollisionEnabled::NoCollision );
+	DiceComp->SetCollisionEnabled( ECollisionEnabled::QueryAndPhysics );
 	StopRollingLocation = DiceComp->GetComponentLocation();
 	IsRollingMode = false;
 	IsStopRollingMode = true;
 	IsSelected = true;
-	SetRotationToNumber(DiceNumber);
+	SetRotationToNumber( DiceNumber );
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Overlap" ) );
+
 
 	PartyGameState->CurrentPlayer->ItemApply();
 	//GM->CurrentPlayer->ItemApply();
 	PartyGameState->CurrentPlayer->RollDicePlayer->CloseView();
+		MultiAfterOverlap();
+	
+}
+
+void ADice::MultiAfterOverlap_Implementation()
+{
+	
+	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "overlapimple" ) );
+
+	//LaunchDice(200);
+
+	
+
 	//GM->CurrentPlayer->RollDicePlayer->CloseView();
 }
 
 void ADice::LaunchDice(float LaunchAmount)
 {
-	FVector LaunchDirection = FVector::UpVector; // À§ÂÊÀ¸·Î ¶ç¿ì±â ¿¹½Ã
-	float LaunchStrength = LaunchAmount; // ¶ç¿ì´Â ÈûÀÇ Å©±â
+	FVector LaunchDirection = FVector::UpVector; // ìœ„ìª½ìœ¼ë¡œ ë„ìš°ê¸° ì˜ˆì‹œ
+	float LaunchStrength = LaunchAmount; // ë„ìš°ëŠ” íž˜ì˜ í¬ê¸°
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Addforce"));
 	DiceComp->AddForce(LaunchDirection * LaunchStrength);
 
@@ -341,17 +396,43 @@ void ADice::ReBack()
 	IsRollingMode = false;
 	IsStopRollingMode = false;
 	IsUpMode = false;
-	DiceComp->SetWorldLocation(BeginLocation);
-	DiceComp->SetWorldScale3D(FVector(0.1f));
+	DiceComp->SetWorldTransform( BeginTransform );
+	//DiceComp->SetWorldLocation(BeginLocation);
+	//DiceComp->SetWorldScale3D(FVector(0.1f));
 
 	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ReBack"));
+}
+
+void ADice::ServerSetting_Implementation()
+{
+	DicePoint1->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint1BeginOverlap );
+	DicePoint2->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint2BeginOverlap );
+	DicePoint3->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint3BeginOverlap );
+	DicePoint4->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint4BeginOverlap );
+	DicePoint5->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint5BeginOverlap );
+	DicePoint6->OnComponentBeginOverlap.AddDynamic( this , &ADice::OnDicePoint6BeginOverlap );
+	UE_LOG( LogTemp , Warning , TEXT( "There Is Server" ) );
+	PartyGameState = Cast<APartyGameStateBase>( GetWorld()->GetGameState() );
+	BeginLocation = DiceComp->GetComponentLocation();
+	RollDiceCharacter = Cast<ARollDiceCharacter>( UGameplayStatics::GetActorOfClass( GetWorld() , ARollDiceCharacter::StaticClass() ) );
+
+	SceneCaptureDice->ShowOnlyActorComponents( this );
 }
 
 void ADice::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ADice, DiceComp);
+	//DOREPLIFETIME( ADice , SceneCaptureDice );
+
+	DOREPLIFETIME( ADice , DiceComp );
+	DOREPLIFETIME( ADice , DiceNumber );
+	DOREPLIFETIME( ADice , IsUpMode );
+	DOREPLIFETIME( ADice , IsRollingMode );
+	DOREPLIFETIME( ADice , IsStopRollingMode );
+	DOREPLIFETIME( ADice , BeginLocation );
+	DOREPLIFETIME( ADice , RollingLocation );
+	DOREPLIFETIME( ADice , StopRollingLocation );
 }
 
 
