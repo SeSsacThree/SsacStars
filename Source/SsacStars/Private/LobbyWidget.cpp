@@ -21,7 +21,6 @@ void ULobbyWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	PlayAnimation( Image_bg_Animation,0,0 );
 
 	gi = GetWorld()->GetGameInstance<USsacGameInstance>();
 	if (gi)

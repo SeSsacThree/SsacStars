@@ -48,8 +48,6 @@ public:
 	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
 	class UButton* btn_doCreateRoom;
 
-	UPROPERTY( EditDefaultsOnly , meta = (BindWidgetAnim), Transient)
-	class UWidgetAnimation* Image_bg_Animation;
 
 	UFUNCTION()
 	void OnMyClicked_doCreateRoom();
