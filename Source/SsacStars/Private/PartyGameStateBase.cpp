@@ -162,7 +162,7 @@ void APartyGameStateBase::MultiUpdateAppeareance_Implementation(APartyPlayer* Pl
 	case 3:
 	{
 		Player->GetMesh()->SetSkeletalMeshAsset(Mesh4);
-		Player->GetMesh()->SetWorldScale3D(FVector(2));
+		Player->GetMesh()->SetWorldScale3D(FVector(5));
 		break;
 	}
 	}

@@ -125,7 +125,7 @@ void ADice::Tick(float DeltaTime)
 	{
 		//미세한 위치 조정 필요
 		DiceComp->SetWorldLocation(StopRollingLocation, false, nullptr, ETeleportType::TeleportPhysics);
-	//	SetRotationToNumber( DiceNumber );
+		SetRotationToNumber( DiceNumber );
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NeedStop"));
 	}
 
