@@ -48,8 +48,6 @@ public:
 	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
 	class UButton* btn_doCreateRoom;
 
-	UPROPERTY( EditDefaultsOnly , meta = (BindWidgetAnim), Transient)
-	class UWidgetAnimation* Image_bg_Animation;
 
 	UFUNCTION()
 	void OnMyClicked_doCreateRoom();
@@ -67,10 +65,10 @@ public:
 	class UButton* btn_goFindRoom;
 
 	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
-	class UButton* btn_doMenuFromCreateRoom;
+	class UButton* btn_goMenuFromCreateRoom;
 
 	UPROPERTY( EditDefaultsOnly , meta = (BindWidget))
-	class UButton* btn_doMenuFromFindRoom;
+	class UButton* btn_goMenuFromFindRoom;
 
 	void SwitchPanel(int32 index);
 
@@ -84,7 +82,7 @@ public:
 	void OnMyGoFindRoom();
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
-	class UScrollBox* scroll_roomList;
+	class UScrollBox* scroll_RoomList;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<class URoomInfoWidget> roomInfoFactory;

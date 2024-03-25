@@ -41,6 +41,8 @@ class SSACSTARS_API USsacGameInstance : public UGameInstance
 public:
 	virtual void Init() override;
 
+	bool IsInRoom();
+
 	UPROPERTY(EditDefaultsOnly)
 	TArray<float> playerScore;
 
@@ -50,7 +52,7 @@ public:
 
 	FFindingRoomsDelegate OnFindingRoomsDelegate;
 
-	FString myNickName;
+	FString myNickName = TEXT("Ssac");
 	FString myRoomName;
 
 	void CreateRoom(int32 maxplayerCount, FString roomName);
