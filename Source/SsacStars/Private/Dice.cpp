@@ -125,7 +125,7 @@ void ADice::Tick(float DeltaTime)
 	{
 		//미세한 위치 조정 필요
 		DiceComp->SetWorldLocation(StopRollingLocation, false, nullptr, ETeleportType::TeleportPhysics);
-		SetRotationToNumber( DiceNumber );
+	//	SetRotationToNumber( DiceNumber );
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NeedStop"));
 	}
 
@@ -142,7 +142,7 @@ void ADice::OnDicePoint1BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 		DiceNumber = 1;
 		PartyGameState->CurrentPlayer->MoveRemaining = 1;
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "1move" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "1move" ) );
 		AfterOverlap();
 	
 
@@ -154,7 +154,7 @@ void ADice::OnDicePoint2BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 		DiceNumber = 2;
 		PartyGameState->CurrentPlayer->MoveRemaining = 2;
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "2move" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "2move" ) );
 		AfterOverlap();
 	
 
@@ -166,7 +166,7 @@ void ADice::OnDicePoint3BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 		DiceNumber = 3;
 		PartyGameState->CurrentPlayer->MoveRemaining = 3;
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "3move" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "3move" ) );
 		AfterOverlap();
 	
 
@@ -178,7 +178,7 @@ void ADice::OnDicePoint4BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	
 		DiceNumber = 4;
 		PartyGameState->CurrentPlayer->MoveRemaining = 4;
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "4move" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "4move" ) );
 		AfterOverlap();
 	
 
@@ -190,7 +190,7 @@ void ADice::OnDicePoint5BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 		DiceNumber = 5;
 		PartyGameState->CurrentPlayer->MoveRemaining = 5;
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "5move" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "5move" ) );
 		AfterOverlap();
 	
 
@@ -202,7 +202,7 @@ void ADice::OnDicePoint6BeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	
 		DiceNumber = 6;
 		PartyGameState->CurrentPlayer->MoveRemaining = 6;
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "6move" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "6move" ) );
 		AfterOverlap();
 	
 		
@@ -225,7 +225,7 @@ void ADice::ThrowDice()
 	if(HasAuthority())
 	{
 		ServerThrowDice();
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Serverthrowdice" ) );
+	//	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Serverthrowdice" ) );
 	}
 }
 void ADice::ServerThrowDice_Implementation()
@@ -259,7 +259,7 @@ void ADice::StartDiceRolling()
 	RollingLocation = DiceComp->GetComponentLocation();
 	if(HasAuthority())
 	{
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "StartRoll" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "StartRoll" ) );
 	}
 	
 }
@@ -294,7 +294,7 @@ void ADice::AfterOverlap()
 		IsStopRollingMode = true;
 		IsSelected = true;
 		SetRotationToNumber( DiceNumber );
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Overlap" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Overlap" ) );
 
 		//PartyGameState->ServerOverlap();
 		PartyGameState->CurrentPlayer->ItemApply();
@@ -315,7 +315,7 @@ void ADice::AfterOverlap()
 }
 void ADice::ServerAfterOverlap_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "ServerDice" ) );
+	//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "ServerDice" ) );
 	DicePoint1->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 	DicePoint2->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 	DicePoint3->SetCollisionEnabled( ECollisionEnabled::NoCollision );
@@ -328,7 +328,7 @@ void ADice::ServerAfterOverlap_Implementation()
 	IsStopRollingMode = true;
 	IsSelected = true;
 	SetRotationToNumber( DiceNumber );
-	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Overlap" ) );
+	//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Overlap" ) );
 
 
 	PartyGameState->CurrentPlayer->ItemApply();
@@ -341,7 +341,7 @@ void ADice::ServerAfterOverlap_Implementation()
 void ADice::MultiAfterOverlap_Implementation()
 {
 	
-	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "overlapimple" ) );
+	//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "overlapimple" ) );
 
 	//LaunchDice(200);
 
@@ -354,7 +354,7 @@ void ADice::LaunchDice(float LaunchAmount)
 {
 	FVector LaunchDirection = FVector::UpVector; // 위쪽으로 띄우기 예시
 	float LaunchStrength = LaunchAmount; // 띄우는 힘의 크기
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Addforce"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Addforce"));
 	DiceComp->AddForce(LaunchDirection * LaunchStrength);
 
 	//LaunchCharacter(LaunchDirection * LaunchStrength, true, true);
@@ -415,7 +415,7 @@ void ADice::ReBack()
 	//DiceComp->SetWorldLocation(BeginLocation);
 	//DiceComp->SetWorldScale3D(FVector(0.1f));
 
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ReBack"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("ReBack"));
 }
 
 void ADice::ServerSetting_Implementation()

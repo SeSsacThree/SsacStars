@@ -23,10 +23,12 @@
 #include "LevelSequenceActor.h"
 #include "CoreMinimal.h"
 #include "Dice.h"
+#include "PartyController.h"
 #include "GameFramework/Actor.h"
 #include "PlayerUiCard.h"
 #include "RollDiceCharacter.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/PlayerState.h"
 
 
 APartyGameStateBase::APartyGameStateBase()
@@ -117,7 +119,7 @@ void APartyGameStateBase::MultiMoveCameraToStar_Implementation()
 {
 	APlayerController* OurPlayerController = UGameplayStatics::GetPlayerController(this, 0);
 	OurPlayerController->SetViewTargetWithBlend(Star, 1.0f);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StarChange"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StarChange"));
 	DelayTime(2.0f, [this]()
 		{
 
@@ -208,7 +210,7 @@ void APartyGameStateBase::MultiMoveCameraToPlayer_Implementation(APartyPlayer* I
 	OurPlayerController->SetViewTargetWithBlend(InPlayer, 1.0f);
 	
 	//StatusUi->PlayAnimation( StatusUi->TurnStartAnimation );
-	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "playAnimaion" ) );
+	//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "playAnimaion" ) );
 	/*
 	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 	{
@@ -363,7 +365,7 @@ void APartyGameStateBase::ServerChangeStarSpace_Implementation()
 		// 선택된 발판을 "Star" 상태로 변경
 
 		Space->SpaceState = ESpaceState::Star;
-		GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "StarSwitch" ) );
+		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "StarSwitch" ) );
 		Space->UpdateAppearance();
 	}
 	// 그발판이 star,warp 발판이 아니라면
@@ -678,7 +680,7 @@ void APartyGameStateBase::MultiServerPressPassButton_Implementation()
 }
 void APartyGameStateBase::ServerClickedItem1Button_Implementation()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Select1"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Select1"));
 	ItemUi->SwitchItem(ItemUi->PlayerInventory[0]);
 	//RemoveItemUi(0);
 	CurrentPlayer->Inventory[0] = EItem::Nothing;
@@ -696,7 +698,7 @@ void APartyGameStateBase::ServerClickedItem2Button_Implementation()
 {
 	ItemUi->SwitchItem(ItemUi->PlayerInventory[1]);
 	//RemoveItemUi(1);
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Select2"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Select2"));
 	CurrentPlayer->Inventory[1] = EItem::Nothing;
 	MultiClickedItem2Button();
 }
@@ -711,7 +713,10 @@ void APartyGameStateBase::ServerOpenMinigame_Implementation()
 {
 	DelayTime( 8.0f , [this]()
 	{
-		MultiOpenMinigame();
+		//MultiOpenMinigame();
+		FString url = TEXT( "MiniGame_Kart" );
+		GetWorld()->ServerTravel( url );
+
 	} );
 	
 	
@@ -787,7 +792,7 @@ void APartyGameStateBase::MultiTriggerSequence_Implementation()
 			Controller->SetPause(false);
 			ServerViewStatusUi();
 			ServerSequenceEnded();
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CalledMulti"));
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CalledMulti"));
 		});
 
 	// 시퀀스 액터 찾기
@@ -839,7 +844,7 @@ void APartyGameStateBase::ServerDiceOverlap_Implementation()
 	Dice->DicePoint5->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 	Dice->DicePoint6->SetCollisionEnabled( ECollisionEnabled::NoCollision );
 	Dice->DiceComp->SetCollisionEnabled( ECollisionEnabled::QueryAndPhysics );
-	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "overlapimple" ) );
+	//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "overlapimple" ) );
 
 	//LaunchDice(200);
 	Dice->StopRollingLocation = Dice->DiceComp->GetComponentLocation();
@@ -859,7 +864,7 @@ void APartyGameStateBase::ServerDiceOverlap_Implementation()
 void APartyGameStateBase::MultiDiceOverlap_Implementation()
 {
 
-	GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "ServerOverlap" ) );
+	//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "ServerOverlap" ) );
 	
 	
 }

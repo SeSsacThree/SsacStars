@@ -154,7 +154,7 @@ void APartyPlayer::ItemApply()
 		MoveRemaining += 3;
 
 		PlayFun->PlusThreeSpaces(this);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItema3d"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItema3d"));
 		break;
 	}
 	case EItem::WarpToStar:
@@ -163,7 +163,7 @@ void APartyPlayer::ItemApply()
 		TelpLocation.Z += 100;
 		SetActorLocation(TelpLocation);
 		CurrentSpace = GM->Star->StarSpace;
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemWtS"));
 		//CurrentSpace=별 전 장소 
 		break;
 	}
@@ -171,13 +171,13 @@ void APartyPlayer::ItemApply()
 	{
 		//장소 바꾸는 함수 호출
 		PlayFun->SwapPlayerPositions(this);
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("UseItemSC"));
 		break;
 	}
 	case EItem::Nothing:
 	{
 		//장소 바꾸는 함수 호출 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("nothing"));
 		break;
 	}
 	}
@@ -252,11 +252,11 @@ void APartyPlayer::MoveToSpace(ABlueBoardSpace* currentSpace)
 			});
 
 
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerMove"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerMove"));
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerCantMove"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("PlayerCantMove"));
 	}
 
 
@@ -301,21 +301,21 @@ void APartyPlayer::MoveEnded()
 					{
 
 						Inventory[Inventoryindex] = EItem::Add3Dice;
-						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
+					//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("a3d"));
 						//GM->ItemUi->Add3DiceItem();
 						break;
 					}
 					case 2:
 					{
 						Inventory[Inventoryindex] = EItem::WarpToStar;
-						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("wts"));
+						//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("wts"));
 						//GM->ItemUi->WarpToStarItem();
 						break;
 					}
 					case 3:
 					{
 						Inventory[Inventoryindex] = EItem::SwitchCharacter;
-						GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("sw"));
+						//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("sw"));
 						//GM->ItemUi->SwitchSpaceItem();
 						break;
 					}
@@ -421,7 +421,7 @@ void APartyPlayer::MoveEnded()
 
 				}
 
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("End"));
+				//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("End"));
 			});
 	}
 
@@ -432,7 +432,7 @@ void APartyPlayer::MoveEnded()
 
 void APartyPlayer::StopOrGo()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StopOrGo"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("StopOrGo"));
 
 	//중간 멈춤 장소가 별이라면 , 
 	if (CurrentSpace->SpaceState == ESpaceState::Star)
@@ -454,7 +454,7 @@ void APartyPlayer::StopOrGo()
 	}//별이아닌데 주사위가 없으면 멈춰
 	else if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining == 0)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CallMoveEnded"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CallMoveEnded"));
 		PartyGameState->ServerUpdateGameInfo(PlayerIndex);
 		//	GM->UpdateGameInfo(PlayerIndex);
 		//	GM->UpdateRankInfo();

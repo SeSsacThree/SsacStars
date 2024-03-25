@@ -205,13 +205,13 @@ void APartyGameModeBase::NextTurn()
 
 	PartyGameState->ServerSoundVoice( PartyGameState->TurnEndSound );
 	//CurrentPlayerIndex++;
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NextTurn"));
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NextTurn"));
 
 	//현재 플레이 하고 있는 플레이어의 수랑  인덱스의 수가 같아지면 라운드종료 
 	if (PartyGameState->CurrentPlayerIndex == InitialTurnOrder.Num())
 	{
 		EndRound();
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("RoundStart"));
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("RoundStart"));
 	}
 	else
 	{
@@ -224,7 +224,7 @@ void APartyGameModeBase::EndRound()
 	PartyGameState->CurrentPlayerIndex = 0;
 	
 	CurrentPlayerIndex = 0;
-	if (PartyGameState->Round > 1)
+	if (PartyGameState->Round > 0)
 	{
 		PartyGameState->ServerViewEndGameUi();
 
@@ -265,7 +265,8 @@ void APartyGameModeBase::AddSelectBehaviorUi()
 {
 	PartyGameState->ServerViewSelectUi();
 	//SelectUi->AddToViewport();
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("addviewport"));
+	//
+	//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("addviewport"));
 
 	//현재 플레이어 턴의 인덱스에 해당하는 플레이어만 가질수 있게 접근이 필요
 	if (PlayerController)
