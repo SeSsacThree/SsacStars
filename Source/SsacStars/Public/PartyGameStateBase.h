@@ -128,6 +128,8 @@ public:
 	class USoundBase* BlueSpaceSound;
 	UPROPERTY( EditAnywhere )
 	class USoundBase* RedSpaceSound;
+	UPROPERTY( EditAnywhere )
+	class USoundBase* TurnEndSound;
 public:
 
 

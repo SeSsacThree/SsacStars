@@ -367,33 +367,38 @@ void ADice::SetRotationToNumber(int Number)
 	{
 	case 1:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector(16.666667, 0, -8.333333), FRotator(0, 0, 90));
-		DiceComp->SetWorldRotation( FRotator( 16.666667 , 0 , -8.333333 ));
+		//DiceComp->SetRelativeLocationAndRotation(FVector(16.666667, 0, -8.333333), FRotator(0, 0, 90));
+		DiceComp->SetWorldRotation( FRotator( 360 , 0 , -630 ));
 		break;
 	}
 	case 2:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector(25, 0, -8.333333), FRotator(-90, 0, 270));
+		//DiceComp->SetRelativeLocationAndRotation(FVector(25, 0, -8.333333), FRotator(-90, 0, 270));
+		DiceComp->SetWorldRotation( FRotator( -90 , 0 , -450) );
 		break;
 	}
 	case 3:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector((16.666667, -8.333333, 0.000000)), FRotator(-90, 0, 180));
+		//DiceComp->SetRelativeLocationAndRotation(FVector((16.666667, -8.333333, 0.000000)), FRotator(-90, 0, 180));
+		DiceComp->SetWorldRotation( FRotator( -90 , 0 ,-180 ) );
 		break;
 	}
 	case 4:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector((16.666666, 8.333333, 0.000000)), FRotator(-90, 0, 0));
+		//DiceComp->SetRelativeLocationAndRotation(FVector((16.666666, 8.333333, 0.000000)), FRotator(-90, 0, 0));
+		DiceComp->SetWorldRotation( FRotator( -90 , 0 , 90 ) );
 		break;
 	}
 	case 5:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector((8.333333, -0.000000, 0.000000)), FRotator(-90, 0, 90));
+		//DiceComp->SetRelativeLocationAndRotation(FVector((8.333333, -0.000000, 0.000000)), FRotator(-90, 0, 90));
+		DiceComp->SetWorldRotation( FRotator( -90 ,0 , -270 ) );
 		break;
 	}
 	case 6:
 	{
-		DiceComp->SetRelativeLocationAndRotation(FVector((15.000000, -0.000000, 8.333334)), FRotator(-180, 0, 90));
+		//DiceComp->SetRelativeLocationAndRotation(FVector((15.000000, -0.000000, 8.333334)), FRotator(-180, 0, 90));
+		DiceComp->SetWorldRotation( FRotator( 180 , 0 , -270 ) );
 		break;
 	}
 
