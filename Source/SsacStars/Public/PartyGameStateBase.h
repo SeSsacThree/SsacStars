@@ -115,6 +115,8 @@ public:
 	int Round = 1;
 public:
 	UPROPERTY( EditAnywhere )
+	class USoundBase* ItemSound;
+	UPROPERTY( EditAnywhere )
 	class USoundBase* TrapSound;
 	UPROPERTY( EditAnywhere )
 	class USoundBase* GetStarSound;
@@ -122,8 +124,13 @@ public:
 	class USoundBase* ResultSound;
 	UPROPERTY( EditAnywhere )
 	class USoundBase* WarpSound;
-
+	UPROPERTY( EditAnywhere )
+	class USoundBase* BlueSpaceSound;
+	UPROPERTY( EditAnywhere )
+	class USoundBase* RedSpaceSound;
 public:
+
+
 	UFUNCTION(Server, Reliable)
 	void ServerMoveCameraToPlayer(APartyPlayer* InPlayer);
 	UFUNCTION(NetMulticast, Reliable)
@@ -138,6 +145,8 @@ public:
 	void ServerUpdateAppeareance(APartyPlayer* Player, int Index);
 	UFUNCTION(NetMulticast, Reliable)
 	void MultiUpdateAppeareance(APartyPlayer* Player, int Index);
+
+
 
 public:
 	UFUNCTION( Server , Reliable )

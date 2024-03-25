@@ -280,6 +280,7 @@ void ARollDiceCharacter::CloseView()
 			//ServerGrabDice( Dice );
 			//GrapDice(Dice);
 			//ServerRemoveThrowDiceUi();
+			Dice->ReBack();
 			PartyGameState->ServerRemoveThrowDiceUi();
 			//ThrowDiceUi->RemoveFromParent();
 
@@ -348,6 +349,7 @@ void ARollDiceCharacter::GetLifetimeReplicatedProps( TArray<FLifetimeProperty>& 
 {
 	Super::GetLifetimeReplicatedProps( OutLifetimeProps );
 	DOREPLIFETIME( ARollDiceCharacter , Dice );
+	DOREPLIFETIME( ARollDiceCharacter , SceneCaptureComponent );
 	//DOREPLIFETIME( ARollDiceCharacter , handComp );
 	
 }

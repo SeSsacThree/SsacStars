@@ -181,8 +181,9 @@ void APartyPlayer::ItemApply()
 		break;
 	}
 	}
+	MoveRemaining += 3;
 
-	//PlayFun->SwapPlayerPositions(this);
+
 	DelayTime(2.0f, [this]()
 		{
 			MoveToSpace(CurrentSpace);
@@ -272,12 +273,14 @@ void APartyPlayer::MoveEnded()
 		case ESpaceState::Blue:
 		{
 			//Coin += 3;
+			PartyGameState->PlaySound( PartyGameState->BlueSpaceSound );
 			Score += 20;
 			PartyGameState->ServerGetCoinsUi();
 		}
 		break;
 		case ESpaceState::Red:
 		{
+			PartyGameState->PlaySound( PartyGameState->RedSpaceSound );
 			PartyGameState->ServerGetCoins_PinguUi();
 			//Coin -= 3;
 			Score -= 20;
@@ -288,7 +291,7 @@ void APartyPlayer::MoveEnded()
 
 
 			int RanItemNum = UKismetMathLibrary::RandomIntegerInRange(1, 3);
-
+			PartyGameState->PlaySound( PartyGameState->ItemSound );
 			UE_LOG(LogTemp, Warning, TEXT("APartyPlayer::ItemSpace"))
 				if (Inventoryindex < 3)
 				{
@@ -332,7 +335,7 @@ void APartyPlayer::MoveEnded()
 			//함정 위젯 열어서 종류에 따라 실행
 			//GM->AddTrapUi();
 			PartyGameState->ServerViewTrapUi();
-
+			PartyGameState->PlaySound( PartyGameState->TrapSound );
 			
 				DelayTime( 2.0f , [this]()
 				{
@@ -410,6 +413,7 @@ void APartyPlayer::MoveEnded()
 					
 					DelayTime( 4.0f , [this]()
 					{
+						PartyGameState->ServerUpdateGameInfo( PlayerIndex );
 						PartyGameState->ServerUpdateEndInfo( PlayerIndex );
 						GM->NextTurn();
 					});
@@ -451,7 +455,7 @@ void APartyPlayer::StopOrGo()
 	else if (CurrentSpace->SpaceState != ESpaceState::Star && MoveRemaining == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("CallMoveEnded"));
-	//PartyGameState->ServerUpdateGameInfo(PlayerIndex);
+		PartyGameState->ServerUpdateGameInfo(PlayerIndex);
 		//	GM->UpdateGameInfo(PlayerIndex);
 		//	GM->UpdateRankInfo();
 		//PartyGameState->ServerUpdateRankInfo();
@@ -480,6 +484,7 @@ void APartyPlayer::ApplyTrap(int Index)
 				break;
 			}
 	}
+	PartyGameState->ServerUpdateGameInfo( PlayerIndex );
 }
 
 void APartyPlayer::DelayTime(float WantSeconds, TFunction<void()> InFunction)
@@ -510,6 +515,8 @@ void APartyPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME( APartyPlayer , MoveRemaining );
 	DOREPLIFETIME( APartyPlayer , PlayerIndex );
 	DOREPLIFETIME( APartyPlayer , RollDicePlayer );
+	DOREPLIFETIME( APartyPlayer , DiceRemainWidget );
+	
 }
 
 

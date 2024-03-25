@@ -100,13 +100,14 @@ void ADice::Tick(float DeltaTime)
 		//FVector CurrentLocation = DiceComp->GetComponentLocation();
 		DiceComp->GetUpVector() * 200.0f * GetWorld()->GetDeltaSeconds();
 		//DiceComp->SetWorldLocation(CurrentLocation);
-
+		
 		FVector CurrentScale = DiceComp->GetComponentScale();
 		FVector ScaleToAddVector = FVector(0.07);
 		FVector NewScale = CurrentScale + ScaleToAddVector;
 		DiceComp->SetWorldScale3D(NewScale);
 		//GEngine->AddOnScreenDebugMessage( -1 , 5.f , FColor::Red , TEXT( "Isupmode" ) );
 	}
+
 
 
 	if (IsRollingMode)
@@ -124,7 +125,13 @@ void ADice::Tick(float DeltaTime)
 	{
 		//미세한 위치 조정 필요
 		DiceComp->SetWorldLocation(StopRollingLocation, false, nullptr, ETeleportType::TeleportPhysics);
+		SetRotationToNumber( DiceNumber );
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("NeedStop"));
+	}
+
+	if(!IsStopRollingMode&& !IsRollingMode&& !IsUpMode)
+	{
+		DiceComp->SetWorldScale3D( BeginTransform.GetScale3D() );
 	}
 }
 
@@ -292,6 +299,9 @@ void ADice::AfterOverlap()
 		//PartyGameState->ServerOverlap();
 		PartyGameState->CurrentPlayer->ItemApply();
 		PartyGameState->CurrentPlayer->RollDicePlayer->CloseView();
+
+
+	
 	}
 	//ServerAfterOverlap();
 	
@@ -358,7 +368,7 @@ void ADice::SetRotationToNumber(int Number)
 	case 1:
 	{
 		DiceComp->SetRelativeLocationAndRotation(FVector(16.666667, 0, -8.333333), FRotator(0, 0, 90));
-
+		DiceComp->SetWorldRotation( FRotator( 16.666667 , 0 , -8.333333 ));
 		break;
 	}
 	case 2:
@@ -396,7 +406,7 @@ void ADice::ReBack()
 	IsRollingMode = false;
 	IsStopRollingMode = false;
 	IsUpMode = false;
-	DiceComp->SetWorldTransform( BeginTransform );
+	//DiceComp->SetWorldTransform( BeginTransform );
 	//DiceComp->SetWorldLocation(BeginLocation);
 	//DiceComp->SetWorldScale3D(FVector(0.1f));
 
@@ -423,8 +433,7 @@ void ADice::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	//DOREPLIFETIME( ADice , SceneCaptureDice );
-
+	DOREPLIFETIME( ADice , SceneCaptureDice );
 	DOREPLIFETIME( ADice , DiceComp );
 	DOREPLIFETIME( ADice , DiceNumber );
 	DOREPLIFETIME( ADice , IsUpMode );

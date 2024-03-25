@@ -101,7 +101,7 @@ public:
 	class UBoxComponent* DicePoint5;
 	UPROPERTY(EditAnywhere )
 	class UBoxComponent* DicePoint6;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite,Replicated)
 	class USceneCaptureComponent2D* SceneCaptureDice;
 	UPROPERTY(EditAnywhere,Replicated)
 	class USkeletalMeshComponent* DiceComp;

@@ -138,7 +138,7 @@ void APartyGameStateBase::MultiUpdateAppeareance_Implementation(APartyPlayer* Pl
 	case 0:
 	{
 		Player->GetMesh()->SetSkeletalMeshAsset(Mesh1);
-		Player->GetMesh()->SetWorldScale3D(FVector(18));
+		Player->GetMesh()->SetWorldScale3D(FVector(22));
 		//UPinguAnimInstance* PinguAnimaion = LoadObject<UPinguAnimInstance>(nullptr, TEXT("D:\Projects\SsacStars\Content\JYS\Blueprints"));
 		//Player->GetMesh()->GetSkeletalMeshAsset()-
 			//SetAnimInstanceClass(PinguAnimaion);
@@ -416,6 +416,7 @@ void APartyGameStateBase::ServerUpdateGameInfo_Implementation(int Index)
 
 void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 {
+	/*
 	for (int i = 0; i < PlayerList.Num(); i++)
 	{
 		if (PlayerList[i]->Score)
@@ -439,7 +440,7 @@ void APartyGameStateBase::MultiUpdateGameInfo_Implementation(int Index)
 		TempArray[i] = Count + 1;
 		PlayerList[i]->Rank = TempArray[i];
 	}
-
+	*/
 	/*
 	if (HasAuthority())
 	{

@@ -33,7 +33,7 @@ public:
 	APartyPlayer();
 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite,Replicated)
 	class UWidgetComponent* DiceRemainWidget;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<class UUserWidget> DiceRemainWidgetFactory;
