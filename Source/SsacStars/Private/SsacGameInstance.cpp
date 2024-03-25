@@ -94,11 +94,13 @@ void USsacGameInstance::FindOtherRooms()
 
 void USsacGameInstance::OnMyFindOtherRoomsComplete(bool bWasSuccessful)
 {
+
+
+	UE_LOG(LogTemp, Warning, TEXT("555"), bWasSuccessful)
 	if (OnFindingRoomsDelegate.IsBound())
 	{
 		OnFindingRoomsDelegate.Broadcast( false );
 	}
-	UE_LOG(LogTemp, Warning, TEXT("%d"), bWasSuccessful)
 
 	for(int i =0; i <roomSearch->SearchResults.Num(); i++)
 	{
