@@ -25,7 +25,6 @@ void AMiniGameStarManager::BeginPlay()
 
 void AMiniGameStarManager::DelaySpawnTimer()
 {
-	//Lambda ÇÔ¼ö ±¸Á¶ [REFERENCE ¶Ç´Â CAPTURE]()-> Return Å¸ÀÔ {±¸ÇöºÎ}
 	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda(
 		[this]()->void
 		{
@@ -49,7 +48,7 @@ void AMiniGameStarManager::spawnStar()
 	
 	if (starPointArr.Num() == 0)
 	{
-		// starPoint Å¬·¡½ºÀÇ ¸ðµç ¾×ÅÍ¸¦ °¡Á®¿À±â
+		// starPoint í´ëž˜ìŠ¤ì˜ ëª¨ë“  ì•¡í„°ë¥¼ ê°€ì ¸ì˜¤ê¸°
 		UGameplayStatics::GetAllActorsOfClass(World, AMiniGameStarPoint::StaticClass(), starPointArr);
 	}
 
@@ -60,18 +59,18 @@ void AMiniGameStarManager::spawnStar()
 
 	if (World)
 	{
-		// starPoint ¾×ÅÍ ¹è¿­ÀÌ ºñ¾îÀÖÁö ¾ÊÀº °æ¿ì¿¡¸¸ ·£´ý ¾×ÅÍ¸¦ ¼±ÅÃ
+		// starPoint ì•¡í„° ë°°ì—´ì´ ë¹„ì–´ìžˆì§€ ì•Šì€ ê²½ìš°ì—ë§Œ ëžœë¤ ì•¡í„°ë¥¼ ì„ íƒ
 		if (starPointArr.Num() > 0)
 		{
-			// ·£´ýÇÏ°Ô starPoint ¾×ÅÍ¸¦ ¼±ÅÃ.
+			// ëžœë¤í•˜ê²Œ starPoint ì•¡í„°ë¥¼ ì„ íƒ.
 			const int32 RandomIndex = FMath::RandRange(0, starPointArr.Num() - 1);
 			AActor* SelectedActor = starPointArr[RandomIndex];
 
 			if (SelectedActor)
 			{
-				// starPoint ¾×ÅÍÀÇ À§Ä¡°ªÀ» °¡Á®¿À±â.
+				// starPoint ì•¡í„°ì˜ ìœ„ì¹˜ê°’ì„ ê°€ì ¸ì˜¤ê¸°.
 				const FVector loc = SelectedActor->GetActorLocation();
-				// star »ý¼º
+				// star ìƒì„±
 				World->SpawnActor<AStar>(starFactory, loc, FRotator::ZeroRotator);
 
 			}
