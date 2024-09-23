@@ -2,7 +2,6 @@
 
 
 #include "KartPlayerController.h"
-
 #include "KartPlayer.h"
 #include "GameFramework/PlayerState.h"
 
