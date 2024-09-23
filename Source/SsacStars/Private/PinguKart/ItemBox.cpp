@@ -113,9 +113,6 @@ void AItemBox::GetRandomItem(AKartPlayer* inKartPlayer)
 			bItemBox = true;
 			currentTime = 0;
 		}
-	), DelayTime, bIsLoop);
-
-	//ServerGetRandomItem(index);
-	
+	), DelayTime, bIsLoop);	
 
 }
