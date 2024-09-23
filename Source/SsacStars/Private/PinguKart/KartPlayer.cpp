@@ -226,9 +226,6 @@ void AKartPlayer::ServerSetStarCount_Implementation(int32 InStarCount)
 	//PlayerState에 점수 저장
 	auto ps = Cast<AKartPlayerController>( Controller )->GetPlayerState<AKartPlayerState>();
 	ps->SetScore( starCount );
-	//서버에서는 자동 호출이 안되기 때문에 직접 호출
-	OnRep_UpdateStarCountUI();
-
 }
 
 void AKartPlayer::useItem()
@@ -326,9 +323,6 @@ void AKartPlayer::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME( AKartPlayer , starCount);
-
-	/*DOREPLIFETIME(AKartPlayer, hasItem);
-	DOREPLIFETIME(AKartPlayer, bSpeedUp);*/
 }
 
 
