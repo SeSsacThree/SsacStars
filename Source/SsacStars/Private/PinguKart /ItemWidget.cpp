@@ -2,7 +2,6 @@
 
 
 #include "ItemWidget.h"
-
 #include "KartPlayer.h"
 #include "Components/Image.h"
 #include "Net/UnrealNetwork.h"
