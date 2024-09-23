@@ -15,13 +15,6 @@ AMiniGameStarPoint::AMiniGameStarPoint()
 void AMiniGameStarPoint::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
-// Called every frame
-void AMiniGameStarPoint::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-}
 
