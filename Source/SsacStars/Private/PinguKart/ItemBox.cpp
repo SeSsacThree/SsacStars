@@ -35,7 +35,6 @@ void AItemBox::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	//boxComponent와 begin overlap함수 바인딩하기
 	boxComp->OnComponentEndOverlap.AddDynamic(this, &AItemBox::OnMyCompEndOverlap);
 }
 
@@ -68,9 +67,7 @@ void AItemBox::OnMyCompEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 			boxComp->SetGenerateOverlapEvents(false);
 
 			if (!GEngine) { return; }
-			/*FString PlayerStateName = FString::Printf(TEXT("Player State ID: %d"), OverlapPlayer->GetPlayerState()->GetPlayerId());
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, PlayerStateName);*/
-
+			
 		}
 		
 	}
@@ -108,7 +105,6 @@ void AItemBox::GetRandomItem(AKartPlayer* inKartPlayer)
 	//Looping 여부
 	bool bIsLoop = false;
 
-	//Lambda 함수 구조 [REFERENCE 또는 CAPTURE]()-> Return 타입 {구현부}
 	GetWorld()->GetTimerManager().SetTimer(DelayTimerHandle, FTimerDelegate::CreateLambda(
 		[this]()->void
 		{
