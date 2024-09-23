@@ -2,9 +2,7 @@
 
 
 #include "KartPlayerState.h"
-
 #include "Net/UnrealNetwork.h"
-
 
 
 void AKartPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
