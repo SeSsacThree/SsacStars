@@ -2,7 +2,6 @@
 
 
 #include "KartGameState.h"
-
 #include "CountDownWidget.h"
 #include "ItemWidget.h"
 #include "KartPlayer.h"
