@@ -67,10 +67,8 @@ void UTenCoinsforaStar::ClickedButton()
 			StarImage->SetVisibility(ESlateVisibility::Visible);
 
 			UE_LOG(LogTemp, Warning, TEXT("UTenCoinsforaStar::ClickedButton - Delay"))
-			// 별 애니메이션 실행과 동시에 WrapBox랑 버튼 사라짐
+   
 			GetStarAnimation(StarImageAnimation);
-
-			//Animation 끝나면 자동으로 RemoveWidgetAfterAnimation 실행됨
 		}
 	), DelayTime, bIsLoop);
 
